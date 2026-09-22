@@ -6,4 +6,4 @@
 - [x] Replace the cart drawer with a full cart page
 - [x] Add consistent luxury navigation and update links across existing pages
 - [x] Remove every “A-Z” copyright reference
-- [ ] Verify desktop and mobile pages, cart flow, and metadata
+- [x] Verify desktop and mobile pages, cart flow, and metadata
