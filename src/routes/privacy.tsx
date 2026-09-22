@@ -32,7 +32,7 @@ function PrivacyPage() {
           <Button asChild variant="cream" size="sm">
             <Link to="/">
               <ArrowLeft />
-              Store
+              Introduction
             </Link>
           </Button>
           <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-24" />
@@ -55,7 +55,7 @@ function PrivacyPage() {
             ["How it is protected", "Customer profiles and cart records are stored in a secure account-based database. Each customer account can access only its own saved profile and cart information."],
             ["Sharing", "MAQAMY does not sell customer information. Details may be shared only when needed to fulfil a customer request, arrange delivery, provide installation support, or comply with legal obligations."],
             ["Customer control", "Customers may request correction or removal of account and delivery information, subject to any information MAQAMY must retain for legitimate business or legal reasons."],
-            ["Copyright", "MAQAMY Living Concepts and the MAQAMY presentation, product language, collection identity, and brand materials are copyrighted A-Z 2026."],
+            ["Copyright", "MAQAMY Living Concepts and the MAQAMY presentation, product language, collection identity, and brand materials are copyrighted © 2026."],
           ].map(([title, body]) => (
             <article key={title} className="border border-brand-gold/25 bg-card p-5 shadow-gold">
               <h2 className="font-display text-3xl font-semibold">{title}</h2>
