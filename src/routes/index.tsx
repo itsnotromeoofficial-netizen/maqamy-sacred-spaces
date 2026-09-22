@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,8 @@ export const Route = createFileRoute("/")({
 function IntroductionPage() {
   const [opening, setOpening] = useState(true);
   const navigate = useNavigate();
-  const tapState = { count: 0, timer: 0 };
+  const tapCount = useRef(0);
+  const tapTimer = useRef(0);
   const { itemCount, userEmail, signOut } = useCart();
   useEffect(() => {
     const timer = window.setTimeout(() => setOpening(false), 1800);
@@ -30,14 +31,14 @@ function IntroductionPage() {
   }, []);
 
   const handleLogoTap = () => {
-    window.clearTimeout(tapState.timer);
-    tapState.count += 1;
-    if (tapState.count === 3) {
-      tapState.count = 0;
+    window.clearTimeout(tapTimer.current);
+    tapCount.current += 1;
+    if (tapCount.current === 3) {
+      tapCount.current = 0;
       void navigate({ to: "/admin" });
       return;
     }
-    tapState.timer = window.setTimeout(() => { tapState.count = 0; }, 900);
+    tapTimer.current = window.setTimeout(() => { tapCount.current = 0; }, 900);
   };
 
   if (opening) return (
