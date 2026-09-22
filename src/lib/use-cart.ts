@@ -74,19 +74,28 @@ export function useCart() {
   const updateQuantity = useCallback(async (item: CartItem, quantity: number) => {
     if (quantity < 1) {
       const { error } = await supabase.from("cart_items").delete().eq("id", item.id);
-      if (error) return toast.error("This item could not be removed.");
+      if (error) {
+        toast.error("This item could not be removed.");
+        return;
+      }
       setCart((items) => items.filter((current) => current.id !== item.id));
       return;
     }
     const nextQuantity = Math.min(quantity, 10);
     const { error } = await supabase.from("cart_items").update({ quantity: nextQuantity }).eq("id", item.id);
-    if (error) return toast.error("Cart quantity could not be updated.");
+    if (error) {
+      toast.error("Cart quantity could not be updated.");
+      return;
+    }
     setCart((items) => items.map((current) => current.id === item.id ? { ...current, quantity: nextQuantity } : current));
   }, []);
 
   const removeItem = useCallback(async (id: string) => {
     const { error } = await supabase.from("cart_items").delete().eq("id", id);
-    if (error) return toast.error("This item could not be removed.");
+    if (error) {
+      toast.error("This item could not be removed.");
+      return;
+    }
     setCart((items) => items.filter((item) => item.id !== id));
   }, []);
 
