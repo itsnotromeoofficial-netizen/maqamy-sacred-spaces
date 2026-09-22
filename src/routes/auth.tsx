@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Chrome, Loader2 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -271,7 +271,7 @@ function AuthPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Label className="block text-sm font-semibold text-brand-forest">
       <span className="mb-2 block">{label}</span>

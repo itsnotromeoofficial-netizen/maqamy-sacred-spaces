@@ -62,7 +62,7 @@ function ResetPasswordPage() {
       return;
     }
     toast.success("Password updated.");
-    await navigate({ to: "/auth" });
+    await navigate({ to: "/auth", search: { redirect: "/" } });
   }
 
   return (
@@ -90,7 +90,7 @@ function ResetPasswordPage() {
           </Button>
         </form>
         <Button asChild variant="link" className="mt-4 px-0 text-brand-forest">
-          <Link to="/auth">
+          <Link to="/auth" search={{ redirect: "/" }}>
             <ArrowLeft />
             Back to sign in
           </Link>
