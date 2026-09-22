@@ -46,10 +46,10 @@ type CartItem = {
 };
 
 const storyLines = [
-  "In the rhythm of life, we often lose touch with stillness.",
-  "Yet within every home lies the possibility of a sacred pause.",
-  "A moment to breathe. A place to return.",
-  "A space that gently reminds us of who we are — and why we are here.",
+  "A place to pause, to surrender, and to remember what truly matters.",
+  "A place where we can heal.",
+  "A place where we can return to ourselves and to the One who created us.",
+  "Not merely a place to live. A place to return.",
 ];
 
 export const Route = createFileRoute("/")({
