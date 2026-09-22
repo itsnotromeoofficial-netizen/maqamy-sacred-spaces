@@ -1,8 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { brandAssets } from "@/lib/maqamy-products";
+import { createFileRoute } from "@tanstack/react-router";
+import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
+import { useCart } from "@/lib/use-cart";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -25,19 +23,11 @@ export const Route = createFileRoute("/privacy")({
 });
 
 function PrivacyPage() {
+  const { itemCount, userEmail, signOut } = useCart();
   return (
     <main className="min-h-screen bg-brand-cream text-brand-forest">
+      <SiteHeader tone="dark" itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} />
       <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:py-12">
-        <header className="flex items-center justify-between gap-4 border-b border-brand-gold/30 pb-6">
-          <Button asChild variant="cream" size="sm">
-            <Link to="/">
-              <ArrowLeft />
-              Store
-            </Link>
-          </Button>
-          <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-24" />
-        </header>
-
         <section className="py-12 lg:py-20">
           <p className="text-xs font-bold uppercase text-brand-gold">Privacy policy</p>
           <h1 className="mt-4 font-display text-5xl font-semibold leading-none sm:text-7xl">
@@ -55,7 +45,7 @@ function PrivacyPage() {
             ["How it is protected", "Customer profiles and cart records are stored in a secure account-based database. Each customer account can access only its own saved profile and cart information."],
             ["Sharing", "MAQAMY does not sell customer information. Details may be shared only when needed to fulfil a customer request, arrange delivery, provide installation support, or comply with legal obligations."],
             ["Customer control", "Customers may request correction or removal of account and delivery information, subject to any information MAQAMY must retain for legitimate business or legal reasons."],
-            ["Copyright", "MAQAMY Living Concepts and the MAQAMY presentation, product language, collection identity, and brand materials are copyrighted A-Z 2026."],
+            ["Copyright", "MAQAMY Living Concepts and the MAQAMY presentation, product language, collection identity, and brand materials are copyrighted © 2026."],
           ].map(([title, body]) => (
             <article key={title} className="border border-brand-gold/25 bg-card p-5 shadow-gold">
               <h2 className="font-display text-3xl font-semibold">{title}</h2>
@@ -64,6 +54,7 @@ function PrivacyPage() {
           ))}
         </section>
       </div>
+      <SiteFooter />
     </main>
   );
 }
