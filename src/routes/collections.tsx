@@ -5,6 +5,7 @@ import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
 import { collections, type ProductCollection } from "@/lib/maqamy-products";
 import { useCart } from "@/lib/use-cart";
+import { useProducts, type CatalogueProduct } from "@/lib/use-products";
 
 export const Route = createFileRoute("/collections")({
   head: () => ({ meta: [
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/collections")({
 
 function CollectionsPage() {
   const { itemCount, userEmail, addToCart, signOut } = useCart();
+  const { products } = useProducts();
   return (
     <main className="bg-brand-mist text-brand-forest">
       <div className="bg-brand-forest"><SiteHeader itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
@@ -30,13 +32,14 @@ function CollectionsPage() {
           <p className="mt-8 max-w-xl text-sm leading-7 text-brand-cream/75">Noor and Janna are complete prayer environments, considered from the mihrab to the final object.</p>
         </div>
       </section>
-      {collections.map((collection, index) => <CollectionChapter key={collection.name} collection={collection} index={index} signedIn={Boolean(userEmail)} onAdd={addToCart} />)}
+      {collections.map((collection, index) => <CollectionChapter key={collection.name} collection={collection} products={products.filter((product) => product.collection === collection.name)} index={index} signedIn={Boolean(userEmail)} onAdd={addToCart} />)}
+      {products.filter((product) => !collections.some((collection) => collection.name === product.collection)).length > 0 ? <AdditionalProducts products={products.filter((product) => !collections.some((collection) => collection.name === product.collection))} signedIn={Boolean(userEmail)} onAdd={addToCart} /> : null}
       <SiteFooter />
     </main>
   );
 }
 
-function CollectionChapter({ collection, index, signedIn, onAdd }: { collection: ProductCollection; index: number; signedIn: boolean; onAdd: ReturnType<typeof useCart>["addToCart"] }) {
+function CollectionChapter({ collection, products, index, signedIn, onAdd }: { collection: ProductCollection; products: CatalogueProduct[]; index: number; signedIn: boolean; onAdd: ReturnType<typeof useCart>["addToCart"] }) {
   return (
     <article className={index % 2 === 0 ? "bg-brand-mist" : "bg-brand-cream"}>
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
@@ -56,20 +59,29 @@ function CollectionChapter({ collection, index, signedIn, onAdd }: { collection:
         </div>
 
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          {collection.packages.map((pack) => (
+          {collection.packages.map((fallback) => {
+            const product = products.find((item) => item.package === fallback.name);
+            const pack = product ? { ...fallback, price: product.price, priceLabel: `${new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR", maximumFractionDigits: 0 }).format(product.price)}${fallback.name === "Bespoke" ? "+" : ""}`, includes: product.specifications } : fallback;
+            const stock = product?.stock ?? 0;
+            return (
             <section key={pack.name} className={`relative flex min-h-[290px] flex-col border p-6 ${pack.badge ? "border-brand-gold bg-brand-cream shadow-gold" : "border-brand-gold/25 bg-card"}`}>
               {pack.badge ? <span className="absolute right-4 top-4 bg-brand-forest px-3 py-1 text-[9px] font-bold uppercase text-brand-cream">{pack.badge}</span> : null}
               <h3 className="font-display text-3xl font-semibold">{pack.name}</h3>
               <p className="mt-3 text-2xl font-extrabold text-brand-gold">{pack.priceLabel}</p>
               <p className="mt-5 text-xs leading-6 text-muted-foreground">{pack.includes.join(" · ")}</p>
-              {signedIn ? <Button variant={pack.badge ? "gold" : "maqamy"} className="mt-auto w-full" onClick={() => void onAdd(collection.name, pack.name)}><ShoppingBag /> Add to cart</Button> : <Button asChild variant={pack.badge ? "gold" : "maqamy"} className="mt-auto w-full"><Link to="/auth" search={{ redirect: "/collections" }}><ShoppingBag /> Sign in to add</Link></Button>}
+              <p className={`mb-4 mt-auto text-xs font-bold uppercase ${stock > 0 ? "text-brand-gold" : "text-muted-foreground"}`}>{stock > 0 ? `${stock} available` : "Currently unavailable"}</p>
+              {signedIn ? <Button variant={pack.badge ? "gold" : "maqamy"} className="w-full" disabled={stock < 1} onClick={() => void onAdd(collection.name, pack.name)}><ShoppingBag /> {stock > 0 ? "Add to cart" : "Out of stock"}</Button> : <Button asChild variant={pack.badge ? "gold" : "maqamy"} className="w-full" disabled={stock < 1}><Link to="/auth" search={{ redirect: "/collections" }}><ShoppingBag /> {stock > 0 ? "Sign in to add" : "Out of stock"}</Link></Button>}
             </section>
-          ))}
+          );})}
         </div>
         <div className="mt-8 flex justify-end"><Button asChild variant="cream"><Link to="/cart">View full cart <ArrowRight /></Link></Button></div>
       </div>
     </article>
   );
+}
+
+function AdditionalProducts({ products, signedIn, onAdd }: { products: CatalogueProduct[]; signedIn: boolean; onAdd: ReturnType<typeof useCart>["addToCart"] }) {
+  return <section className="bg-brand-cream px-5 py-20 sm:px-8 lg:py-28"><div className="mx-auto max-w-7xl"><p className="text-xs font-bold uppercase text-brand-gold">New additions</p><h2 className="mt-3 font-display text-6xl font-semibold">More from MAQAMY.</h2><div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{products.map((product) => <article key={product.id} className="flex min-h-[360px] flex-col border border-brand-gold/25 bg-card p-6">{product.image_url ? <img src={product.image_url} alt={product.name} className="mb-6 aspect-[4/3] w-full object-contain" /> : null}<p className="text-xs font-bold uppercase text-brand-gold">{product.collection} · {product.package}</p><h3 className="mt-2 font-display text-4xl font-semibold">{product.name}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{product.description}</p><p className="mt-4 text-2xl font-extrabold text-brand-gold">{new Intl.NumberFormat("en-MY", { style: "currency", currency: "MYR", maximumFractionDigits: 0 }).format(product.price)}</p><p className="mb-4 mt-auto text-xs font-bold uppercase text-brand-gold">{product.stock > 0 ? `${product.stock} available` : "Currently unavailable"}</p>{signedIn ? <Button variant="maqamy" disabled={product.stock < 1} onClick={() => void onAdd(product.collection, product.package)}><ShoppingBag /> {product.stock > 0 ? "Add to cart" : "Out of stock"}</Button> : <Button asChild variant="maqamy" disabled={product.stock < 1}><Link to="/auth" search={{ redirect: "/collections" }}><ShoppingBag /> {product.stock > 0 ? "Sign in to add" : "Out of stock"}</Link></Button>}</article>)}</div></div></section>;
 }
 
 function DetailList({ title, items }: { title: string; items: string[] }) {

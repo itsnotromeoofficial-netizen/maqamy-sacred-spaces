@@ -2,12 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { findPackage, type CollectionName, type PackageName } from "@/lib/maqamy-products";
 
 export type CartItem = {
   id: string;
-  collection: CollectionName;
-  package: PackageName;
+  collection: string;
+  package: string;
   quantity: number;
   unit_price: number;
 };
@@ -48,13 +47,13 @@ export function useCart() {
   const itemCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
   const total = useMemo(() => cart.reduce((sum, item) => sum + item.unit_price * item.quantity, 0), [cart]);
 
-  const addToCart = useCallback(async (collection: CollectionName, packageName: PackageName) => {
+  const addToCart = useCallback(async (collection: string, packageName: string) => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return false;
-    const selected = findPackage(collection, packageName);
-    if (!selected) return false;
+    const { data: selected } = await supabase.from("products").select("price, stock").eq("collection", collection).eq("package", packageName).eq("active", true).maybeSingle();
+    if (!selected || selected.stock < 1) { toast.error("This product is currently out of stock."); return false; }
     const existing = cart.find((item) => item.collection === collection && item.package === packageName);
-    const quantity = Math.min((existing?.quantity ?? 0) + 1, 10);
+    const quantity = Math.min((existing?.quantity ?? 0) + 1, selected.stock, 10);
     const { error } = await supabase.from("cart_items").upsert({
       user_id: data.user.id,
       collection,

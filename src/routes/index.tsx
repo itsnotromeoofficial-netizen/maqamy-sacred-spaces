@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
@@ -21,17 +21,31 @@ export const Route = createFileRoute("/")({
 
 function IntroductionPage() {
   const [opening, setOpening] = useState(true);
+  const navigate = useNavigate();
+  const tapCount = useRef(0);
+  const tapTimer = useRef(0);
   const { itemCount, userEmail, signOut } = useCart();
   useEffect(() => {
     const timer = window.setTimeout(() => setOpening(false), 1800);
     return () => window.clearTimeout(timer);
   }, []);
 
+  const handleLogoTap = () => {
+    window.clearTimeout(tapTimer.current);
+    tapCount.current += 1;
+    if (tapCount.current === 3) {
+      tapCount.current = 0;
+      void navigate({ to: "/admin" });
+      return;
+    }
+    tapTimer.current = window.setTimeout(() => { tapCount.current = 0; }, 900);
+  };
+
   if (opening) return (
     <main className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-brand-forest text-brand-cream">
       <Button variant="ghost" size="sm" onClick={() => setOpening(false)} className="absolute right-5 top-5 text-brand-cream"><X /> Skip</Button>
       <div className="text-center">
-        <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto w-36 brightness-0 invert sm:w-44" />
+        <Button variant="ghost" className="h-auto p-2" aria-label="MAQAMY Living Concepts" onClick={handleLogoTap}><img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto w-36 brightness-0 invert sm:w-44" /></Button>
         <div className="mx-auto mt-10 h-12 w-1 animate-spin-bar bg-brand-gold" aria-hidden="true" />
         <p className="mt-10 text-xs font-bold uppercase text-brand-gold-soft">A place to return</p>
       </div>

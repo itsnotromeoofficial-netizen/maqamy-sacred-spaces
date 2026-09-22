@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { LogIn, LogOut, Menu, ShoppingBag, X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { brandAssets } from "@/lib/maqamy-products";
@@ -12,13 +12,27 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
   tone?: "light" | "dark";
 }) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const logoTaps = useRef(0);
+  const logoTimer = useRef(0);
   const light = tone === "light";
   const textClass = light ? "text-brand-cream" : "text-brand-forest";
   const borderClass = light ? "border-brand-cream/20" : "border-brand-gold/25";
+  const onLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    window.clearTimeout(logoTimer.current);
+    logoTaps.current += 1;
+    if (logoTaps.current === 3) {
+      event.preventDefault();
+      logoTaps.current = 0;
+      void navigate({ to: "/admin" });
+      return;
+    }
+    logoTimer.current = window.setTimeout(() => { logoTaps.current = 0; }, 900);
+  };
   return (
     <header className={`relative z-40 border-b ${borderClass} ${textClass}`}>
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-12">
-        <Link to="/" aria-label="MAQAMY introduction">
+        <Link to="/" aria-label="MAQAMY introduction" onClick={onLogoClick}>
           <img src={brandAssets.logo} alt="MAQAMY" className={`w-24 ${light ? "brightness-0 invert" : ""}`} />
         </Link>
         <nav className="hidden items-center gap-9 text-xs font-bold uppercase lg:flex">
