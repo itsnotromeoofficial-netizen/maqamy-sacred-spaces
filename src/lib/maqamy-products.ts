@@ -29,9 +29,9 @@ export type ProductCollection = {
 };
 
 export const brandAssets = {
-  logo: logoAsset.url,
-  desert: desertImage.url,
-  prayerSpace: prayerSpaceImage.url,
+  logo: logoAsset,
+  desert: desertImage,
+  prayerSpace: prayerSpaceImage,
 };
 
 export const collections: ProductCollection[] = [
@@ -40,7 +40,7 @@ export const collections: ProductCollection[] = [
     title: "Noor Collection",
     subtitle: "Light in Every Day",
     quote: "Let your home be a place of light.",
-    image: noorCollection.url,
+    image: noorCollection,
     imageAlt: "Noor prayer space collection with mihrab, rug, side table, and accessories",
     story:
       "A serene collection inspired by divine light. Clean lines, refined geometry, and warm tones create a prayer space that brings clarity, peace and presence to your home.",
@@ -78,7 +78,7 @@ export const collections: ProductCollection[] = [
     title: "Janna Collection",
     subtitle: "A Garden at Home",
     quote: "A place of peace, a glimpse of Jannah.",
-    image: jannaCollection.url,
+    image: jannaCollection,
     imageAlt: "Janna prayer space collection with green mihrab, rug, side table, and accessories",
     story:
       "Inspired by the gardens of Jannah, this collection brings the beauty of nature and Islamic art together. Earthy tones, graceful patterns and natural textures create a tranquil space to reconnect with Allah.",
