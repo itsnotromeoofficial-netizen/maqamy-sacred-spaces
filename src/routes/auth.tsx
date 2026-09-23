@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { brandAssets } from "@/lib/maqamy-products";
+import { siteUrl } from "@/lib/site";
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name").max(100, "Name is too long"),
