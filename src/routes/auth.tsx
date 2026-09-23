@@ -130,7 +130,7 @@ function AuthPage() {
       if (!data.session) {
         setVerify({ email, kind: "signup" });
         setCode("");
-        setNotice("We sent a 6-digit verification code to your email. Enter it below.");
+        setNotice("We sent an 8-digit verification code to your email. Enter it below.");
         return;
       }
       await navigate({ to: safeRedirect });
@@ -157,8 +157,8 @@ function AuthPage() {
     event.preventDefault();
     if (!verify) return;
     const token = code.replace(/\D/g, "");
-    if (token.length !== 6) {
-      toast.error("Enter the 6-digit code from your email.");
+    if (token.length !== 8) {
+      toast.error("Enter the 8-digit code from your email.");
       return;
     }
     setLoading(true);
@@ -209,9 +209,9 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    setVerify({ email: parsed.data.email, kind: "recovery" });
-    setCode("");
-    setNotice("We sent a 6-digit code to your email. Enter it below to continue.");
+      setVerify({ email: parsed.data.email, kind: "recovery" });
+      setCode("");
+      setNotice("We sent an 8-digit code to your email. Enter it below to continue.");
   }
 
 
@@ -263,14 +263,14 @@ function AuthPage() {
                     Sent to <span className="font-semibold text-brand-forest">{verify.email}</span>
                   </p>
                   <form className="space-y-4" onSubmit={handleVerify}>
-                    <Field label="6-digit code">
+                    <Field label="8-digit code">
                       <Input
                         value={code}
-                        onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                        onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 8))}
                         inputMode="numeric"
                         autoComplete="one-time-code"
-                        maxLength={6}
-                        className="text-center font-display text-3xl tracking-[0.4em]"
+                        maxLength={8}
+                        className="text-center font-display text-2xl tracking-[0.35em]"
                         required
                       />
                     </Field>
