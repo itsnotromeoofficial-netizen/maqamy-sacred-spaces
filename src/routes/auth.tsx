@@ -115,7 +115,7 @@ function AuthPage() {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: siteUrl("/"),
           data: { full_name: fullName, phone, address },
         },
       });
@@ -158,7 +158,7 @@ function AuthPage() {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: siteUrl("/reset-password"),
     });
     setLoading(false);
     if (error) {
