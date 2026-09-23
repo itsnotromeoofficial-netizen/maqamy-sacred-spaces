@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { brandAssets } from "@/lib/maqamy-products";
+import { siteUrl } from "@/lib/site";
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Enter your full name").max(100, "Name is too long"),
@@ -114,7 +115,7 @@ function AuthPage() {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: siteUrl("/"),
           data: { full_name: fullName, phone, address },
         },
       });
@@ -157,7 +158,7 @@ function AuthPage() {
     }
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: siteUrl("/reset-password"),
     });
     setLoading(false);
     if (error) {
