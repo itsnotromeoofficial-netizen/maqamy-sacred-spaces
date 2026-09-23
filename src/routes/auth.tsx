@@ -250,67 +250,112 @@ function AuthPage() {
                 <div>
                   <p className="text-xs font-bold uppercase text-brand-gold">Customer account</p>
                   <h1 className="mt-2 font-display text-4xl font-semibold text-brand-forest sm:text-5xl">
-                    {mode === "register" ? "Register" : "Sign in"}
+                    {verify ? "Verify" : mode === "register" ? "Register" : "Sign in"}
                   </h1>
                 </div>
                 <img src={brandAssets.logo} alt="MAQAMY" className="w-20" />
               </div>
 
-              <div className="mb-6 grid grid-cols-2 gap-2 rounded-md bg-secondary p-1">
-                <Button type="button" variant={mode === "register" ? "maqamy" : "ghost"} onClick={() => setMode("register")}>Register</Button>
-                <Button type="button" variant={mode === "sign-in" ? "maqamy" : "ghost"} onClick={() => setMode("sign-in")}>Sign in</Button>
-              </div>
-
-              {notice ? <p className="mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
-
-              <form className="space-y-4" onSubmit={handleSubmit}>
-                {mode === "register" ? (
-                  <>
-                    <Field label="Full name">
-                      <Input value={values.fullName} onChange={(event) => updateValue("fullName", event.target.value)} autoComplete="name" required />
+              {verify ? (
+                <>
+                  {notice ? <p className="mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
+                  <p className="mb-5 text-sm leading-6 text-muted-foreground">
+                    Sent to <span className="font-semibold text-brand-forest">{verify.email}</span>
+                  </p>
+                  <form className="space-y-4" onSubmit={handleVerify}>
+                    <Field label="6-digit code">
+                      <Input
+                        value={code}
+                        onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        className="text-center font-display text-3xl tracking-[0.4em]"
+                        required
+                      />
                     </Field>
-                    <Field label="Phone number">
-                      <Input value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} autoComplete="tel" required />
+                    <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading}>
+                      {loading ? <Loader2 className="animate-spin" /> : null}
+                      {verify.kind === "recovery" ? "Continue" : "Verify account"}
+                    </Button>
+                  </form>
+                  <div className="mt-4 flex items-center justify-between">
+                    <Button type="button" variant="link" className="px-0 text-brand-forest" onClick={handleResend} disabled={loading}>
+                      Resend code
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="px-0 text-brand-forest"
+                      onClick={() => {
+                        setVerify(null);
+                        setNotice("");
+                      }}
+                      disabled={loading}
+                    >
+                      Use another email
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-6 grid grid-cols-2 gap-2 rounded-md bg-secondary p-1">
+                    <Button type="button" variant={mode === "register" ? "maqamy" : "ghost"} onClick={() => setMode("register")}>Register</Button>
+                    <Button type="button" variant={mode === "sign-in" ? "maqamy" : "ghost"} onClick={() => setMode("sign-in")}>Sign in</Button>
+                  </div>
+
+                  {notice ? <p className="mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
+
+                  <form className="space-y-4" onSubmit={handleSubmit}>
+                    {mode === "register" ? (
+                      <>
+                        <Field label="Full name">
+                          <Input value={values.fullName} onChange={(event) => updateValue("fullName", event.target.value)} autoComplete="name" required />
+                        </Field>
+                        <Field label="Phone number">
+                          <Input value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} autoComplete="tel" required />
+                        </Field>
+                      </>
+                    ) : null}
+
+                    <Field label="Email">
+                      <Input type="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} autoComplete="email" required />
                     </Field>
-                  </>
-                ) : null}
 
-                <Field label="Email">
-                  <Input type="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} autoComplete="email" required />
-                </Field>
+                    {mode === "register" ? (
+                      <Field label="Delivery address">
+                        <Textarea value={values.address} onChange={(event) => updateValue("address", event.target.value)} autoComplete="street-address" required />
+                      </Field>
+                    ) : null}
 
-                {mode === "register" ? (
-                  <Field label="Delivery address">
-                    <Textarea value={values.address} onChange={(event) => updateValue("address", event.target.value)} autoComplete="street-address" required />
-                  </Field>
-                ) : null}
+                    <Field label="Password">
+                      <Input type="password" value={values.password} onChange={(event) => updateValue("password", event.target.value)} autoComplete={mode === "register" ? "new-password" : "current-password"} required />
+                    </Field>
 
-                <Field label="Password">
-                  <Input type="password" value={values.password} onChange={(event) => updateValue("password", event.target.value)} autoComplete={mode === "register" ? "new-password" : "current-password"} required />
-                </Field>
+                    <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading}>
+                      {loading ? <Loader2 className="animate-spin" /> : null}
+                      {mode === "register" ? "Create account" : "Sign in"}
+                    </Button>
+                  </form>
 
-                <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading}>
-                  {loading ? <Loader2 className="animate-spin" /> : null}
-                  {mode === "register" ? "Create account" : "Sign in"}
-                </Button>
-              </form>
+                  <div className="my-6 flex items-center gap-3 text-xs uppercase text-muted-foreground">
+                    <span className="h-px flex-1 bg-border" />
+                    <span>or</span>
+                    <span className="h-px flex-1 bg-border" />
+                  </div>
 
-              <div className="my-6 flex items-center gap-3 text-xs uppercase text-muted-foreground">
-                <span className="h-px flex-1 bg-border" />
-                <span>or</span>
-                <span className="h-px flex-1 bg-border" />
-              </div>
+                  <Button type="button" variant="cream" size="lg" className="w-full" onClick={handleGoogle} disabled={loading}>
+                    <Chrome />
+                    Continue with Google
+                  </Button>
 
-              <Button type="button" variant="cream" size="lg" className="w-full" onClick={handleGoogle} disabled={loading}>
-                <Chrome />
-                Continue with Google
-              </Button>
-
-              {mode === "sign-in" ? (
-                <Button type="button" variant="link" className="mt-3 px-0 text-brand-forest" onClick={handleReset} disabled={loading}>
-                  Send password reset link
-                </Button>
-              ) : null}
+                  {mode === "sign-in" ? (
+                    <Button type="button" variant="link" className="mt-3 px-0 text-brand-forest" onClick={handleReset} disabled={loading}>
+                      Forgot password — send me a code
+                    </Button>
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
         </section>
