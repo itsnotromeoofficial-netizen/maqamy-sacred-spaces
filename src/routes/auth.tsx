@@ -62,6 +62,8 @@ function AuthPage() {
   const [mode, setMode] = useState<"sign-in" | "register">("register");
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
+  const [verify, setVerify] = useState<{ email: string; kind: "signup" | "recovery" } | null>(null);
+  const [code, setCode] = useState("");
   const [values, setValues] = useState({
     fullName: "",
     phone: "",
@@ -126,8 +128,9 @@ function AuthPage() {
         return;
       }
       if (!data.session) {
-        setNotice("Check your email to confirm your account before signing in.");
-        setMode("sign-in");
+        setVerify({ email, kind: "signup" });
+        setCode("");
+        setNotice("We sent a 6-digit verification code to your email. Enter it below.");
         return;
       }
       await navigate({ to: safeRedirect });
@@ -150,6 +153,47 @@ function AuthPage() {
     await navigate({ to: safeRedirect });
   }
 
+  async function handleVerify(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!verify) return;
+    const token = code.replace(/\D/g, "");
+    if (token.length !== 6) {
+      toast.error("Enter the 6-digit code from your email.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email: verify.email,
+      token,
+      type: verify.kind === "signup" ? "signup" : "recovery",
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (verify.kind === "recovery") {
+      await navigate({ to: "/reset-password" });
+      return;
+    }
+    await navigate({ to: safeRedirect });
+  }
+
+  async function handleResend() {
+    if (!verify) return;
+    setLoading(true);
+    const { error } =
+      verify.kind === "signup"
+        ? await supabase.auth.resend({ type: "signup", email: verify.email })
+        : await supabase.auth.resetPasswordForEmail(verify.email);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNotice("A new code is on its way.");
+  }
+
   async function handleReset() {
     const parsed = resetSchema.safeParse({ email: values.email });
     if (!parsed.success) {
@@ -165,8 +209,11 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    setNotice("Password reset link sent. Check your email.");
+    setVerify({ email: parsed.data.email, kind: "recovery" });
+    setCode("");
+    setNotice("We sent a 6-digit code to your email. Enter it below to continue.");
   }
+
 
   return (
     <main className="min-h-screen bg-brand-cream text-brand-forest">
