@@ -64,7 +64,7 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
   signedIn: boolean;
   onAdd: ReturnType<typeof useCart>["addToCart"];
 }) {
-  const [selected, setSelected] = useState(collection.packages.find((item) => item.badge)?.name ?? collection.packages[0].name);
+  const [selected, setSelected] = useState(collection.packages.find((item) => item.badge)?.name ?? collection.packages[0]?.name ?? "");
   const editions = collection.packages.map((fallback) => {
     const product = products.find((item) => item.package === fallback.name);
     return {
@@ -74,7 +74,7 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
       stock: product?.stock ?? 0,
     };
   });
-  const current = editions.find((item) => item.fallback.name === selected) ?? editions[0];
+  const current = editions.find((item) => item.fallback.name === selected) ?? editions[0]!;
   const priceLabel = (price: number, name: string) => `${formatRM(price)}${name === "Bespoke" ? "+" : ""}`;
 
   return (
