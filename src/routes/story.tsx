@@ -42,7 +42,7 @@ function StoryPage() {
     <main className="bg-brand-cream text-brand-forest">
       <div className="bg-brand-forest"><SiteHeader itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
       <section className="grid min-h-[78svh] lg:grid-cols-2">
-        <div className="flex flex-col justify-center px-5 py-20 sm:px-8 lg:px-12">
+        <div className="flex flex-col justify-center px-5 py-20 sm:px-8 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))] lg:pr-12">
           <p className="text-xs font-bold uppercase text-brand-gold">The intention</p>
           <h1 className="mt-5 max-w-xl font-display text-6xl font-semibold leading-[0.92] sm:text-8xl">More than a corner. A state of being.</h1>
           <p className="mt-8 max-w-lg text-base leading-8 text-muted-foreground">MAQAMY transforms an overlooked part of the home into a considered sanctuary — one that makes daily prayer feel present, natural and deeply personal.</p>

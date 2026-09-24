@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
 
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
@@ -63,80 +64,87 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
   signedIn: boolean;
   onAdd: ReturnType<typeof useCart>["addToCart"];
 }) {
+  const [selected, setSelected] = useState(collection.packages.find((item) => item.badge)?.name ?? collection.packages[0].name);
+  const editions = collection.packages.map((fallback) => {
+    const product = products.find((item) => item.package === fallback.name);
+    return {
+      fallback,
+      price: product?.price ?? fallback.price,
+      includes: product?.specifications?.length ? product.specifications : fallback.includes,
+      stock: product?.stock ?? 0,
+    };
+  });
+  const current = editions.find((item) => item.fallback.name === selected) ?? editions[0];
+  const priceLabel = (price: number, name: string) => `${formatRM(price)}${name === "Bespoke" ? "+" : ""}`;
+
   return (
     <article className="border-t border-brand-forest/10">
-      <div className="mx-auto max-w-[1400px] px-5 py-20 sm:px-8 lg:px-12 lg:py-32">
-        <div className="mb-14 flex flex-col items-center gap-4 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">
-            {String(index + 1).padStart(2, "0")} — {collection.subtitle}
-          </p>
-          <h2 className="font-display text-6xl font-normal uppercase leading-none sm:text-8xl">{collection.name}</h2>
+      <div className="mx-auto max-w-[1400px] px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16 xl:gap-24">
+          <figure className="min-w-0 bg-brand-mist p-3 sm:p-6">
+            <img src={collection.image} alt={collection.imageAlt} className="mx-auto block h-auto w-full object-contain" />
+          </figure>
+
+          <div className="min-w-0 lg:sticky lg:top-8 lg:self-start">
+            <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">
+              {String(index + 1).padStart(2, "0")} — {collection.subtitle}
+            </p>
+            <h2 className="mt-5 font-display text-6xl font-normal uppercase leading-none sm:text-7xl xl:text-8xl">{collection.name}</h2>
+            <p className="mt-6 font-display text-2xl font-normal italic leading-snug sm:text-3xl">“{collection.quote}”</p>
+            <p className="mt-5 text-sm leading-7 text-muted-foreground">{collection.story}</p>
+
+            <div className="mt-10 border-t border-brand-forest/15 pt-8">
+              <div className="flex items-baseline justify-between gap-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">Select an edition</p>
+                <p className="font-display text-4xl font-normal">{priceLabel(current.price, current.fallback.name)}</p>
+              </div>
+              <div className="mt-6 grid gap-3" role="radiogroup" aria-label={`${collection.name} editions`}>
+                {editions.map(({ fallback, price, includes, stock }) => {
+                  const active = fallback.name === selected;
+                  return (
+                    <button
+                      key={fallback.name}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setSelected(fallback.name)}
+                      className={`grid grid-cols-[minmax(0,1fr)_auto] gap-4 border px-5 py-4 text-left transition-colors ${active ? "border-brand-forest bg-brand-mist" : "border-brand-forest/15 hover:border-brand-forest/40"}`}
+                    >
+                      <span className="min-w-0">
+                        <span className="flex flex-wrap items-baseline gap-3">
+                          <span className="font-display text-2xl">{fallback.name}</span>
+                          {fallback.badge ? <span className="text-[9px] font-bold uppercase tracking-[0.35em] text-brand-gold">{fallback.badge}</span> : null}
+                        </span>
+                        <span className="mt-1 block text-xs leading-6 text-muted-foreground">{includes.join(" · ")}</span>
+                        <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{stock > 0 ? `${stock} available` : "Currently unavailable"}</span>
+                      </span>
+                      <span className="font-display text-xl">{priceLabel(price, fallback.name)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6">
+                {signedIn ? (
+                  <Button variant="maqamy" size="lg" className="w-full" disabled={current.stock < 1} onClick={() => void onAdd(collection.name, current.fallback.name)}>
+                    {current.stock > 0 ? `Add ${current.fallback.name} to cart` : "Out of stock"}
+                  </Button>
+                ) : (
+                  <Button asChild variant="maqamy" size="lg" className="w-full">
+                    <Link to="/auth" search={{ redirect: "/collections" }}>Sign in to add</Link>
+                  </Button>
+                )}
+                <Button asChild variant="link" className="mt-2 w-full text-brand-forest">
+                  <Link to="/cart">View cart <ArrowRight /></Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <figure className="mx-auto max-w-5xl">
-          <img src={collection.image} alt={collection.imageAlt} className="mx-auto block h-auto w-full object-contain" />
-        </figure>
-
-        <div className="mx-auto mt-16 max-w-3xl text-center">
-          <p className="font-display text-3xl font-normal italic leading-snug sm:text-4xl">“{collection.quote}”</p>
-          <p className="mt-8 text-sm leading-8 text-muted-foreground">{collection.story}</p>
-        </div>
-
-        <div className="mx-auto mt-20 grid max-w-5xl gap-14 md:grid-cols-2">
+        <div className="mx-auto mt-20 grid max-w-6xl gap-14 md:grid-cols-2 lg:mt-28">
           <DetailList title="Details" items={collection.details} />
           <DetailList title="The collection" items={collection.collection} />
-        </div>
-
-        <div className="mx-auto mt-24 max-w-5xl">
-          <p className="border-b border-brand-forest/15 pb-5 text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">
-            Select an edition
-          </p>
-          {collection.packages.map((fallback) => {
-            const product = products.find((item) => item.package === fallback.name);
-            const price = product?.price ?? fallback.price;
-            const includes = product?.specifications?.length ? product.specifications : fallback.includes;
-            const stock = product?.stock ?? 0;
-            const label = `${formatRM(price)}${fallback.name === "Bespoke" ? "+" : ""}`;
-
-            return (
-              <section
-                key={fallback.name}
-                className="group grid gap-6 border-b border-brand-forest/10 py-9 transition-colors hover:bg-brand-mist/60 md:grid-cols-[1fr_auto] md:items-center md:gap-10"
-              >
-                <div className="md:pr-10">
-                  <div className="flex flex-wrap items-baseline gap-4">
-                    <h3 className="font-display text-3xl font-normal">{fallback.name}</h3>
-                    {fallback.badge ? (
-                      <span className="text-[9px] font-bold uppercase tracking-[0.35em] text-brand-gold">{fallback.badge}</span>
-                    ) : null}
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-muted-foreground">{includes.join(" · ")}</p>
-                  <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-                    {stock > 0 ? `${stock} available` : "Currently unavailable"}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-8 md:justify-end">
-                  <p className="font-display text-3xl font-normal">{label}</p>
-                  {signedIn ? (
-                    <Button variant="maqamy" className="min-w-40" disabled={stock < 1} onClick={() => void onAdd(collection.name, fallback.name)}>
-                      {stock > 0 ? "Add to cart" : "Out of stock"}
-                    </Button>
-                  ) : (
-                    <Button asChild variant="maqamy" className="min-w-40" disabled={stock < 1}>
-                      <Link to="/auth" search={{ redirect: "/collections" }}>{stock > 0 ? "Sign in to add" : "Out of stock"}</Link>
-                    </Button>
-                  )}
-                </div>
-              </section>
-            );
-          })}
-
-          <div className="mt-10 flex justify-center">
-            <Button asChild variant="link" className="text-brand-forest">
-              <Link to="/cart">View cart <ArrowRight /></Link>
-            </Button>
-          </div>
         </div>
       </div>
     </article>
