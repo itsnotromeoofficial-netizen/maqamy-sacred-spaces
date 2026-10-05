@@ -8,6 +8,13 @@
       "when": 1791205858422,
       "tag": "0000_orders_admins_product_options",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791208998250,
+      "tag": "0001_rate_limits",
+      "breakpoints": true
     }
   ]
 }
