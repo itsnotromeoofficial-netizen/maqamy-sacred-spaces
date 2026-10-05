@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2, UserRound } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+
+import { supabase } from "@/integrations/supabase/client";
 
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
@@ -20,7 +23,18 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { cart, total, itemCount, userEmail, loading, updateQuantity, removeItem, signOut } = useCart();
+  const { cart, total, itemCount, userEmail, loading, updateQuantity, removeItem, signOut, reload } = useCart();
+  const [placing, setPlacing] = useState(false);
+  const [placed, setPlaced] = useState<string | null>(null);
+  const placeOrder = async () => {
+    setPlacing(true);
+    const { data, error } = await supabase.rpc("place_order");
+    setPlacing(false);
+    if (error || !data) { toast.error("Your order could not be placed. Please try again."); return; }
+    setPlaced(data);
+    toast.success(`Order ${data} received.`);
+    await reload();
+  };
   return (
     <main className="min-h-screen bg-brand-cream text-brand-forest">
       <SiteHeader tone="dark" itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} />
@@ -29,7 +43,7 @@ function CartPage() {
           <p className="text-xs font-bold uppercase text-brand-gold">Your selection</p>
           <h1 className="mt-4 font-display text-6xl font-semibold leading-none sm:text-8xl">The cart.</h1>
           <p className="mt-6 max-w-xl text-sm leading-7 text-muted-foreground">A considered overview of the prayer spaces you have selected for your home.</p>
-          {loading ? <div className="mx-auto my-24 h-12 w-1 animate-spin-bar bg-brand-gold" /> : !userEmail ? <SignedOut /> : cart.length === 0 ? <EmptyCart /> : (
+          {loading ? <div className="mx-auto my-24 h-12 w-1 animate-spin-bar bg-brand-gold" /> : placed ? <OrderPlaced number={placed} /> : !userEmail ? <SignedOut /> : cart.length === 0 ? <EmptyCart /> : (
             <div className="mt-14 grid gap-10 lg:grid-cols-[1.4fr_0.6fr] lg:items-start">
               <div className="space-y-4">
                 {cart.map((item) => (
@@ -46,8 +60,8 @@ function CartPage() {
               <aside className="border border-brand-gold/30 bg-brand-forest p-6 text-brand-cream lg:sticky lg:top-8">
                 <p className="text-xs font-bold uppercase text-brand-gold-soft">Summary</p>
                 <div className="mt-8 flex items-baseline justify-between border-b border-brand-cream/20 pb-6"><span className="text-sm">Estimated total</span><strong className="font-display text-4xl">{formatRM(total)}+</strong></div>
-                <p className="mt-5 text-xs leading-6 text-brand-cream/70">Final bespoke, delivery, and installation costs are confirmed during consultation.</p>
-                <Button variant="gold" size="lg" className="mt-8 w-full" onClick={() => toast.success("Your collection is saved for consultation.")}>Save for consultation <ArrowRight /></Button>
+                <p className="mt-5 text-xs leading-6 text-brand-cream/70">Your order is sent to our team for approval. You will receive an order number instantly and can follow its progress.</p>
+                <Button variant="gold" size="lg" className="mt-8 w-full" disabled={placing} onClick={() => void placeOrder()}>{placing ? "Placing order…" : "Place order"} <ArrowRight /></Button>
               </aside>
             </div>
           )}
@@ -60,3 +74,5 @@ function CartPage() {
 
 function SignedOut() { return <div className="mt-14 border-y border-brand-gold/25 py-20 text-center"><UserRound className="mx-auto size-9 text-brand-gold" /><h2 className="mt-5 font-display text-4xl font-semibold">Your private cart begins with an account.</h2><p className="mx-auto mt-4 max-w-md text-sm leading-7 text-muted-foreground">Register with your name, phone number, email, and address to save your selections.</p><Button asChild variant="gold" size="lg" className="mt-7"><Link to="/auth" search={{ redirect: "/cart" }}>Register or sign in <ArrowRight /></Link></Button></div>; }
 function EmptyCart() { return <div className="mt-14 border-y border-brand-gold/25 py-20 text-center"><ShoppingBag className="mx-auto size-9 text-brand-gold" /><h2 className="mt-5 font-display text-4xl font-semibold">Your cart is ready for a collection.</h2><Button asChild variant="maqamy" size="lg" className="mt-7"><Link to="/collections">Explore Noor & Janna <ArrowRight /></Link></Button></div>; }
+
+function OrderPlaced({ number }: { number: string }) { return <div className="animate-fade-soft mt-14 border-y border-brand-gold/25 py-20 text-center"><p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Order received</p><h2 className="mt-5 font-display text-5xl font-light">{number}</h2><p className="mx-auto mt-4 max-w-md text-sm leading-7 text-muted-foreground">Thank you. Our team will review and approve your order shortly. Keep this number — you can follow every step on your orders page.</p><Button asChild variant="gold" size="lg" className="mt-7"><Link to="/orders">Track my orders <ArrowRight /></Link></Button></div>; }

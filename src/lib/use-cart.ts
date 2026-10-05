@@ -105,5 +105,10 @@ export function useCart() {
     toast.success("Signed out.");
   }, []);
 
-  return { cart, userEmail, loading, itemCount, total, addToCart, updateQuantity, removeItem, signOut };
+  const reload = useCallback(async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data.user) await loadCart(data.user.id);
+  }, [loadCart]);
+
+  return { cart, userEmail, loading, itemCount, total, addToCart, updateQuantity, removeItem, signOut, reload };
 }

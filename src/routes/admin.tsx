@@ -175,7 +175,7 @@ function ProductsPanel() {
       await saveFn({ data: {
         id: form.id, name: form.name, collection: form.collection || "MAQAMY", package: form.package || form.name,
         description: form.description, price: form.price, stock: form.stock, image_url: form.image_url, display_order: form.display_order,
-        specifications: parseList(form.specifications.replace(/,/g, "\u200b")).map((s) => s.replace(/\u200b/g, ",")),
+        specifications: form.specifications.split("\n").map((s) => s.trim()).filter(Boolean),
         features: form.features.split("\n").map((s) => s.trim()).filter(Boolean),
         colours: parseList(form.colours), varieties: parseList(form.varieties),
       } });

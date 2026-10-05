@@ -39,6 +39,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
           <Link to="/story" activeProps={{ className: "text-brand-gold-soft" }}>Our story</Link>
           <Link to="/collections" activeProps={{ className: "text-brand-gold-soft" }}>Collections</Link>
           <Link to="/cart" activeProps={{ className: "text-brand-gold-soft" }}>Cart</Link>
+          <Link to="/orders" activeProps={{ className: "text-brand-gold-soft" }}>My orders</Link>
           <Link to="/privacy" activeProps={{ className: "text-brand-gold-soft" }}>Privacy</Link>
         </nav>
         <div className="flex items-center gap-2">
@@ -47,8 +48,8 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
           ) : (
             <Button asChild variant="ghost" size="sm" className={`hidden sm:inline-flex ${textClass}`}><Link to="/auth" search={{ redirect: "/collections" }}><LogIn /> Account</Link></Button>
           )}
-          <Button asChild variant="gold" size="icon" className="relative" aria-label={`Cart with ${itemCount} items`}>
-            <Link to="/cart"><ShoppingBag />{itemCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center bg-brand-cream px-1 text-[10px] text-brand-forest">{itemCount}</span> : null}</Link>
+          <Button asChild variant="gold" className="h-9 w-24 px-0 text-xs uppercase tracking-[0.15em]" aria-label={`Cart with ${itemCount} items`}>
+            <Link to="/cart"><ShoppingBag /><span>Cart{itemCount > 0 ? ` · ${itemCount}` : ""}</span></Link>
           </Button>
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((value) => !value)} className={`${textClass} lg:hidden`}>{open ? <X /> : <Menu />}</Button>
         </div>
@@ -59,6 +60,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
             <Link to="/story" onClick={() => setOpen(false)}>Our story</Link>
             <Link to="/collections" onClick={() => setOpen(false)}>Collections</Link>
             <Link to="/cart" onClick={() => setOpen(false)}>Cart</Link>
+            <Link to="/orders" onClick={() => setOpen(false)}>My orders</Link>
             <Link to="/privacy" onClick={() => setOpen(false)}>Privacy policy</Link>
           </div>
         </nav>
@@ -76,7 +78,7 @@ export function SiteFooter() {
           <p className="mt-5 text-xs uppercase text-brand-cream/60">MAQAMY Living Concepts © 2026</p>
         </div>
         <div className="flex flex-wrap gap-6 text-sm text-brand-cream/70">
-          <Link to="/story">Our story</Link><Link to="/collections">Collections</Link><Link to="/cart">Cart</Link><Link to="/privacy">Privacy</Link>
+          <Link to="/story">Our story</Link><Link to="/collections">Collections</Link><Link to="/cart">Cart</Link><Link to="/orders">My orders</Link><Link to="/privacy">Privacy</Link>
         </div>
       </div>
     </footer>
