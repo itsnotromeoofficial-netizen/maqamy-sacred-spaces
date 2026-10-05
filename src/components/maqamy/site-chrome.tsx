@@ -35,7 +35,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
         <Link to="/" aria-label="MAQAMY introduction" onClick={onLogoClick}>
           <img src={brandAssets.logo} alt="MAQAMY" className={`w-24 ${light ? "brightness-0 invert" : ""}`} />
         </Link>
-        <nav className="hidden items-center gap-9 text-xs font-bold uppercase lg:flex">
+        <nav className="hidden items-center gap-9 text-xs font-semibold uppercase tracking-[0.2em] lg:flex">
           <Link to="/story" activeProps={{ className: "text-brand-gold-soft" }}>Our story</Link>
           <Link to="/collections" activeProps={{ className: "text-brand-gold-soft" }}>Collections</Link>
           <Link to="/cart" activeProps={{ className: "text-brand-gold-soft" }}>Cart</Link>

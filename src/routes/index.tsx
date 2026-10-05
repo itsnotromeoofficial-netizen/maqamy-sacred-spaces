@@ -47,7 +47,7 @@ function IntroductionPage() {
       <div className="text-center">
         <Button variant="ghost" className="h-auto p-2" aria-label="MAQAMY Living Concepts" onClick={handleLogoTap}><img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto w-36 brightness-0 invert sm:w-44" /></Button>
         <div className="mx-auto mt-10 h-12 w-1 animate-spin-bar bg-brand-gold" aria-hidden="true" />
-        <p className="mt-10 text-xs font-bold uppercase text-brand-gold-soft">A place to return</p>
+        <p className="mt-10 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold-soft">A place to return</p>
       </div>
     </main>
   );
@@ -59,8 +59,8 @@ function IntroductionPage() {
         <div className="absolute inset-0 bg-brand-forest/45" />
         <div className="absolute inset-x-0 top-0"><SiteHeader itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
         <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col justify-end px-5 pb-14 pt-32 sm:px-8 lg:px-12 lg:pb-20">
-          <p className="animate-rise-cut text-xs font-bold uppercase text-brand-gold-soft">Prayer spaces for a more meaningful life</p>
-          <h1 className="animate-rise-cut mt-5 max-w-5xl font-display text-6xl font-semibold leading-[0.88] sm:text-8xl lg:text-[8.5rem]">A place to<br /><span className="italic text-brand-gold-soft">return.</span></h1>
+          <p className="animate-rise-cut text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold-soft">Prayer spaces for a more meaningful life</p>
+          <h1 className="animate-rise-cut mt-5 max-w-5xl font-display text-6xl font-light leading-[0.88] sm:text-8xl lg:text-[8.5rem]">A place to<br /><span className="italic text-brand-gold-soft">return.</span></h1>
           <div className="mt-10 grid gap-6 border-t border-brand-cream/30 pt-6 sm:grid-cols-[1fr_auto] sm:items-end">
             <p className="max-w-lg text-sm leading-7 text-brand-cream/80 sm:text-base">Complete prayer environments, created with intention for the spiritual centre of your home.</p>
             <div className="flex flex-wrap gap-3">
