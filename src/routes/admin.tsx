@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { Ban, LogOut, Minus, PackageX, PackagePlus, Plus, Save, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +11,8 @@ import {
   adjustAdminStock, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminProduct, deleteCustomer,
   getAdminSession, listAdminAccounts, listAdminCustomers, listAdminOrders, listAdminProducts, loginAdmin,
   logoutAdmin, saveAdminProduct, setAdminStock, updateOrderStatus,
-} from "@/lib/admin.functions";
+  type AdminAccount, type AdminCustomer, type AdminSession,
+} from "@/lib/admin-api";
 import { brandAssets, formatRM } from "@/lib/maqamy-products";
 import { ORDER_LABELS, ORDER_STATUSES, parseList, type OrderItem, type OrderStatus } from "@/lib/orders";
 
@@ -36,9 +36,9 @@ export const Route = createFileRoute("/admin")({
 const errorText = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
 
 function AdminPage() {
-  const sessionFn = useServerFn(getAdminSession);
-  const loginFn = useServerFn(loginAdmin);
-  const logoutFn = useServerFn(logoutAdmin);
+  const sessionFn = getAdminSession;
+  const loginFn = loginAdmin;
+  const logoutFn = logoutAdmin;
   const navigate = useNavigate();
   const [session, setSession] = useState<{ authenticated: boolean; username: string; team: string; master: boolean } | null>(null);
   const [tab, setTab] = useState<Tab>("orders");
@@ -82,8 +82,8 @@ function AdminPage() {
 /* ---------------- Orders ---------------- */
 
 function OrdersPanel() {
-  const listFn = useServerFn(listAdminOrders);
-  const statusFn = useServerFn(updateOrderStatus);
+  const listFn = listAdminOrders;
+  const statusFn = updateOrderStatus;
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const refresh = () => listFn().then(setOrders).catch((e) => toast.error(errorText(e, "Orders could not be loaded")));
@@ -154,11 +154,11 @@ type FormState = {
 const emptyForm: FormState = { name: "", collection: "MAQAMY", package: "", description: "", price: 0, stock: 0, image_url: "", display_order: 100, specifications: "", features: "", colours: "", varieties: "" };
 
 function ProductsPanel() {
-  const listFn = useServerFn(listAdminProducts);
-  const saveFn = useServerFn(saveAdminProduct);
-  const adjustFn = useServerFn(adjustAdminStock);
-  const setStockFn = useServerFn(setAdminStock);
-  const deleteFn = useServerFn(deleteAdminProduct);
+  const listFn = listAdminProducts;
+  const saveFn = saveAdminProduct;
+  const adjustFn = adjustAdminStock;
+  const setStockFn = setAdminStock;
+  const deleteFn = deleteAdminProduct;
   const [products, setProducts] = useState<Product[] | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [busy, setBusy] = useState(false);
@@ -241,12 +241,12 @@ function ProductsPanel() {
 
 /* ---------------- Customers ---------------- */
 
-type Customer = Awaited<ReturnType<typeof listAdminCustomers>>[number];
+type Customer = AdminCustomer;
 
 function CustomersPanel() {
-  const listFn = useServerFn(listAdminCustomers);
-  const banFn = useServerFn(banCustomer);
-  const deleteFn = useServerFn(deleteCustomer);
+  const listFn = listAdminCustomers;
+  const banFn = banCustomer;
+  const deleteFn = deleteCustomer;
   const [customers, setCustomers] = useState<Customer[] | null>(null);
   const [query, setQuery] = useState("");
   const refresh = () => listFn().then(setCustomers).catch((e) => toast.error(errorText(e, "Customers could not be loaded")));
@@ -289,10 +289,10 @@ function CustomersPanel() {
 /* ---------------- Admin accounts ---------------- */
 
 function AdminsPanel() {
-  const listFn = useServerFn(listAdminAccounts);
-  const createFn = useServerFn(createAdminAccount);
-  const deleteFn = useServerFn(deleteAdminAccount);
-  const [admins, setAdmins] = useState<Awaited<ReturnType<typeof listAdminAccounts>> | null>(null);
+  const listFn = listAdminAccounts;
+  const createFn = createAdminAccount;
+  const deleteFn = deleteAdminAccount;
+  const [admins, setAdmins] = useState<AdminAccount[] | null>(null);
   const [form, setForm] = useState({ team: "", username: "", password: "" });
   const [busy, setBusy] = useState(false);
   const refresh = () => listFn().then(setAdmins).catch((e) => toast.error(errorText(e, "Admins could not be loaded")));
@@ -314,8 +314,8 @@ function AdminsPanel() {
         <datalist id="admin-teams">{teams.map((t) => <option key={t} value={t} />)}</datalist>
         <Field label="Username"><Input autoComplete="off" placeholder="alex1" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></Field>
         <Field label="Password"><Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></Field>
-        <Button variant="gold" size="lg" disabled={busy || !form.team || !form.username || form.password.length < 6} onClick={() => void create()}><UserPlus />{busy ? "Creating…" : "Create admin"}</Button>
-        <p className="text-xs leading-6 text-muted-foreground">Passwords need at least 6 characters. Only you, the owner, can see this tab.</p>
+        <Button variant="gold" size="lg" disabled={busy || !form.team || !form.username || form.password.length < 8} onClick={() => void create()}><UserPlus />{busy ? "Creating…" : "Create admin"}</Button>
+        <p className="text-xs leading-6 text-muted-foreground">Passwords need at least 8 characters. Only you, the owner, can see this tab.</p>
       </div>
     </section>
     <section>
