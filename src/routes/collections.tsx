@@ -181,6 +181,9 @@ function AdditionalProducts({ products, signedIn, onAdd }: {
               <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-brand-gold">{product.collection} — {product.package}</p>
               <h3 className="mt-4 font-display text-3xl font-light">{product.name}</h3>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">{product.description}</p>
+              {product.features.length ? <ul className="mt-4 space-y-1 text-sm text-muted-foreground">{product.features.map((f) => <li key={f}>— {f}</li>)}</ul> : null}
+              {product.colours.length ? <p className="mt-4 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">Colours</span> · {product.colours.join(", ")}</p> : null}
+              {product.varieties.length ? <p className="mt-2 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">Varieties</span> · {product.varieties.join(", ")}</p> : null}
               <p className="mt-6 font-display text-2xl">{formatRM(product.price)}</p>
               <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                 {product.stock > 0 ? `${product.stock} available` : "Currently unavailable"}
