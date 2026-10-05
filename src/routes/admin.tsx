@@ -36,18 +36,18 @@ export const Route = createFileRoute("/admin")({
 const errorText = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
 
 function AdminPage() {
-  const sessionFn = getAdminSession;
-  const loginFn = loginAdmin;
   const logoutFn = logoutAdmin;
   const navigate = useNavigate();
-  const [session, setSession] = useState<{ authenticated: boolean; username: string; team: string; master: boolean } | null>(null);
+  const [session, setSession] = useState<AdminSession | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("orders");
 
-  const load = () => sessionFn().then((s) => { setSession(s); return s; });
-  useEffect(() => { void load(); }, []);
+  const load = () => { setLoadError(null); getAdminSession().then(setSession).catch((e) => setLoadError(errorText(e, "Could not reach the server."))); };
+  useEffect(() => { load(); }, []);
 
+  if (loadError) return <main className="flex min-h-screen items-center justify-center bg-brand-forest px-5 text-center text-brand-cream"><div className="animate-fade-soft"><p className="font-display text-3xl font-light">{loadError}</p><Button variant="gold" className="mt-6" onClick={load}>Try again</Button></div></main>;
   if (session === null) return <main className="flex min-h-screen items-center justify-center bg-brand-forest"><div className="h-14 w-1 animate-spin-bar bg-brand-gold" /></main>;
-  if (!session.authenticated) return <AdminLogin onSuccess={load} loginFn={loginFn} />;
+  if (!session.authenticated) return <AdminLogin onSuccess={setSession} />;
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "orders", label: "Orders" },
