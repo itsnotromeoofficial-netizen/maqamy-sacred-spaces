@@ -337,17 +337,17 @@ function AdminsPanel() {
 function Loading() { return <div className="mx-auto my-16 h-12 w-1 animate-spin-bar bg-brand-gold" />; }
 function Empty({ text }: { text: string }) { return <p className="border border-dashed border-brand-gold/40 py-14 text-center text-sm text-muted-foreground">{text}</p>; }
 
-function AdminLogin({ onSuccess, loginFn }: { onSuccess: () => Promise<unknown>; loginFn: (options: { data: { username: string; password: string } }) => Promise<{ ok: boolean }> }) {
-  const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState(false);
+function AdminLogin({ onSuccess }: { onSuccess: (s: AdminSession) => void }) {
+  const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState<string | null>(null);
   return <main className="flex min-h-screen items-center justify-center bg-brand-forest px-5 text-brand-cream">
     <section className="animate-fade-soft w-full max-w-md border border-brand-gold/35 bg-brand-ink/40 p-7 shadow-maqamy sm:p-10">
       <img src={brandAssets.logo} alt="MAQAMY" className="w-28 brightness-0 invert" />
       <div className="mt-12 flex items-center gap-3 text-brand-gold-soft"><ShieldCheck className="size-5" /><p className="text-xs font-semibold uppercase tracking-[0.3em]">Private administration</p></div>
       <h1 className="mt-4 font-display text-5xl font-light">Welcome back.</h1>
-      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(false); try { const result = await loginFn({ data: { username, password } }); if (result.ok) { const s = await onSuccess() as { authenticated?: boolean } | undefined; if (s && !s.authenticated) setError(true); } else setError(true); } catch { setError(true); } finally { setBusy(false); } }}>
+      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(null); try { onSuccess(await loginAdmin({ data: { username, password } })); } catch (e) { setError(errorText(e, "Those details were not recognised.")); } finally { setBusy(false); } }}>
         <Field label="Username"><Input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
         <Field label="Password"><Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
-        {error ? <p className="animate-fade-soft text-sm text-brand-gold-soft">Those details were not recognised.</p> : null}
+        {error ? <p className="animate-fade-soft text-sm text-brand-gold-soft">{error}</p> : null}
         <Button variant="gold" size="lg" className="w-full" disabled={busy || !username || !password}>{busy ? "Checking…" : "Enter"}</Button>
       </form>
     </section>
