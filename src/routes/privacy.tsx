@@ -29,8 +29,8 @@ function PrivacyPage() {
       <SiteHeader tone="dark" itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} />
       <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:py-12">
         <section className="py-12 lg:py-20">
-          <p className="text-xs font-bold uppercase text-brand-gold">Privacy policy</p>
-          <h1 className="mt-4 font-display text-5xl font-semibold leading-none sm:text-7xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Privacy policy</p>
+          <h1 className="mt-4 font-display text-5xl font-light leading-none sm:text-7xl">
             MAQAMY Living Concepts
           </h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
@@ -48,7 +48,7 @@ function PrivacyPage() {
             ["Copyright", "MAQAMY Living Concepts and the MAQAMY presentation, product language, collection identity, and brand materials are copyrighted © 2026."],
           ].map(([title, body]) => (
             <article key={title} className="border border-brand-gold/25 bg-card p-5 shadow-gold">
-              <h2 className="font-display text-3xl font-semibold">{title}</h2>
+              <h2 className="font-display text-3xl font-light">{title}</h2>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">{body}</p>
             </article>
           ))}

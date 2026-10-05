@@ -2,6 +2,14 @@
 @import "tw-animate-css";
 @source "../src";
 
+@font-face { font-family: "Aime"; src: url("/fonts/Aime-Thin-Trial.ttf") format("truetype"); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: "Aime"; src: url("/fonts/Aime-Light-Trial.ttf") format("truetype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Aime"; src: url("/fonts/Aime-Regular-Trial.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Aime"; src: url("/fonts/Aime-SemiBold-Trial.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Aime"; src: url("/fonts/Aime-Bold-Trial.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Aime"; src: url("/fonts/Aime-Italic-Trial.ttf") format("truetype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Aime"; src: url("/fonts/Aime-LightItalic-Trial.ttf") format("truetype"); font-weight: 300; font-style: italic; font-display: swap; }
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -12,8 +20,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --font-display: "Cormorant Garamond", Georgia, serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Aime", "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Aime", Georgia, "Times New Roman", serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -184,6 +192,21 @@
   to { clip-path: inset(0 0 0 0); transform: translateY(0); }
 }
 
+@keyframes maqamy-fade-soft {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-fade-soft {
+  animation: maqamy-fade-soft 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @keyframes maqamy-line-sweep {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
@@ -215,6 +238,8 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-feature-settings: "kern", "liga";
+    -webkit-font-smoothing: antialiased;
   }
 
   ::selection {

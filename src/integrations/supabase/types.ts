@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          password_hash: string
+          team: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password_hash: string
+          team: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password_hash?: string
+          team?: string
+          username?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           collection: string
@@ -47,13 +71,60 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          created_at: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          order_number: string
+          status: string
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          items?: Json
+          order_number?: string
+          status?: string
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          items?: Json
+          order_number?: string
+          status?: string
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           active: boolean
           collection: string
+          colours: string[]
           created_at: string
           description: string
           display_order: number
+          features: string[]
           id: string
           image_url: string | null
           name: string
@@ -62,13 +133,16 @@ export type Database = {
           specifications: string[]
           stock: number
           updated_at: string
+          varieties: string[]
         }
         Insert: {
           active?: boolean
           collection: string
+          colours?: string[]
           created_at?: string
           description?: string
           display_order?: number
+          features?: string[]
           id?: string
           image_url?: string | null
           name: string
@@ -77,13 +151,16 @@ export type Database = {
           specifications?: string[]
           stock?: number
           updated_at?: string
+          varieties?: string[]
         }
         Update: {
           active?: boolean
           collection?: string
+          colours?: string[]
           created_at?: string
           description?: string
           display_order?: number
+          features?: string[]
           id?: string
           image_url?: string | null
           name?: string
@@ -92,6 +169,7 @@ export type Database = {
           specifications?: string[]
           stock?: number
           updated_at?: string
+          varieties?: string[]
         }
         Relationships: []
       }
@@ -130,7 +208,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      place_order: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

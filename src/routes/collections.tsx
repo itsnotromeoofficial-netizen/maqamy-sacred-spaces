@@ -31,8 +31,8 @@ function CollectionsPage() {
 
       <section className="px-5 pb-16 pt-20 sm:px-8 lg:px-12 lg:pb-24 lg:pt-28">
         <div className="mx-auto max-w-5xl text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
-          <h1 className="mt-8 font-display text-5xl font-normal italic leading-[1.05] sm:text-7xl">Two expressions of peace</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
+          <h1 className="mt-8 font-display text-5xl font-light italic leading-[1.05] sm:text-7xl">Two expressions of peace</h1>
           <p className="mx-auto mt-8 max-w-md text-sm leading-8 text-muted-foreground">
             Complete prayer environments, considered from the mihrab to the final object.
           </p>
@@ -86,17 +86,17 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
           </figure>
 
           <div className="min-w-0 lg:sticky lg:top-8 lg:self-start">
-            <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">
               {String(index + 1).padStart(2, "0")} — {collection.subtitle}
             </p>
-            <h2 className="mt-5 font-display text-6xl font-normal uppercase leading-none sm:text-7xl xl:text-8xl">{collection.name}</h2>
-            <p className="mt-6 font-display text-2xl font-normal italic leading-snug sm:text-3xl">“{collection.quote}”</p>
+            <h2 className="mt-5 font-display text-6xl font-light uppercase leading-none sm:text-7xl xl:text-8xl">{collection.name}</h2>
+            <p className="mt-6 font-display text-2xl font-light italic leading-snug sm:text-3xl">“{collection.quote}”</p>
             <p className="mt-5 text-sm leading-7 text-muted-foreground">{collection.story}</p>
 
             <div className="mt-10 border-t border-brand-forest/15 pt-8">
               <div className="flex items-baseline justify-between gap-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">Select an edition</p>
-                <p className="font-display text-4xl font-normal">{priceLabel(current.price, current.fallback.name)}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">Select an edition</p>
+                <p className="font-display text-4xl font-light">{priceLabel(current.price, current.fallback.name)}</p>
               </div>
               <div className="mt-6 grid gap-3" role="radiogroup" aria-label={`${collection.name} editions`}>
                 {editions.map(({ fallback, price, includes, stock }) => {
@@ -113,10 +113,10 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
                       <span className="min-w-0">
                         <span className="flex flex-wrap items-baseline gap-3">
                           <span className="font-display text-2xl">{fallback.name}</span>
-                          {fallback.badge ? <span className="text-[9px] font-bold uppercase tracking-[0.35em] text-brand-gold">{fallback.badge}</span> : null}
+                          {fallback.badge ? <span className="text-[9px] font-semibold uppercase tracking-[0.35em] text-brand-gold">{fallback.badge}</span> : null}
                         </span>
                         <span className="mt-1 block text-xs leading-6 text-muted-foreground">{includes.join(" · ")}</span>
-                        <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">{stock > 0 ? `${stock} available` : "Currently unavailable"}</span>
+                        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">{stock > 0 ? `${stock} available` : "Currently unavailable"}</span>
                       </span>
                       <span className="font-display text-xl">{priceLabel(price, fallback.name)}</span>
                     </button>
@@ -160,8 +160,8 @@ function AdditionalProducts({ products, signedIn, onAdd }: {
     <section className="border-t border-brand-forest/10 px-5 py-20 sm:px-8 lg:px-12 lg:py-32">
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-16 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">New additions</p>
-          <h2 className="mt-6 font-display text-5xl font-normal italic sm:text-6xl">More from MAQAMY</h2>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">New additions</p>
+          <h2 className="mt-6 font-display text-5xl font-light italic sm:text-6xl">More from MAQAMY</h2>
         </div>
 
         <div className="grid gap-x-10 gap-y-20 sm:grid-cols-2 lg:grid-cols-3">
@@ -178,11 +178,14 @@ function AdditionalProducts({ products, signedIn, onAdd }: {
                   <span className="font-display text-5xl italic text-brand-forest/20">{product.collection}</span>
                 )}
               </div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-brand-gold">{product.collection} — {product.package}</p>
-              <h3 className="mt-4 font-display text-3xl font-normal">{product.name}</h3>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-brand-gold">{product.collection} — {product.package}</p>
+              <h3 className="mt-4 font-display text-3xl font-light">{product.name}</h3>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">{product.description}</p>
+              {product.features.length ? <ul className="mt-4 space-y-1 text-sm text-muted-foreground">{product.features.map((f) => <li key={f}>— {f}</li>)}</ul> : null}
+              {product.colours.length ? <p className="mt-4 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">Colours</span> · {product.colours.join(", ")}</p> : null}
+              {product.varieties.length ? <p className="mt-2 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">Varieties</span> · {product.varieties.join(", ")}</p> : null}
               <p className="mt-6 font-display text-2xl">{formatRM(product.price)}</p>
-              <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
+              <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                 {product.stock > 0 ? `${product.stock} available` : "Currently unavailable"}
               </p>
               <div className="mt-6">
@@ -207,7 +210,7 @@ function AdditionalProducts({ products, signedIn, onAdd }: {
 function DetailList({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <p className="border-b border-brand-forest/15 pb-4 text-[10px] font-bold uppercase tracking-[0.45em] text-brand-gold">{title}</p>
+      <p className="border-b border-brand-forest/15 pb-4 text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{title}</p>
       <ul className="mt-6 space-y-5 text-sm leading-7 text-muted-foreground">
         {items.map((item) => <li key={item} className="border-b border-brand-forest/5 pb-5 last:border-0">{item}</li>)}
       </ul>

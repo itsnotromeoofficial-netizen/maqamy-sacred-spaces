@@ -229,7 +229,7 @@ function AuthPage() {
             <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-full" />
           </div>
           <div className="absolute bottom-10 left-10 max-w-md text-brand-cream">
-            <p className="font-display text-5xl font-semibold italic leading-tight">A place to return.</p>
+            <p className="font-display text-5xl font-light italic leading-tight">A place to return.</p>
             <p className="mt-4 text-sm leading-7 text-brand-cream/80">
               Sign in to preserve your selected prayer-space collection, delivery details, and consultation cart.
             </p>
@@ -248,8 +248,8 @@ function AuthPage() {
             <div className="border border-brand-gold/30 bg-card p-5 shadow-maqamy sm:p-8">
               <div className="mb-8 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold uppercase text-brand-gold">Customer account</p>
-                  <h1 className="mt-2 font-display text-4xl font-semibold text-brand-forest sm:text-5xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Customer account</p>
+                  <h1 className="mt-2 font-display text-4xl font-light text-brand-forest sm:text-5xl">
                     {verify ? "Verify" : mode === "register" ? "Register" : "Sign in"}
                   </h1>
                 </div>

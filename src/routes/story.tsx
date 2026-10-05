@@ -43,8 +43,8 @@ function StoryPage() {
       <div className="bg-brand-forest"><SiteHeader itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
       <section className="grid min-h-[78svh] lg:grid-cols-2">
         <div className="flex flex-col justify-center px-5 py-20 sm:px-8 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))] lg:pr-12">
-          <p className="text-xs font-bold uppercase text-brand-gold">The intention</p>
-          <h1 className="mt-5 max-w-xl font-display text-6xl font-semibold leading-[0.92] sm:text-8xl">More than a corner. A state of being.</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">The intention</p>
+          <h1 className="mt-5 max-w-xl font-display text-6xl font-light leading-[0.92] sm:text-8xl">More than a corner. A state of being.</h1>
           <p className="mt-8 max-w-lg text-base leading-8 text-muted-foreground">MAQAMY transforms an overlooked part of the home into a considered sanctuary — one that makes daily prayer feel present, natural and deeply personal.</p>
         </div>
         <div className="min-h-[55svh] bg-brand-mist p-5 sm:p-8 lg:p-12">
@@ -54,17 +54,17 @@ function StoryPage() {
       <section className="px-5 py-24 sm:px-8 lg:py-36">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.65fr_1.35fr]">
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <p className="text-xs font-bold uppercase text-brand-gold">The quiet return</p>
-            <h2 className="mt-4 font-display text-4xl font-semibold">Words to hold.</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">The quiet return</p>
+            <h2 className="mt-4 font-display text-4xl font-light">Words to hold.</h2>
           </div>
           <div className="space-y-[30vh] py-[15vh]">
-            {storyLines.map((line, index) => <p key={line} ref={(node) => { refs.current[index] = node; }} data-index={index} className={`text-balance font-display text-4xl font-semibold leading-[1.08] transition-colors duration-500 sm:text-6xl ${active === index ? "bg-highlight px-4 py-3 text-highlight-foreground sm:px-6" : "text-brand-forest/25"}`}>{line}</p>)}
+            {storyLines.map((line, index) => <p key={line} ref={(node) => { refs.current[index] = node; }} data-index={index} className={`text-balance font-display text-4xl font-light leading-[1.08] transition-colors duration-500 sm:text-6xl ${active === index ? "bg-highlight px-4 py-3 text-highlight-foreground sm:px-6" : "text-brand-forest/25"}`}>{line}</p>)}
           </div>
         </div>
       </section>
       <section className="bg-brand-forest px-5 py-20 text-brand-cream sm:px-8 lg:py-28">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
-          <h2 className="max-w-3xl font-display text-5xl font-semibold leading-none sm:text-7xl">Meet the spaces shaped by this intention.</h2>
+          <h2 className="max-w-3xl font-display text-5xl font-light leading-none sm:text-7xl">Meet the spaces shaped by this intention.</h2>
           <Button asChild variant="gold" size="lg"><Link to="/collections">Explore Noor & Janna <ArrowRight /></Link></Button>
         </div>
       </section>

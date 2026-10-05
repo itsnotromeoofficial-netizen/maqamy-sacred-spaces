@@ -69,7 +69,7 @@ function ResetPasswordPage() {
     <main className="flex min-h-screen items-center justify-center bg-brand-cream px-5 py-10 text-brand-forest">
       <div className="w-full max-w-md border border-brand-gold/30 bg-card p-6 shadow-maqamy">
         <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto mb-6 w-24" />
-        <h1 className="font-display text-4xl font-semibold">Reset password</h1>
+        <h1 className="font-display text-4xl font-light">Reset password</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {hasRecovery
             ? "Enter a new password for your customer account."
