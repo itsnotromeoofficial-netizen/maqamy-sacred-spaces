@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { Ban, LogOut, Minus, PackageX, PackagePlus, Plus, Save, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -12,7 +11,8 @@ import {
   adjustAdminStock, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminProduct, deleteCustomer,
   getAdminSession, listAdminAccounts, listAdminCustomers, listAdminOrders, listAdminProducts, loginAdmin,
   logoutAdmin, saveAdminProduct, setAdminStock, updateOrderStatus,
-} from "@/lib/admin.functions";
+  type AdminAccount, type AdminCustomer, type AdminSession,
+} from "@/lib/admin-api";
 import { brandAssets, formatRM } from "@/lib/maqamy-products";
 import { ORDER_LABELS, ORDER_STATUSES, parseList, type OrderItem, type OrderStatus } from "@/lib/orders";
 
@@ -36,18 +36,18 @@ export const Route = createFileRoute("/admin")({
 const errorText = (error: unknown, fallback: string) => (error instanceof Error ? error.message : fallback);
 
 function AdminPage() {
-  const sessionFn = useServerFn(getAdminSession);
-  const loginFn = useServerFn(loginAdmin);
-  const logoutFn = useServerFn(logoutAdmin);
+  const logoutFn = logoutAdmin;
   const navigate = useNavigate();
-  const [session, setSession] = useState<{ authenticated: boolean; username: string; team: string; master: boolean } | null>(null);
+  const [session, setSession] = useState<AdminSession | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("orders");
 
-  const load = () => sessionFn().then((s) => { setSession(s); return s; });
-  useEffect(() => { void load(); }, []);
+  const load = () => { setLoadError(null); getAdminSession().then(setSession).catch((e) => setLoadError(errorText(e, "Could not reach the server."))); };
+  useEffect(() => { load(); }, []);
 
+  if (loadError) return <main className="flex min-h-screen items-center justify-center bg-brand-forest px-5 text-center text-brand-cream"><div className="animate-fade-soft"><p className="font-display text-3xl font-light">{loadError}</p><Button variant="gold" className="mt-6" onClick={load}>Try again</Button></div></main>;
   if (session === null) return <main className="flex min-h-screen items-center justify-center bg-brand-forest"><div className="h-14 w-1 animate-spin-bar bg-brand-gold" /></main>;
-  if (!session.authenticated) return <AdminLogin onSuccess={load} loginFn={loginFn} />;
+  if (!session.authenticated) return <AdminLogin onSuccess={setSession} />;
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "orders", label: "Orders" },
@@ -82,8 +82,8 @@ function AdminPage() {
 /* ---------------- Orders ---------------- */
 
 function OrdersPanel() {
-  const listFn = useServerFn(listAdminOrders);
-  const statusFn = useServerFn(updateOrderStatus);
+  const listFn = listAdminOrders;
+  const statusFn = updateOrderStatus;
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const refresh = () => listFn().then(setOrders).catch((e) => toast.error(errorText(e, "Orders could not be loaded")));
@@ -154,11 +154,11 @@ type FormState = {
 const emptyForm: FormState = { name: "", collection: "MAQAMY", package: "", description: "", price: 0, stock: 0, image_url: "", display_order: 100, specifications: "", features: "", colours: "", varieties: "" };
 
 function ProductsPanel() {
-  const listFn = useServerFn(listAdminProducts);
-  const saveFn = useServerFn(saveAdminProduct);
-  const adjustFn = useServerFn(adjustAdminStock);
-  const setStockFn = useServerFn(setAdminStock);
-  const deleteFn = useServerFn(deleteAdminProduct);
+  const listFn = listAdminProducts;
+  const saveFn = saveAdminProduct;
+  const adjustFn = adjustAdminStock;
+  const setStockFn = setAdminStock;
+  const deleteFn = deleteAdminProduct;
   const [products, setProducts] = useState<Product[] | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [busy, setBusy] = useState(false);
@@ -241,12 +241,12 @@ function ProductsPanel() {
 
 /* ---------------- Customers ---------------- */
 
-type Customer = Awaited<ReturnType<typeof listAdminCustomers>>[number];
+type Customer = AdminCustomer;
 
 function CustomersPanel() {
-  const listFn = useServerFn(listAdminCustomers);
-  const banFn = useServerFn(banCustomer);
-  const deleteFn = useServerFn(deleteCustomer);
+  const listFn = listAdminCustomers;
+  const banFn = banCustomer;
+  const deleteFn = deleteCustomer;
   const [customers, setCustomers] = useState<Customer[] | null>(null);
   const [query, setQuery] = useState("");
   const refresh = () => listFn().then(setCustomers).catch((e) => toast.error(errorText(e, "Customers could not be loaded")));
@@ -289,10 +289,10 @@ function CustomersPanel() {
 /* ---------------- Admin accounts ---------------- */
 
 function AdminsPanel() {
-  const listFn = useServerFn(listAdminAccounts);
-  const createFn = useServerFn(createAdminAccount);
-  const deleteFn = useServerFn(deleteAdminAccount);
-  const [admins, setAdmins] = useState<Awaited<ReturnType<typeof listAdminAccounts>> | null>(null);
+  const listFn = listAdminAccounts;
+  const createFn = createAdminAccount;
+  const deleteFn = deleteAdminAccount;
+  const [admins, setAdmins] = useState<AdminAccount[] | null>(null);
   const [form, setForm] = useState({ team: "", username: "", password: "" });
   const [busy, setBusy] = useState(false);
   const refresh = () => listFn().then(setAdmins).catch((e) => toast.error(errorText(e, "Admins could not be loaded")));
@@ -314,8 +314,8 @@ function AdminsPanel() {
         <datalist id="admin-teams">{teams.map((t) => <option key={t} value={t} />)}</datalist>
         <Field label="Username"><Input autoComplete="off" placeholder="alex1" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></Field>
         <Field label="Password"><Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></Field>
-        <Button variant="gold" size="lg" disabled={busy || !form.team || !form.username || form.password.length < 6} onClick={() => void create()}><UserPlus />{busy ? "Creating…" : "Create admin"}</Button>
-        <p className="text-xs leading-6 text-muted-foreground">Passwords need at least 6 characters. Only you, the owner, can see this tab.</p>
+        <Button variant="gold" size="lg" disabled={busy || !form.team || !form.username || form.password.length < 8} onClick={() => void create()}><UserPlus />{busy ? "Creating…" : "Create admin"}</Button>
+        <p className="text-xs leading-6 text-muted-foreground">Passwords need at least 8 characters. Only you, the owner, can see this tab.</p>
       </div>
     </section>
     <section>
@@ -337,17 +337,17 @@ function AdminsPanel() {
 function Loading() { return <div className="mx-auto my-16 h-12 w-1 animate-spin-bar bg-brand-gold" />; }
 function Empty({ text }: { text: string }) { return <p className="border border-dashed border-brand-gold/40 py-14 text-center text-sm text-muted-foreground">{text}</p>; }
 
-function AdminLogin({ onSuccess, loginFn }: { onSuccess: () => Promise<unknown>; loginFn: (options: { data: { username: string; password: string } }) => Promise<{ ok: boolean }> }) {
-  const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState(false);
+function AdminLogin({ onSuccess }: { onSuccess: (s: AdminSession) => void }) {
+  const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState<string | null>(null);
   return <main className="flex min-h-screen items-center justify-center bg-brand-forest px-5 text-brand-cream">
     <section className="animate-fade-soft w-full max-w-md border border-brand-gold/35 bg-brand-ink/40 p-7 shadow-maqamy sm:p-10">
       <img src={brandAssets.logo} alt="MAQAMY" className="w-28 brightness-0 invert" />
       <div className="mt-12 flex items-center gap-3 text-brand-gold-soft"><ShieldCheck className="size-5" /><p className="text-xs font-semibold uppercase tracking-[0.3em]">Private administration</p></div>
       <h1 className="mt-4 font-display text-5xl font-light">Welcome back.</h1>
-      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(false); try { const result = await loginFn({ data: { username, password } }); if (result.ok) { const s = await onSuccess() as { authenticated?: boolean } | undefined; if (s && !s.authenticated) setError(true); } else setError(true); } catch { setError(true); } finally { setBusy(false); } }}>
+      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(null); try { onSuccess(await loginAdmin({ data: { username, password } })); } catch (e) { setError(errorText(e, "Those details were not recognised.")); } finally { setBusy(false); } }}>
         <Field label="Username"><Input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
         <Field label="Password"><Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
-        {error ? <p className="animate-fade-soft text-sm text-brand-gold-soft">Those details were not recognised.</p> : null}
+        {error ? <p className="animate-fade-soft text-sm text-brand-gold-soft">{error}</p> : null}
         <Button variant="gold" size="lg" className="w-full" disabled={busy || !username || !password}>{busy ? "Checking…" : "Enter"}</Button>
       </form>
     </section>

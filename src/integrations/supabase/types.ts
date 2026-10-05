@@ -203,12 +203,50 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_events: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: number
+          key: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: number
+          key: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: number
+          key?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       place_order: { Args: never; Returns: string }
+      rate_limit_clear: {
+        Args: { _bucket: string; _key: string }
+        Returns: undefined
+      }
+      rate_limit_count: {
+        Args: { _bucket: string; _key: string; _window_seconds: number }
+        Returns: number
+      }
+      rate_limit_hit: {
+        Args: {
+          _bucket: string
+          _key: string
+          _max: number
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
