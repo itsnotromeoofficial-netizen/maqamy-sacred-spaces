@@ -43,7 +43,7 @@ function AdminPage() {
   const [session, setSession] = useState<{ authenticated: boolean; username: string; team: string; master: boolean } | null>(null);
   const [tab, setTab] = useState<Tab>("orders");
 
-  const load = () => sessionFn().then(setSession);
+  const load = () => sessionFn().then((s) => { setSession(s); return s; });
   useEffect(() => { void load(); }, []);
 
   if (session === null) return <main className="flex min-h-screen items-center justify-center bg-brand-forest"><div className="h-14 w-1 animate-spin-bar bg-brand-gold" /></main>;
@@ -344,7 +344,7 @@ function AdminLogin({ onSuccess, loginFn }: { onSuccess: () => Promise<unknown>;
       <img src={brandAssets.logo} alt="MAQAMY" className="w-28 brightness-0 invert" />
       <div className="mt-12 flex items-center gap-3 text-brand-gold-soft"><ShieldCheck className="size-5" /><p className="text-xs font-semibold uppercase tracking-[0.3em]">Private administration</p></div>
       <h1 className="mt-4 font-display text-5xl font-light">Welcome back.</h1>
-      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(false); const result = await loginFn({ data: { username, password } }); if (result.ok) await onSuccess(); else setError(true); setBusy(false); }}>
+      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(false); try { const result = await loginFn({ data: { username, password } }); if (result.ok) { const s = await onSuccess() as { authenticated?: boolean } | undefined; if (s && !s.authenticated) setError(true); } else setError(true); } catch { setError(true); } finally { setBusy(false); } }}>
         <Field label="Username"><Input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
         <Field label="Password"><Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
         {error ? <p className="animate-fade-soft text-sm text-brand-gold-soft">Those details were not recognised.</p> : null}

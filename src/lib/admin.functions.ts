@@ -31,7 +31,7 @@ function sessionConfig() {
     password: process.env['MAQAMY_ADMIN_SESSION_SECRET']!,
     name: "maqamy-admin",
     maxAge: 60 * 60 * 8,
-    cookie: { httpOnly: true, secure: true, sameSite: "strict" as const, path: "/" },
+    cookie: { httpOnly: true, secure: true, sameSite: "none" as const, partitioned: true, path: "/" },
   };
 }
 
