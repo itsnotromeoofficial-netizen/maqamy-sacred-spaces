@@ -3,6 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { z } from "zod";
 
+import { ORDER_STATUSES } from "./orders";
+
 const list = z.array(z.string().trim().min(1).max(180)).max(30);
 
 const productSchema = z.object({
@@ -21,7 +23,6 @@ const productSchema = z.object({
   display_order: z.number().int().min(0).max(100_000),
 });
 
-export const ORDER_STATUSES = ["pending", "approved", "preparing", "shipped", "delivered", "rejected"] as const;
 
 type AdminSession = { authenticated?: boolean; username?: string; team?: string; master?: boolean };
 
