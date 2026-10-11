@@ -111,9 +111,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const router = useRouter();
-  const pathname = router.state.location.pathname;
-  void useRouterPath(); // subscribe to route changes
+  const pathname = useRouterPath();
 
   return (
     <QueryClientProvider client={queryClient}>
