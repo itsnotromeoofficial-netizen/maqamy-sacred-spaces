@@ -9,7 +9,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { formatRM } from "@/lib/maqamy-products";
 import { ORDER_LABELS, ORDER_STEPS, type OrderItem, type OrderStatus } from "@/lib/orders";
 import { useCart } from "@/lib/use-cart";
-import { ORDER_LABELS_MS } from "@/lib/i18n";
+import { ORDER_LABELS_MS, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/orders")({
   head: () => ({ meta: [

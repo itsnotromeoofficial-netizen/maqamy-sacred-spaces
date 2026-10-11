@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { collections, formatRM, type ProductCollection } from "@/lib/maqamy-products";
 import { useCart } from "@/lib/use-cart";
 import { useProducts, type CatalogueProduct } from "@/lib/use-products";
-import { msCollections, trWord } from "@/lib/i18n";
+import { msCollections, trWord, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/collections")({
   head: () => ({ meta: [

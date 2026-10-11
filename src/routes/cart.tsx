@@ -9,7 +9,7 @@ import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
 import { formatRM } from "@/lib/maqamy-products";
 import { useCart } from "@/lib/use-cart";
-import { trWord } from "@/lib/i18n";
+import { trWord, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [
