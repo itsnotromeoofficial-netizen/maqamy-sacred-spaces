@@ -9,14 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { brandAssets } from "@/lib/maqamy-products";
+import { tr, useLang } from "@/lib/i18n";
 
-const passwordSchema = z
+const passwordSchema = () => z
   .object({
-    password: z.string().min(8, "Password must be at least 8 characters").max(128, "Password is too long"),
-    confirmPassword: z.string().min(8, "Confirm your password"),
+    password: z.string().min(8, tr("Password must be at least 8 characters", "Kata laluan mestilah sekurang-kurangnya 8 aksara")).max(128, tr("Password is too long", "Kata laluan terlalu panjang")),
+    confirmPassword: z.string().min(8, tr("Confirm your password", "Sahkan kata laluan anda")),
   })
   .refine((value) => value.password === value.confirmPassword, {
-    message: "Passwords do not match",
+    message: tr("Passwords do not match", "Kata laluan tidak sepadan"),
     path: ["confirmPassword"],
   });
 
@@ -40,6 +41,7 @@ function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useLang();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
@@ -48,9 +50,9 @@ function ResetPasswordPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = passwordSchema.safeParse({ password, confirmPassword });
+    const parsed = passwordSchema().safeParse({ password, confirmPassword });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Check your new password.");
+      toast.error(parsed.error.issues[0]?.message ?? t("Check your new password.", "Semak kata laluan baharu anda."));
       return;
     }
 
@@ -61,7 +63,7 @@ function ResetPasswordPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("Password updated.");
+    toast.success(t("Password updated.", "Kata laluan dikemas kini."));
     await navigate({ to: "/auth", search: { redirect: "/" } });
   }
 
@@ -69,30 +71,30 @@ function ResetPasswordPage() {
     <main className="flex min-h-screen items-center justify-center bg-brand-cream px-5 py-10 text-brand-forest">
       <div className="w-full max-w-md border border-brand-gold/30 bg-card p-6 shadow-maqamy">
         <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto mb-6 w-24" />
-        <h1 className="font-display text-4xl font-light">Reset password</h1>
+        <h1 className="font-display text-4xl font-light">{t("Reset password", "Tetapkan semula kata laluan")}</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
           {hasRecovery
-            ? "Enter a new password for your customer account."
-            : "Open this page from the password reset email to set a new password."}
+            ? t("Enter a new password for your customer account.", "Masukkan kata laluan baharu untuk akaun anda.")
+            : t("Open this page from the password reset email to set a new password.", "Buka halaman ini daripada e-mel tetapan semula untuk menetapkan kata laluan baharu.")}
         </p>
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <Label className="block text-sm font-semibold">
-            <span className="mb-2 block">New password</span>
+            <span className="mb-2 block">{t("New password", "Kata laluan baharu")}</span>
             <Input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" required />
           </Label>
           <Label className="block text-sm font-semibold">
-            <span className="mb-2 block">Confirm password</span>
+            <span className="mb-2 block">{t("Confirm password", "Sahkan kata laluan")}</span>
             <Input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" required />
           </Label>
           <Button type="submit" variant="gold" className="w-full" disabled={loading || !hasRecovery}>
             {loading ? <Loader2 className="animate-spin" /> : null}
-            Update password
+            {t("Update password", "Kemas kini kata laluan")}
           </Button>
         </form>
         <Button asChild variant="link" className="mt-4 px-0 text-brand-forest">
           <Link to="/auth" search={{ redirect: "/" }}>
             <ArrowLeft />
-            Back to sign in
+            {t("Back to sign in", "Kembali ke log masuk")}
           </Link>
         </Button>
       </div>

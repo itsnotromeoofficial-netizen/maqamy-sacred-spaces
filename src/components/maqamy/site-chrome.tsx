@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { brandAssets } from "@/lib/maqamy-products";
+import { useLang } from "@/lib/i18n";
+import { LanguageToggle } from "@/components/maqamy/language-picker";
 
 export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light" }: {
   itemCount?: number;
@@ -12,6 +14,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
   tone?: "light" | "dark";
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useLang();
   const navigate = useNavigate();
   const logoTaps = useRef(0);
   const logoTimer = useRef(0);
@@ -36,20 +39,21 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
           <img src={brandAssets.logo} alt="MAQAMY" className={`w-24 ${light ? "brightness-0 invert" : ""}`} />
         </Link>
         <nav className="hidden items-center gap-9 text-xs font-semibold uppercase tracking-[0.2em] lg:flex">
-          <Link to="/story" activeProps={{ className: "text-brand-gold-soft" }}>Our story</Link>
-          <Link to="/collections" activeProps={{ className: "text-brand-gold-soft" }}>Collections</Link>
-          <Link to="/cart" activeProps={{ className: "text-brand-gold-soft" }}>Cart</Link>
-          <Link to="/orders" activeProps={{ className: "text-brand-gold-soft" }}>My orders</Link>
-          <Link to="/privacy" activeProps={{ className: "text-brand-gold-soft" }}>Privacy</Link>
+          <Link to="/story" activeProps={{ className: "text-brand-gold-soft" }}>{t("Our story", "Kisah kami")}</Link>
+          <Link to="/collections" activeProps={{ className: "text-brand-gold-soft" }}>{t("Collections", "Koleksi")}</Link>
+          <Link to="/cart" activeProps={{ className: "text-brand-gold-soft" }}>{t("Cart", "Troli")}</Link>
+          <Link to="/orders" activeProps={{ className: "text-brand-gold-soft" }}>{t("My orders", "Pesanan saya")}</Link>
+          <Link to="/privacy" activeProps={{ className: "text-brand-gold-soft" }}>{t("Privacy", "Privasi")}</Link>
         </nav>
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           {userEmail ? (
-            <Button variant="ghost" size="sm" onClick={onSignOut} className={`hidden sm:inline-flex ${textClass}`}><LogOut /> Sign out</Button>
+            <Button variant="ghost" size="sm" onClick={onSignOut} className={`hidden sm:inline-flex ${textClass}`}><LogOut /> {t("Sign out", "Log keluar")}</Button>
           ) : (
-            <Button asChild variant="ghost" size="sm" className={`hidden sm:inline-flex ${textClass}`}><Link to="/auth" search={{ redirect: "/collections" }}><LogIn /> Account</Link></Button>
+            <Button asChild variant="ghost" size="sm" className={`hidden sm:inline-flex ${textClass}`}><Link to="/auth" search={{ redirect: "/collections" }}><LogIn /> {t("Account", "Akaun")}</Link></Button>
           )}
           <Button asChild variant="gold" className="h-9 w-24 px-0 text-xs uppercase tracking-[0.15em]" aria-label={`Cart with ${itemCount} items`}>
-            <Link to="/cart"><ShoppingBag /><span>Cart{itemCount > 0 ? ` · ${itemCount}` : ""}</span></Link>
+            <Link to="/cart"><ShoppingBag /><span>{t("Cart", "Troli")}{itemCount > 0 ? ` · ${itemCount}` : ""}</span></Link>
           </Button>
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((value) => !value)} className={`${textClass} lg:hidden`}>{open ? <X /> : <Menu />}</Button>
         </div>
@@ -57,11 +61,11 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
       {open ? (
         <nav className={`border-t ${borderClass} ${light ? "bg-brand-forest" : "bg-brand-cream"} px-5 py-6 lg:hidden`}>
           <div className="flex flex-col gap-5 text-sm font-semibold">
-            <Link to="/story" onClick={() => setOpen(false)}>Our story</Link>
-            <Link to="/collections" onClick={() => setOpen(false)}>Collections</Link>
-            <Link to="/cart" onClick={() => setOpen(false)}>Cart</Link>
-            <Link to="/orders" onClick={() => setOpen(false)}>My orders</Link>
-            <Link to="/privacy" onClick={() => setOpen(false)}>Privacy policy</Link>
+            <Link to="/story" onClick={() => setOpen(false)}>{t("Our story", "Kisah kami")}</Link>
+            <Link to="/collections" onClick={() => setOpen(false)}>{t("Collections", "Koleksi")}</Link>
+            <Link to="/cart" onClick={() => setOpen(false)}>{t("Cart", "Troli")}</Link>
+            <Link to="/orders" onClick={() => setOpen(false)}>{t("My orders", "Pesanan saya")}</Link>
+            <Link to="/privacy" onClick={() => setOpen(false)}>{t("Privacy policy", "Dasar privasi")}</Link>
           </div>
         </nav>
       ) : null}
@@ -70,6 +74,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
 }
 
 export function SiteFooter() {
+  const { t } = useLang();
   return (
     <footer className="bg-brand-ink px-5 py-10 text-brand-cream sm:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
@@ -78,7 +83,7 @@ export function SiteFooter() {
           <p className="mt-5 text-xs uppercase text-brand-cream/60">MAQAMY Living Concepts © 2026</p>
         </div>
         <div className="flex flex-wrap gap-6 text-sm text-brand-cream/70">
-          <Link to="/story">Our story</Link><Link to="/collections">Collections</Link><Link to="/cart">Cart</Link><Link to="/orders">My orders</Link><Link to="/privacy">Privacy</Link>
+          <Link to="/story">{t("Our story", "Kisah kami")}</Link><Link to="/collections">{t("Collections", "Koleksi")}</Link><Link to="/cart">{t("Cart", "Troli")}</Link><Link to="/orders">{t("My orders", "Pesanan saya")}</Link><Link to="/privacy">{t("Privacy", "Privasi")}</Link>
         </div>
       </div>
     </footer>

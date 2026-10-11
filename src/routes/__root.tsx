@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { LanguagePicker } from "@/components/maqamy/language-picker";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -118,6 +119,7 @@ function RootComponent() {
       <div key={pathname} className="animate-page-in">
         <Outlet />
       </div>
+      {pathname.startsWith("/admin") ? null : <LanguagePicker />}
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );

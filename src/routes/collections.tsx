@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { collections, formatRM, type ProductCollection } from "@/lib/maqamy-products";
 import { useCart } from "@/lib/use-cart";
 import { useProducts, type CatalogueProduct } from "@/lib/use-products";
+import { msCollections, trWord, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/collections")({
   head: () => ({ meta: [
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/collections")({
 function CollectionsPage() {
   const { itemCount, userEmail, addToCart, signOut } = useCart();
   const { products } = useProducts();
+  const { t } = useLang();
   const extras = products.filter((product) => !collections.some((collection) => collection.name === product.collection));
 
   return (
@@ -32,9 +34,9 @@ function CollectionsPage() {
       <section className="px-5 pb-16 pt-20 sm:px-8 lg:px-12 lg:pb-24 lg:pt-28">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
-          <h1 className="mt-8 font-display text-5xl font-light italic leading-[1.05] sm:text-7xl">Two expressions of peace</h1>
+          <h1 className="mt-8 font-display text-5xl font-light italic leading-[1.05] sm:text-7xl">{t("Two expressions of peace", "Dua ekspresi ketenangan")}</h1>
           <p className="mx-auto mt-8 max-w-md text-sm leading-8 text-muted-foreground">
-            Complete prayer environments, considered from the mihrab to the final object.
+            {t("Complete prayer environments, considered from the mihrab to the final object.", "Persekitaran solat yang lengkap, dirancang dari mihrab hingga objek terakhir.")}
           </p>
         </div>
       </section>
@@ -64,6 +66,8 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
   signedIn: boolean;
   onAdd: ReturnType<typeof useCart>["addToCart"];
 }) {
+  const { t, lang } = useLang();
+  const ms = lang === "ms" ? msCollections[collection.name] : undefined;
   const [selected, setSelected] = useState(collection.packages.find((item) => item.badge)?.name ?? collection.packages[0]?.name ?? "");
   const editions = collection.packages.map((fallback) => {
     const product = products.find((item) => item.package === fallback.name);
@@ -87,15 +91,15 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
 
           <div className="min-w-0 lg:sticky lg:top-8 lg:self-start">
             <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">
-              {String(index + 1).padStart(2, "0")} — {collection.subtitle}
+              {String(index + 1).padStart(2, "0")} — {ms?.subtitle ?? collection.subtitle}
             </p>
             <h2 className="mt-5 font-display text-6xl font-light uppercase leading-none sm:text-7xl xl:text-8xl">{collection.name}</h2>
-            <p className="mt-6 font-display text-2xl font-light italic leading-snug sm:text-3xl">“{collection.quote}”</p>
-            <p className="mt-5 text-sm leading-7 text-muted-foreground">{collection.story}</p>
+            <p className="mt-6 font-display text-2xl font-light italic leading-snug sm:text-3xl">“{ms?.quote ?? collection.quote}”</p>
+            <p className="mt-5 text-sm leading-7 text-muted-foreground">{ms?.story ?? collection.story}</p>
 
             <div className="mt-10 border-t border-brand-forest/15 pt-8">
               <div className="flex items-baseline justify-between gap-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">Select an edition</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("Select an edition", "Pilih edisi")}</p>
                 <p className="font-display text-4xl font-light">{priceLabel(current.price, current.fallback.name)}</p>
               </div>
               <div className="mt-6 grid gap-3" role="radiogroup" aria-label={`${collection.name} editions`}>
@@ -112,11 +116,11 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
                     >
                       <span className="min-w-0">
                         <span className="flex flex-wrap items-baseline gap-3">
-                          <span className="font-display text-2xl">{fallback.name}</span>
-                          {fallback.badge ? <span className="text-[9px] font-semibold uppercase tracking-[0.35em] text-brand-gold">{fallback.badge}</span> : null}
+                          <span className="font-display text-2xl">{trWord(fallback.name, lang)}</span>
+                          {fallback.badge ? <span className="text-[9px] font-semibold uppercase tracking-[0.35em] text-brand-gold">{trWord(fallback.badge, lang)}</span> : null}
                         </span>
-                        <span className="mt-1 block text-xs leading-6 text-muted-foreground">{includes.join(" · ")}</span>
-                        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">{stock > 0 ? `${stock} available` : "Currently unavailable"}</span>
+                        <span className="mt-1 block text-xs leading-6 text-muted-foreground">{includes.map((w) => trWord(w, lang)).join(" · ")}</span>
+                        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">{stock > 0 ? t(`${stock} available`, `${stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}</span>
                       </span>
                       <span className="font-display text-xl">{priceLabel(price, fallback.name)}</span>
                     </button>
@@ -127,15 +131,15 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
               <div className="mt-6">
                 {signedIn ? (
                   <Button variant="maqamy" size="lg" className="w-full" disabled={current.stock < 1} onClick={() => void onAdd(collection.name, current.fallback.name)}>
-                    {current.stock > 0 ? `Add ${current.fallback.name} to cart` : "Out of stock"}
+                    {current.stock > 0 ? t(`Add ${current.fallback.name} to cart`, `Tambah ${trWord(current.fallback.name, lang)} ke troli`) : t("Out of stock", "Kehabisan stok")}
                   </Button>
                 ) : (
                   <Button asChild variant="maqamy" size="lg" className="w-full">
-                    <Link to="/auth" search={{ redirect: "/collections" }}>Sign in to add</Link>
+                    <Link to="/auth" search={{ redirect: "/collections" }}>{t("Sign in to add", "Log masuk untuk menambah")}</Link>
                   </Button>
                 )}
                 <Button asChild variant="link" className="mt-2 w-full text-brand-forest">
-                  <Link to="/cart">View cart <ArrowRight /></Link>
+                  <Link to="/cart">{t("View cart", "Lihat troli")} <ArrowRight /></Link>
                 </Button>
               </div>
             </div>
@@ -143,8 +147,8 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
         </div>
 
         <div className="mx-auto mt-20 grid max-w-6xl gap-14 md:grid-cols-2 lg:mt-28">
-          <DetailList title="Details" items={collection.details} />
-          <DetailList title="The collection" items={collection.collection} />
+          <DetailList title={t("Details", "Butiran")} items={ms?.details ?? collection.details} />
+          <DetailList title={t("The collection", "Koleksi")} items={ms?.collection ?? collection.collection} />
         </div>
       </div>
     </article>
@@ -156,12 +160,13 @@ function AdditionalProducts({ products, signedIn, onAdd }: {
   signedIn: boolean;
   onAdd: ReturnType<typeof useCart>["addToCart"];
 }) {
+  const { t } = useLang();
   return (
     <section className="border-t border-brand-forest/10 px-5 py-20 sm:px-8 lg:px-12 lg:py-32">
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-16 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">New additions</p>
-          <h2 className="mt-6 font-display text-5xl font-light italic sm:text-6xl">More from MAQAMY</h2>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("New additions", "Tambahan baharu")}</p>
+          <h2 className="mt-6 font-display text-5xl font-light italic sm:text-6xl">{t("More from MAQAMY", "Lagi daripada MAQAMY")}</h2>
         </div>
 
         <div className="grid gap-x-10 gap-y-20 sm:grid-cols-2 lg:grid-cols-3">
@@ -182,20 +187,20 @@ function AdditionalProducts({ products, signedIn, onAdd }: {
               <h3 className="mt-4 font-display text-3xl font-light">{product.name}</h3>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">{product.description}</p>
               {product.features.length ? <ul className="mt-4 space-y-1 text-sm text-muted-foreground">{product.features.map((f) => <li key={f}>— {f}</li>)}</ul> : null}
-              {product.colours.length ? <p className="mt-4 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">Colours</span> · {product.colours.join(", ")}</p> : null}
-              {product.varieties.length ? <p className="mt-2 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">Varieties</span> · {product.varieties.join(", ")}</p> : null}
+              {product.colours.length ? <p className="mt-4 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Colours", "Warna")}</span> · {product.colours.join(", ")}</p> : null}
+              {product.varieties.length ? <p className="mt-2 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Varieties", "Variasi")}</span> · {product.varieties.join(", ")}</p> : null}
               <p className="mt-6 font-display text-2xl">{formatRM(product.price)}</p>
               <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                {product.stock > 0 ? `${product.stock} available` : "Currently unavailable"}
+                {product.stock > 0 ? t(`${product.stock} available`, `${product.stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}
               </p>
               <div className="mt-6">
                 {signedIn ? (
                   <Button variant="maqamy" className="w-full" disabled={product.stock < 1} onClick={() => void onAdd(product.collection, product.package)}>
-                    {product.stock > 0 ? "Add to cart" : "Out of stock"}
+                    {product.stock > 0 ? t("Add to cart", "Tambah ke troli") : t("Out of stock", "Kehabisan stok")}
                   </Button>
                 ) : (
                   <Button asChild variant="maqamy" className="w-full" disabled={product.stock < 1}>
-                    <Link to="/auth" search={{ redirect: "/collections" }}>{product.stock > 0 ? "Sign in to add" : "Out of stock"}</Link>
+                    <Link to="/auth" search={{ redirect: "/collections" }}>{product.stock > 0 ? t("Sign in to add", "Log masuk untuk menambah") : t("Out of stock", "Kehabisan stok")}</Link>
                   </Button>
                 )}
               </div>
