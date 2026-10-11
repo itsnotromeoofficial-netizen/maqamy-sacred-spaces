@@ -12,22 +12,23 @@ import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { brandAssets } from "@/lib/maqamy-products";
 import { siteUrl } from "@/lib/site";
+import { tr, useLang } from "@/lib/i18n";
 
-const registerSchema = z.object({
-  fullName: z.string().trim().min(2, "Enter your full name").max(100, "Name is too long"),
-  phone: z.string().trim().min(7, "Enter a valid phone number").max(30, "Phone number is too long"),
-  email: z.string().trim().email("Enter a valid email").max(255, "Email is too long"),
-  address: z.string().trim().min(8, "Enter your delivery address").max(500, "Address is too long"),
-  password: z.string().min(8, "Password must be at least 8 characters").max(128, "Password is too long"),
+const registerSchema = () => z.object({
+  fullName: z.string().trim().min(2, tr("Enter your full name", "Masukkan nama penuh anda")).max(100, tr("Name is too long", "Nama terlalu panjang")),
+  phone: z.string().trim().min(7, tr("Enter a valid phone number", "Masukkan nombor telefon yang sah")).max(30, tr("Phone number is too long", "Nombor telefon terlalu panjang")),
+  email: z.string().trim().email(tr("Enter a valid email", "Masukkan e-mel yang sah")).max(255, tr("Email is too long", "E-mel terlalu panjang")),
+  address: z.string().trim().min(8, tr("Enter your delivery address", "Masukkan alamat penghantaran anda")).max(500, tr("Address is too long", "Alamat terlalu panjang")),
+  password: z.string().min(8, tr("Password must be at least 8 characters", "Kata laluan mestilah sekurang-kurangnya 8 aksara")).max(128, tr("Password is too long", "Kata laluan terlalu panjang")),
 });
 
-const signInSchema = z.object({
-  email: z.string().trim().email("Enter a valid email").max(255, "Email is too long"),
-  password: z.string().min(1, "Enter your password").max(128, "Password is too long"),
+const signInSchema = () => z.object({
+  email: z.string().trim().email(tr("Enter a valid email", "Masukkan e-mel yang sah")).max(255, tr("Email is too long", "E-mel terlalu panjang")),
+  password: z.string().min(1, tr("Enter your password", "Masukkan kata laluan anda")).max(128, tr("Password is too long", "Kata laluan terlalu panjang")),
 });
 
-const resetSchema = z.object({
-  email: z.string().trim().email("Enter a valid email").max(255, "Email is too long"),
+const resetSchema = () => z.object({
+  email: z.string().trim().email(tr("Enter a valid email", "Masukkan e-mel yang sah")).max(255, tr("Email is too long", "E-mel terlalu panjang")),
 });
 
 export const Route = createFileRoute("/auth")({
@@ -59,6 +60,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
+  const { t } = useLang();
   const [mode, setMode] = useState<"sign-in" | "register">("register");
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
@@ -92,7 +94,7 @@ function AuthPage() {
     });
     setLoading(false);
     if (result.error) {
-      toast.error("Google sign-in could not start.");
+      toast.error(tr("Google sign-in could not start.", "Log masuk Google tidak dapat dimulakan."));
       return;
     }
     if (result.redirected) return;
@@ -105,9 +107,9 @@ function AuthPage() {
     setNotice("");
 
     if (mode === "register") {
-      const parsed = registerSchema.safeParse(values);
+      const parsed = registerSchema().safeParse(values);
       if (!parsed.success) {
-        toast.error(parsed.error.issues[0]?.message ?? "Check your registration details.");
+        toast.error(parsed.error.issues[0]?.message ?? tr("Check your registration details.", "Semak butiran pendaftaran anda."));
         setLoading(false);
         return;
       }
@@ -130,16 +132,16 @@ function AuthPage() {
       if (!data.session) {
         setVerify({ email, kind: "signup" });
         setCode("");
-        setNotice("We sent an 8-digit verification code to your email. Enter it below.");
+        setNotice(tr("We sent an 8-digit verification code to your email. Enter it below.", "Kami telah menghantar kod pengesahan 8 digit ke e-mel anda. Masukkan di bawah."));
         return;
       }
       await navigate({ to: safeRedirect });
       return;
     }
 
-    const parsed = signInSchema.safeParse(values);
+    const parsed = signInSchema().safeParse(values);
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Check your sign-in details.");
+      toast.error(parsed.error.issues[0]?.message ?? tr("Check your sign-in details.", "Semak butiran log masuk anda."));
       setLoading(false);
       return;
     }
@@ -158,7 +160,7 @@ function AuthPage() {
     if (!verify) return;
     const token = code.replace(/\D/g, "");
     if (token.length !== 8) {
-      toast.error("Enter the 8-digit code from your email.");
+      toast.error(tr("Enter the 8-digit code from your email.", "Masukkan kod 8 digit daripada e-mel anda."));
       return;
     }
     setLoading(true);
@@ -191,13 +193,13 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    setNotice("A new code is on its way.");
+    setNotice(tr("A new code is on its way.", "Kod baharu sedang dihantar."));
   }
 
   async function handleReset() {
-    const parsed = resetSchema.safeParse({ email: values.email });
+    const parsed = resetSchema().safeParse({ email: values.email });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Enter your email first.");
+      toast.error(parsed.error.issues[0]?.message ?? tr("Enter your email first.", "Masukkan e-mel anda dahulu."));
       return;
     }
     setLoading(true);
@@ -211,7 +213,7 @@ function AuthPage() {
     }
       setVerify({ email: parsed.data.email, kind: "recovery" });
       setCode("");
-      setNotice("We sent an 8-digit code to your email. Enter it below to continue.");
+      setNotice(tr("We sent an 8-digit code to your email. Enter it below to continue.", "Kami telah menghantar kod 8 digit ke e-mel anda. Masukkan di bawah untuk meneruskan."));
   }
 
 
@@ -229,9 +231,9 @@ function AuthPage() {
             <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-full" />
           </div>
           <div className="absolute bottom-10 left-10 max-w-md text-brand-cream">
-            <p className="font-display text-5xl font-light italic leading-tight">A place to return.</p>
+            <p className="font-display text-5xl font-light italic leading-tight">{t("A place to return.", "Tempat untuk kembali.")}</p>
             <p className="mt-4 text-sm leading-7 text-brand-cream/80">
-              Sign in to preserve your selected prayer-space collection, delivery details, and consultation cart.
+              {t("Sign in to preserve your selected prayer-space collection, delivery details, and consultation cart.", "Log masuk untuk menyimpan koleksi ruang solat pilihan anda, butiran penghantaran dan troli anda.")}
             </p>
           </div>
         </section>
@@ -241,16 +243,16 @@ function AuthPage() {
             <Button asChild variant="cream" size="sm" className="mb-8">
               <Link to="/">
                 <ArrowLeft />
-                Return to store
+                {t("Return to store", "Kembali ke kedai")}
               </Link>
             </Button>
 
             <div className="border border-brand-gold/30 bg-card p-5 shadow-maqamy sm:p-8">
               <div className="mb-8 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Customer account</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Customer account", "Akaun pelanggan")}</p>
                   <h1 className="mt-2 font-display text-4xl font-light text-brand-forest sm:text-5xl">
-                    {verify ? "Verify" : mode === "register" ? "Register" : "Sign in"}
+                    {verify ? t("Verify", "Sahkan") : mode === "register" ? t("Register", "Daftar") : t("Sign in", "Log masuk")}
                   </h1>
                 </div>
                 <img src={brandAssets.logo} alt="MAQAMY" className="w-20" />
@@ -260,10 +262,10 @@ function AuthPage() {
                 <>
                   {notice ? <p className="mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
                   <p className="mb-5 text-sm leading-6 text-muted-foreground">
-                    Sent to <span className="font-semibold text-brand-forest">{verify.email}</span>
+                    {t("Sent to", "Dihantar ke")} <span className="font-semibold text-brand-forest">{verify.email}</span>
                   </p>
                   <form className="space-y-4" onSubmit={handleVerify}>
-                    <Field label="8-digit code">
+                    <Field label={t("8-digit code", "Kod 8 digit")}>
                       <Input
                         value={code}
                         onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 8))}
@@ -276,12 +278,12 @@ function AuthPage() {
                     </Field>
                     <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading}>
                       {loading ? <Loader2 className="animate-spin" /> : null}
-                      {verify.kind === "recovery" ? "Continue" : "Verify account"}
+                      {verify.kind === "recovery" ? t("Continue", "Teruskan") : t("Verify account", "Sahkan akaun")}
                     </Button>
                   </form>
                   <div className="mt-4 flex items-center justify-between">
                     <Button type="button" variant="link" className="px-0 text-brand-forest" onClick={handleResend} disabled={loading}>
-                      Resend code
+                      {t("Resend code", "Hantar semula kod")}
                     </Button>
                     <Button
                       type="button"
@@ -293,15 +295,15 @@ function AuthPage() {
                       }}
                       disabled={loading}
                     >
-                      Use another email
+                      {t("Use another email", "Guna e-mel lain")}
                     </Button>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="mb-6 grid grid-cols-2 gap-2 rounded-md bg-secondary p-1">
-                    <Button type="button" variant={mode === "register" ? "maqamy" : "ghost"} onClick={() => setMode("register")}>Register</Button>
-                    <Button type="button" variant={mode === "sign-in" ? "maqamy" : "ghost"} onClick={() => setMode("sign-in")}>Sign in</Button>
+                    <Button type="button" variant={mode === "register" ? "maqamy" : "ghost"} onClick={() => setMode("register")}>{t("Register", "Daftar")}</Button>
+                    <Button type="button" variant={mode === "sign-in" ? "maqamy" : "ghost"} onClick={() => setMode("sign-in")}>{t("Sign in", "Log masuk")}</Button>
                   </div>
 
                   {notice ? <p className="mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
@@ -309,49 +311,49 @@ function AuthPage() {
                   <form className="space-y-4" onSubmit={handleSubmit}>
                     {mode === "register" ? (
                       <>
-                        <Field label="Full name">
+                        <Field label={t("Full name", "Nama penuh")}>
                           <Input value={values.fullName} onChange={(event) => updateValue("fullName", event.target.value)} autoComplete="name" required />
                         </Field>
-                        <Field label="Phone number">
+                        <Field label={t("Phone number", "Nombor telefon")}>
                           <Input value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} autoComplete="tel" required />
                         </Field>
                       </>
                     ) : null}
 
-                    <Field label="Email">
+                    <Field label={t("Email", "E-mel")}>
                       <Input type="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} autoComplete="email" required />
                     </Field>
 
                     {mode === "register" ? (
-                      <Field label="Delivery address">
+                      <Field label={t("Delivery address", "Alamat penghantaran")}>
                         <Textarea value={values.address} onChange={(event) => updateValue("address", event.target.value)} autoComplete="street-address" required />
                       </Field>
                     ) : null}
 
-                    <Field label="Password">
+                    <Field label={t("Password", "Kata laluan")}>
                       <Input type="password" value={values.password} onChange={(event) => updateValue("password", event.target.value)} autoComplete={mode === "register" ? "new-password" : "current-password"} required />
                     </Field>
 
                     <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading}>
                       {loading ? <Loader2 className="animate-spin" /> : null}
-                      {mode === "register" ? "Create account" : "Sign in"}
+                      {mode === "register" ? t("Create account", "Cipta akaun") : t("Sign in", "Log masuk")}
                     </Button>
                   </form>
 
                   <div className="my-6 flex items-center gap-3 text-xs uppercase text-muted-foreground">
                     <span className="h-px flex-1 bg-border" />
-                    <span>or</span>
+                    <span>{t("or", "atau")}</span>
                     <span className="h-px flex-1 bg-border" />
                   </div>
 
                   <Button type="button" variant="cream" size="lg" className="w-full" onClick={handleGoogle} disabled={loading}>
                     <Chrome />
-                    Continue with Google
+                    {t("Continue with Google", "Teruskan dengan Google")}
                   </Button>
 
                   {mode === "sign-in" ? (
                     <Button type="button" variant="link" className="mt-3 px-0 text-brand-forest" onClick={handleReset} disabled={loading}>
-                      Forgot password — send me a code
+                      {t("Forgot password — send me a code", "Lupa kata laluan — hantar kod kepada saya")}
                     </Button>
                   ) : null}
                 </>
