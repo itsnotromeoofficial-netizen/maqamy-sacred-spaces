@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -110,11 +111,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const pathname = router.state.location.pathname;
+  void useRouterPath(); // subscribe to route changes
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <div key={pathname} className="animate-page-in">
+        <Outlet />
+      </div>
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
+}
+
+function useRouterPath() {
+  return useRouterState({ select: (s) => s.location.pathname });
 }
