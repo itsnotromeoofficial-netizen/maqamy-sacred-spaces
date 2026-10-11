@@ -84,7 +84,7 @@ export const msCollections: Record<string, { subtitle: string; quote: string; st
 const msWords: Record<string, string> = {
   "Prayer Rug": "Sejadah", "Side Table": "Meja Sisi", "Quran Stand": "Rehal Al-Quran", Packaging: "Pembungkusan",
   "Custom design": "Reka bentuk tersuai", "Wall panels": "Panel dinding", "Full installation": "Pemasangan penuh",
-  "Most popular": "Paling popular", Essential: "Asas", Signature: "Tandatangan", Bespoke: "Tempahan Khas",
+  "Most popular": "Paling popular",
 };
 export function trWord(word: string, lang: Lang) { return lang === "ms" ? (msWords[word] ?? word) : word; }
 
