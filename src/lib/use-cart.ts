@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { tr } from "@/lib/i18n";
 
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,7 +24,7 @@ export function useCart() {
       .eq("user_id", userId)
       .order("created_at", { ascending: true });
     if (error) {
-      toast.error("Your cart could not be loaded.");
+      toast.error(tr("Your cart could not be loaded.", "Troli anda tidak dapat dimuatkan."));
       return;
     }
     setCart((data ?? []) as CartItem[]);
@@ -51,7 +52,7 @@ export function useCart() {
     const { data } = await supabase.auth.getUser();
     if (!data.user) return false;
     const { data: selected } = await supabase.from("products").select("price, stock").eq("collection", collection).eq("package", packageName).eq("active", true).maybeSingle();
-    if (!selected || selected.stock < 1) { toast.error("This product is currently out of stock."); return false; }
+    if (!selected || selected.stock < 1) { toast.error(tr("This product is currently out of stock.", "Produk ini kehabisan stok buat masa ini.")); return false; }
     const existing = cart.find((item) => item.collection === collection && item.package === packageName);
     const quantity = Math.min((existing?.quantity ?? 0) + 1, selected.stock, 10);
     const { error } = await supabase.from("cart_items").upsert({
@@ -62,11 +63,11 @@ export function useCart() {
       unit_price: selected.price,
     }, { onConflict: "user_id,collection,package" });
     if (error) {
-      toast.error("This item could not be added.");
+      toast.error(tr("This item could not be added.", "Item ini tidak dapat ditambah."));
       return false;
     }
     await loadCart(data.user.id);
-    toast.success(`${collection} ${packageName} added to cart.`);
+    toast.success(tr(`${collection} ${packageName} added to cart.`, `${collection} ${packageName} ditambah ke troli.`));
     return true;
   }, [cart, loadCart]);
 
@@ -74,7 +75,7 @@ export function useCart() {
     if (quantity < 1) {
       const { error } = await supabase.from("cart_items").delete().eq("id", item.id);
       if (error) {
-        toast.error("This item could not be removed.");
+        toast.error(tr("This item could not be removed.", "Item ini tidak dapat dibuang."));
         return;
       }
       setCart((items) => items.filter((current) => current.id !== item.id));
@@ -83,7 +84,7 @@ export function useCart() {
     const nextQuantity = Math.min(quantity, 10);
     const { error } = await supabase.from("cart_items").update({ quantity: nextQuantity }).eq("id", item.id);
     if (error) {
-      toast.error("Cart quantity could not be updated.");
+      toast.error(tr("Cart quantity could not be updated.", "Kuantiti troli tidak dapat dikemas kini."));
       return;
     }
     setCart((items) => items.map((current) => current.id === item.id ? { ...current, quantity: nextQuantity } : current));
@@ -92,7 +93,7 @@ export function useCart() {
   const removeItem = useCallback(async (id: string) => {
     const { error } = await supabase.from("cart_items").delete().eq("id", id);
     if (error) {
-      toast.error("This item could not be removed.");
+      toast.error(tr("This item could not be removed.", "Item ini tidak dapat dibuang."));
       return;
     }
     setCart((items) => items.filter((item) => item.id !== id));
@@ -102,7 +103,7 @@ export function useCart() {
     await supabase.auth.signOut();
     setUserEmail(null);
     setCart([]);
-    toast.success("Signed out.");
+    toast.success(tr("Signed out.", "Telah log keluar."));
   }, []);
 
   const reload = useCallback(async () => {
