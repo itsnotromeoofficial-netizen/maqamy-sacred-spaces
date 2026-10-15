@@ -248,15 +248,16 @@ button:active:not(:disabled), [role="button"]:active, a:active {
   animation: maqamy-line-sweep 0.5s cubic-bezier(0.76, 0, 0.24, 1) both;
 }
 
+/* The supplied logo has a pale background; blending preserves its exact artwork. */
+img[src*="maqamy-logo.jpg"] {
+  mix-blend-mode: multiply;
+}
+img[src*="maqamy-logo.jpg"].invert {
+  filter: invert(1);
+  mix-blend-mode: screen;
+}
+
 @layer base {
-  /* The supplied logo has a pale background; blending preserves its exact artwork. */
-  img[src*="maqamy-logo.jpg"] {
-    mix-blend-mode: multiply;
-  }
-  img[src*="maqamy-logo.jpg"].invert {
-    filter: invert(1);
-    mix-blend-mode: screen;
-  }
   * {
     border-color: var(--color-border);
   }
