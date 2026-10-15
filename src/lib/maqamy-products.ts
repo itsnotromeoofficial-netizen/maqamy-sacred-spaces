@@ -1,6 +1,6 @@
 import jannaCollection from "@/assets/janna-collection.jpg";
 import desertImage from "@/assets/maqamy-desert.jpg";
-import logoAsset from "@/assets/maqamy-logo.jpg.asset.json";
+import logoAsset from "@/assets/maqamy-logo.png.asset.json";
 import prayerSpaceImage from "@/assets/maqamy-prayer-space.jpg";
 import noorCollection from "@/assets/noor-collection.jpg";
 
