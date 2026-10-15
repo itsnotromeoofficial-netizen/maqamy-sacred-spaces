@@ -29,7 +29,8 @@ export type ProductCollection = {
 };
 
 export const brandAssets = {
-  logo: logoAsset.url,
+  // Asset proxy paths belong to the Lovable host, not the Vercel/custom domain.
+  logo: new URL(logoAsset.url, "https://maqamy-sacred-spaces.lovable.app").href,
   desert: desertImage,
   prayerSpace: prayerSpaceImage,
 };
