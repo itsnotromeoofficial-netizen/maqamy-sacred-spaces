@@ -249,6 +249,14 @@ button:active:not(:disabled), [role="button"]:active, a:active {
 }
 
 @layer base {
+  /* The supplied logo has a pale background; blending preserves its exact artwork. */
+  img[src*="maqamy-logo.jpg"] {
+    mix-blend-mode: multiply;
+  }
+  img[src*="maqamy-logo.jpg"].invert {
+    filter: invert(1);
+    mix-blend-mode: screen;
+  }
   * {
     border-color: var(--color-border);
   }
