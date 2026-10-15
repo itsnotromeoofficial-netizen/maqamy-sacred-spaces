@@ -13,3 +13,6 @@
 - [x] Update the colour-marked home wording in English and Malay
 - [x] Replace the story with the supplied brand story in English and Malay
 - [x] Check logo, home and story across screen sizes
+
+## GitHub / Vercel sync
+- [ ] Confirm the latest commit reaches GitHub and triggers the Vercel redeploy
