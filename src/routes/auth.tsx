@@ -228,7 +228,7 @@ function AuthPage() {
           />
           <div className="absolute inset-0 bg-brand-forest/35" />
           <div className="absolute left-10 top-10 w-28">
-            <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-full" />
+            <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-full invert" />
           </div>
           <div className="absolute bottom-10 left-10 max-w-md text-brand-cream">
             <p className="font-display text-5xl font-light italic leading-tight">{t("A place to return.", "Tempat untuk kembali.")}</p>

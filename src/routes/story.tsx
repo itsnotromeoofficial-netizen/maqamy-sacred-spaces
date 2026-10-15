@@ -7,27 +7,14 @@ import { Button } from "@/components/ui/button";
 import { brandAssets } from "@/lib/maqamy-products";
 import { useCart } from "@/lib/use-cart";
 import { useLang } from "@/lib/i18n";
-
-const storyLinesMs = [
-  "Tempat untuk berhenti seketika, berserah, dan mengingati apa yang benar-benar penting.",
-  "Tempat di mana kita boleh pulih.",
-  "Tempat di mana kita boleh kembali kepada diri sendiri dan kepada Dia yang menciptakan kita.",
-  "Bukan sekadar tempat untuk tinggal. Tempat untuk kembali.",
-];
-
-const storyLines = [
-  "A place to pause, to surrender, and to remember what truly matters.",
-  "A place where we can heal.",
-  "A place where we can return to ourselves and to the One who created us.",
-  "Not merely a place to live. A place to return.",
-];
+import { brandStory } from "@/lib/brand-story";
 
 export const Route = createFileRoute("/story")({
   head: () => ({ meta: [
-    { title: "Our Intention — MAQAMY" },
-    { name: "description", content: "The MAQAMY intention: transforming an overlooked part of the home into a considered sanctuary." },
-    { property: "og:title", content: "Our Intention — MAQAMY" },
-    { property: "og:description", content: "Not merely a place to live. A place to return." },
+    { title: "The MAQAMY Story — Designed for the Presence of the Heart" },
+    { name: "description", content: "Discover MAQAMY, a Malaysian design house bringing together design excellence, cultural identity and spiritual meaning through mindful living." },
+    { property: "og:title", content: "The MAQAMY Story — Designed for the Presence of the Heart" },
+    { property: "og:description", content: "Contemporary Islamic living, rooted in Malaysia and inspired by Ḥuḍūr al-Qalb — the presence of the heart." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -38,12 +25,11 @@ function StoryPage() {
   const [active, setActive] = useState(0);
   const refs = useRef<Array<HTMLParagraphElement | null>>([]);
   const { itemCount, userEmail, signOut } = useCart();
-  const { t, lang } = useLang();
-  const lines = lang === "ms" ? storyLinesMs : storyLines;
+  const { t } = useLang();
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) if (entry.isIntersecting) setActive(Number(entry.target.getAttribute("data-index") ?? 0));
-    }, { rootMargin: "-42% 0px -42% 0px", threshold: 0.1 });
+    }, { rootMargin: "-20% 0px -20% 0px", threshold: 0.25 });
     refs.current.forEach((node) => { if (node) observer.observe(node); });
     return () => observer.disconnect();
   }, []);
@@ -53,9 +39,9 @@ function StoryPage() {
       <div className="bg-brand-forest"><SiteHeader itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
       <section className="grid min-h-[78svh] lg:grid-cols-2">
         <div className="flex flex-col justify-center px-5 py-20 sm:px-8 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))] lg:pr-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("The intention", "Niat kami")}</p>
-          <h1 className="mt-5 max-w-xl font-display text-6xl font-light leading-[0.92] sm:text-8xl">{t("More than a corner. A state of being.", "Lebih daripada sudut. Satu keadaan jiwa.")}</h1>
-          <p className="mt-8 max-w-lg text-base leading-8 text-muted-foreground">{t("MAQAMY transforms an overlooked part of the home into a considered sanctuary — one that makes daily prayer feel present, natural and deeply personal.", "MAQAMY mengubah sudut rumah yang sering terlepas pandang menjadi tempat perlindungan yang dirancang teliti — menjadikan solat harian terasa hadir, semula jadi dan sangat peribadi.")}</p>
+          <p className="text-xs font-semibold uppercase text-brand-gold">{t("Malaysian design house", "Rumah reka bentuk Malaysia")}</p>
+          <h1 className="mt-5 max-w-xl font-display text-6xl font-light leading-[1.05] sm:text-7xl">{t("The MAQAMY Story", "Kisah MAQAMY")}</h1>
+          <p className="mt-8 max-w-lg font-display text-2xl italic leading-8 text-muted-foreground">{t("Designed for the presence of the heart.", "Direka untuk kehadiran hati.")}</p>
         </div>
         <div className="min-h-[55svh] bg-brand-mist p-5 sm:p-8 lg:p-12">
           <img src={brandAssets.prayerSpace} alt="A complete MAQAMY prayer space" className="h-full w-full object-contain" />
@@ -64,17 +50,18 @@ function StoryPage() {
       <section className="px-5 py-24 sm:px-8 lg:py-36">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.65fr_1.35fr]">
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("The quiet return", "Kembali dalam tenang")}</p>
-            <h2 className="mt-4 font-display text-4xl font-light">{t("Words to hold.", "Kata-kata untuk dipegang.")}</h2>
+            <p className="text-xs font-semibold uppercase text-brand-gold">{t("Our philosophy", "Falsafah kami")}</p>
+            <h2 className="mt-4 font-display text-4xl font-light">Ḥuḍūr al-Qalb</h2>
+            <p className="mt-4 text-base text-muted-foreground">{t("The presence of the heart.", "Kehadiran hati.")}</p>
           </div>
-          <div className="space-y-[30vh] py-[15vh]">
-            {lines.map((line, index) => <p key={line} ref={(node) => { refs.current[index] = node; }} data-index={index} className={`text-balance font-display text-4xl font-light leading-[1.08] transition-colors duration-500 sm:text-6xl ${active === index ? "bg-highlight px-4 py-3 text-highlight-foreground sm:px-6" : "text-brand-forest/25"}`}>{line}</p>)}
+          <div className="space-y-16">
+            {brandStory.map((paragraph, index) => <p key={index} ref={(node) => { refs.current[index] = node; }} data-index={index} className={`px-5 py-6 text-lg leading-9 transition-colors duration-500 sm:px-8 sm:text-2xl sm:leading-10 ${active === index ? "bg-highlight text-highlight-foreground" : "text-muted-foreground"}`}>{t(paragraph.en, paragraph.ms)}</p>)}
           </div>
         </div>
       </section>
       <section className="bg-brand-forest px-5 py-20 text-brand-cream sm:px-8 lg:py-28">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
-          <h2 className="max-w-3xl font-display text-5xl font-light leading-none sm:text-7xl">{t("Meet the spaces shaped by this intention.", "Kenali ruang yang dibentuk oleh niat ini.")}</h2>
+          <h2 className="max-w-3xl font-display text-4xl font-light leading-tight sm:text-6xl">{t("MAQAMY — Designed for the presence of the heart.", "MAQAMY — Direka untuk kehadiran hati.")}</h2>
           <Button asChild variant="gold" size="lg"><Link to="/collections">{t("Explore Noor & Janna", "Terokai Noor & Janna")} <ArrowRight /></Link></Button>
         </div>
       </section>

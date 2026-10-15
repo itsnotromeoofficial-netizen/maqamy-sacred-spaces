@@ -10,10 +10,10 @@ import { useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "MAQAMY — A Place to Return" },
-    { name: "description", content: "Enter MAQAMY, where complete prayer spaces are created with intention for the spiritual centre of the home." },
-    { property: "og:title", content: "MAQAMY — A Place to Return" },
-    { property: "og:description", content: "Prayer spaces for a more meaningful life, designed in Malaysia." },
+    { title: "MAQAMY — A Space for the Heart to Be Present" },
+    { name: "description", content: "A Malaysian design house inspired by Ḥuḍūr al-Qalb, creating thoughtful furnishings and spaces for the presence of the heart." },
+    { property: "og:title", content: "MAQAMY — A Space for the Heart to Be Present" },
+    { property: "og:description", content: "Devotion cannot be designed, but its essence can be invited and nurtured through thoughtful spaces." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -61,10 +61,10 @@ function IntroductionPage() {
         <div className="absolute inset-0 bg-brand-forest/45" />
         <div className="absolute inset-x-0 top-0"><SiteHeader itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
         <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col justify-end px-5 pb-14 pt-32 sm:px-8 lg:px-12 lg:pb-20">
-          <p className="animate-rise-cut text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold-soft">{t("Prayer spaces for a more meaningful life", "Ruang solat untuk kehidupan yang lebih bermakna")}</p>
-          <h1 className="animate-rise-cut mt-5 max-w-5xl font-display text-6xl font-light leading-[0.88] sm:text-8xl lg:text-[8.5rem]">{t("A place to", "Tempat untuk")}<br /><span className="italic text-brand-gold-soft">{t("return.", "kembali.")}</span></h1>
+          <p className="animate-rise-cut max-w-2xl text-xs font-semibold uppercase leading-6 text-brand-gold-soft">{t("Inspired by the Islamic understanding of Ḥuḍūr al-Qalb", "Diilhamkan oleh pemahaman Islam tentang Ḥuḍūr al-Qalb")}</p>
+          <h1 className="animate-rise-cut mt-5 max-w-5xl text-balance font-display text-5xl font-light leading-[1.05] sm:text-7xl lg:text-8xl">{t("A Space for the Heart", "Ruang untuk Hati")}<br /><span className="italic text-brand-gold-soft">{t("to Be Present.", "Hadir.")}</span></h1>
           <div className="mt-10 grid gap-6 border-t border-brand-cream/30 pt-6 sm:grid-cols-[1fr_auto] sm:items-end">
-            <p className="max-w-lg text-sm leading-7 text-brand-cream/80 sm:text-base">{t("Complete prayer environments, created with intention for the spiritual centre of your home.", "Persekitaran solat yang lengkap, dicipta dengan niat untuk pusat kerohanian rumah anda.")}</p>
+            <p className="max-w-lg text-sm leading-7 text-brand-cream/80 sm:text-base">{t("Devotion cannot be designed, but its essence can be invited and nurtured through thoughtful spaces.", "Pengabdian tidak boleh direka, namun intipatinya dapat diundang dan dipupuk melalui ruang yang dirancang dengan teliti.")}</p>
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="cream" size="lg"><Link to="/story">{t("Discover our intention", "Kenali niat kami")} <ArrowRight /></Link></Button>
               <Button asChild variant="gold" size="lg"><Link to="/collections">{t("View collections", "Lihat koleksi")} <ArrowRight /></Link></Button>
