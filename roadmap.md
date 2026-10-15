@@ -9,7 +9,7 @@
 - [x] Verify desktop and mobile pages, cart flow, and metadata
 
 ## Brand refresh
-- [ ] Replace the logo throughout the site with the uploaded logo
-- [ ] Update the colour-marked home wording in English and Malay
-- [ ] Replace the story with the supplied brand story in English and Malay
-- [ ] Check logo, home and story across screen sizes
+- [x] Replace the logo throughout the site with the uploaded logo
+- [x] Update the colour-marked home wording in English and Malay
+- [x] Replace the story with the supplied brand story in English and Malay
+- [x] Check logo, home and story across screen sizes
