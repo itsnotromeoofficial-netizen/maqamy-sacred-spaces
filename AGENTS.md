@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Keep public-page mastheads in SiteHeader with a centred logo and separate navigation row so desktop and mobile share the same brand hierarchy.
 - Keep bilingual brand-story paragraphs in a shared browser-safe copy module so the story page renders matching English and Malay narratives.
 - Reference the supplied logo through its transparent asset pointer resolved against the absolute Lovable-hosted origin so external deployments load it; derive transparency from the original pixels to preserve the exact lettering on light and dark placements.
 - Admin back office runs only via the token-authenticated `/api/public/admin` endpoint on the Lovable-hosted app; other hosts (Vercel) call it cross-origin — they lack the backend service key, so admin logic must never depend on the serving host.

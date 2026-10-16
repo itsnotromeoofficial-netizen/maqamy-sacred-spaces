@@ -15,4 +15,9 @@
 - [x] Check logo, home and story across screen sizes
 
 ## GitHub / Vercel sync
-- [ ] Confirm the latest commit reaches GitHub and triggers the Vercel redeploy
+- [x] Confirm the latest commit reaches GitHub and triggers the Vercel redeploy
+
+## Desktop presentation
+- [x] Centre and enlarge the supplied logo on mobile and desktop
+- [x] Refine home composition, navigation and collection controls with restrained animation
+- [x] Verify desktop and mobile navigation, logo visibility and edition selection
