@@ -78,14 +78,15 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
       stock: product?.stock ?? 0,
     };
   });
-  const current = editions.find((item) => item.fallback.name === selected) ?? editions[0]!;
+  const current = editions.find((item) => item.fallback.name === selected) ?? editions[0];
+  if (!current) return null;
   const priceLabel = (price: number, name: string) => `${formatRM(price)}${name === "Bespoke" ? "+" : ""}`;
 
   return (
     <article className="border-t border-brand-forest/10">
       <div className="mx-auto max-w-[1400px] px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16 xl:gap-24">
-          <figure className="min-w-0 bg-brand-mist p-3 sm:p-6">
+          <figure className="maqamy-product-image min-w-0 self-start bg-brand-mist p-3 sm:p-6">
             <img src={collection.image} alt={collection.imageAlt} className="mx-auto block h-auto w-full object-contain" />
           </figure>
 
@@ -98,7 +99,7 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
             <p className="mt-5 text-sm leading-7 text-muted-foreground">{ms?.story ?? collection.story}</p>
 
             <div className="mt-10 border-t border-brand-forest/15 pt-8">
-              <div className="flex items-baseline justify-between gap-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("Select an edition", "Pilih edisi")}</p>
                 <p className="font-display text-4xl font-light">{priceLabel(current.price, current.fallback.name)}</p>
               </div>
@@ -106,13 +107,14 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
                 {editions.map(({ fallback, price, includes, stock }) => {
                   const active = fallback.name === selected;
                   return (
-                    <button
+                    <Button
                       key={fallback.name}
                       type="button"
+                      variant="ghost"
                       role="radio"
                       aria-checked={active}
                       onClick={() => setSelected(fallback.name)}
-                      className={`grid grid-cols-[minmax(0,1fr)_auto] gap-4 border px-5 py-4 text-left transition-colors ${active ? "border-brand-forest bg-brand-mist" : "border-brand-forest/15 hover:border-brand-forest/40"}`}
+                      className={`grid h-auto grid-cols-[minmax(0,1fr)_auto] gap-4 whitespace-normal rounded-none border px-5 py-4 text-left font-normal hover:bg-brand-mist hover:text-brand-forest ${active ? "border-brand-forest bg-brand-mist" : "border-brand-forest/15 hover:border-brand-forest/40"}`}
                     >
                       <span className="min-w-0">
                         <span className="flex flex-wrap items-baseline gap-3">
@@ -123,12 +125,12 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
                         <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">{stock > 0 ? t(`${stock} available`, `${stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}</span>
                       </span>
                       <span className="font-display text-xl">{priceLabel(price, fallback.name)}</span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
 
-              <div className="mt-6">
+              <div className="mt-6 grid gap-2 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
                 {signedIn ? (
                   <Button variant="maqamy" size="lg" className="w-full" disabled={current.stock < 1} onClick={() => void onAdd(collection.name, current.fallback.name)}>
                     {current.stock > 0 ? t(`Add ${current.fallback.name} to cart`, `Tambah ${trWord(current.fallback.name, lang)} ke troli`) : t("Out of stock", "Kehabisan stok")}
@@ -138,7 +140,7 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
                     <Link to="/auth" search={{ redirect: "/collections" }}>{t("Sign in to add", "Log masuk untuk menambah")}</Link>
                   </Button>
                 )}
-                <Button asChild variant="link" className="mt-2 w-full text-brand-forest">
+                <Button asChild variant="link" className="w-full text-brand-forest">
                   <Link to="/cart">{t("View cart", "Lihat troli")} <ArrowRight /></Link>
                 </Button>
               </div>
