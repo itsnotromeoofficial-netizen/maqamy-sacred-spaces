@@ -16,3 +16,8 @@
 
 ## GitHub / Vercel sync
 - [ ] Confirm the latest commit reaches GitHub and triggers the Vercel redeploy
+
+## Desktop presentation
+- [ ] Centre and enlarge the supplied logo on mobile and desktop
+- [ ] Refine home composition, navigation and collection controls with restrained animation
+- [ ] Verify desktop and mobile navigation, logo visibility and edition selection
