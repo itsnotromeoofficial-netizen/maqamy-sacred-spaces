@@ -136,6 +136,7 @@ function OrdersPanel({ session }: { session: AdminSession }) {
             </div>
             <div className="text-right">
               <StatusPill status={order.status as OrderStatus} />
+              <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${order.payment_status === "paid" ? "text-brand-gold" : "text-muted-foreground"}`}>{order.payment_status === "paid" ? "Paid" : order.payment_status === "failed" ? "Payment failed" : "Not paid"}</p>
               <p className="mt-3 font-display text-3xl">{formatRM(order.total)}</p>
             </div>
           </div>
