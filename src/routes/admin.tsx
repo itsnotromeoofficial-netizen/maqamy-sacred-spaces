@@ -8,17 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Tables } from "@/integrations/supabase/types";
 import {
-  adjustAdminStock, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminProduct, deleteCustomer,
-  getAdminSession, listAdminAccounts, listAdminCustomers, listAdminOrders, listAdminProducts, loginAdmin,
-  logoutAdmin, saveAdminProduct, setAdminStock, updateOrderStatus,
-  type AdminAccount, type AdminCustomer, type AdminSession,
+  adjustAdminStock, approveOrder, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminProduct, deleteCustomer,
+  getAdminSession, listAdminAccounts, listAdminCustomers, listAdminInvoices, listAdminOrders, listAdminProducts, listDeliveryTeam, loginAdmin,
+  logoutAdmin, saveAdminProduct, searchInvoices, setAdminStock, updateOrderStatus,
+  type AdminAccount, type AdminCustomer, type AdminInvoice, type AdminOrder, type AdminSession, type DeliveryMember,
 } from "@/lib/admin-api";
 import { brandAssets, formatRM } from "@/lib/maqamy-products";
 import { ORDER_LABELS, ORDER_STATUSES, parseList, type OrderItem, type OrderStatus } from "@/lib/orders";
 
 type Product = Tables<"products">;
-type Order = Tables<"orders">;
-type Tab = "orders" | "products" | "customers" | "admins";
+type Order = AdminOrder;
+type Tab = "orders" | "products" | "customers" | "admins" | "invoices";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [
