@@ -388,8 +388,18 @@ function AdminsPanel() {
     <section className="self-start border border-brand-gold/25 bg-card p-6">
       <h2 className="font-display text-3xl font-light">New admin</h2>
       <div className="mt-6 grid gap-4">
-        <Field label="Team / department"><Input list="admin-teams" placeholder="Sales department" value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })} /></Field>
-        <datalist id="admin-teams">{teams.map((t) => <option key={t} value={t} />)}</datalist>
+        <div className="grid gap-2 text-xs font-semibold uppercase tracking-[0.15em]">
+          <span>Team / department</span>
+          <div className="flex flex-wrap gap-2">
+            {["Delivery Team", "Sales Team", "Tech Team"].map((t) => (
+              <Button key={t} type="button" size="sm" variant={form.team === t ? "maqamy" : "cream"} onClick={() => setForm({ ...form, team: t })}>{t}</Button>
+            ))}
+            <Button type="button" size="sm" variant={form.team && !["Delivery Team", "Sales Team", "Tech Team"].includes(form.team) ? "maqamy" : "cream"} onClick={() => setForm({ ...form, team: "" })}>Custom</Button>
+          </div>
+          {(!["Delivery Team", "Sales Team", "Tech Team"].includes(form.team)) ? (
+            <Input placeholder="Custom team name" value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })} />
+          ) : null}
+        </div>
         <Field label="Username"><Input autoComplete="off" placeholder="alex1" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></Field>
         <Field label="Password"><Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></Field>
         <Button variant="gold" size="lg" disabled={busy || !form.team || !form.username || form.password.length < 8} onClick={() => void create()}><UserPlus />{busy ? "Creating…" : "Create admin"}</Button>
