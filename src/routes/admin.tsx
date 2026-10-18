@@ -49,11 +49,14 @@ function AdminPage() {
   if (session === null) return <main className="flex min-h-screen items-center justify-center bg-brand-forest"><div className="h-14 w-1 animate-spin-bar bg-brand-gold" /></main>;
   if (!session.authenticated) return <AdminLogin onSuccess={setSession} />;
 
+  const isDelivery = !session.master && session.team === "Delivery Team";
   const tabs: { id: Tab; label: string }[] = [
-    { id: "orders", label: "Orders" },
-    { id: "products", label: "Products" },
-    { id: "customers", label: "Customers" },
-    ...(session.master ? [{ id: "admins" as Tab, label: "Admin team" }] : []),
+    { id: "orders", label: isDelivery ? "My deliveries" : "Orders" },
+    ...(isDelivery ? [] : [
+      { id: "products" as Tab, label: "Products" },
+      { id: "customers" as Tab, label: "Customers" },
+    ]),
+    ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "admins" as Tab, label: "Admin team" }] : []),
   ];
 
   return <main className="min-h-screen bg-brand-mist text-brand-forest">
@@ -73,7 +76,7 @@ function AdminPage() {
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`-mb-px whitespace-nowrap border-b-2 px-5 py-3 text-sm font-semibold transition-colors duration-300 ${tab === t.id ? "border-brand-forest text-brand-forest" : "border-transparent text-muted-foreground hover:text-brand-forest"}`}>{t.label}</button>)}
       </nav>
       <div key={tab} className="animate-fade-soft py-10">
-        {tab === "orders" ? <OrdersPanel /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : <AdminsPanel />}
+        {tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : <AdminsPanel />}
       </div>
     </div>
   </main>;
