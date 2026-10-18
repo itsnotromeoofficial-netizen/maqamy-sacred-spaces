@@ -16,10 +16,12 @@ import { createCheckoutSession } from "@/utils/payments.functions";
 import { trWord, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/cart")({
-  validateSearch: (search: Record<string, unknown>): { order?: string; payment?: string } => ({
-    order: typeof search.order === "string" ? search.order : undefined,
-    payment: typeof search.payment === "string" ? search.payment : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { order?: string; payment?: string } => {
+    const out: { order?: string; payment?: string } = {};
+    if (typeof search['order'] === "string") out['order'] = search['order'];
+    if (typeof search['payment'] === "string") out['payment'] = search['payment'];
+    return out;
+  },
   head: () => ({ meta: [
     { title: "Your Cart — MAQAMY" },
     { name: "description", content: "Review your saved MAQAMY prayer-space collections and complete your purchase with secure payment." },
