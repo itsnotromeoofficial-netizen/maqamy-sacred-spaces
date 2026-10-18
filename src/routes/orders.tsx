@@ -61,6 +61,19 @@ function OrderCard({ order }: { order: Tables<"orders"> }) {
   const items = order.items as unknown as OrderItem[];
   const reached = ORDER_STEPS.indexOf(status);
   const { t, lang } = useLang();
+  const [invoice, setInvoice] = useState<Tables<"invoices"> | null>(null);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const canInvoice = status !== "pending" && status !== "rejected";
+
+  const toggleInvoice = async () => {
+    if (showInvoice) { setShowInvoice(false); return; }
+    if (!invoice) {
+      const { data } = await supabase.from("invoices").select("*").eq("order_id", order.id).maybeSingle();
+      if (data) setInvoice(data);
+    }
+    setShowInvoice(true);
+  };
+
   return (
     <article className="animate-fade-soft border border-brand-gold/25 bg-card p-6 sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -69,8 +82,40 @@ function OrderCard({ order }: { order: Tables<"orders"> }) {
           <h2 className="mt-2 font-display text-4xl font-light">{order.order_number}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t("Placed", "Dibuat")} {new Date(order.created_at).toLocaleString(lang === "ms" ? "ms-MY" : "en-MY")}</p>
         </div>
-        <p className="font-display text-3xl">{formatRM(order.total)}</p>
+        <div className="text-right">
+          <p className="font-display text-3xl">{formatRM(order.total)}</p>
+          {canInvoice ? <Button variant="ghost" size="sm" className="mt-2" onClick={() => void toggleInvoice()}>{showInvoice ? t("Hide invoice", "Sembunyi invois") : t("View invoice", "Lihat invois")}</Button> : null}
+        </div>
       </div>
+
+      {showInvoice ? (
+        invoice ? (
+          <div className="animate-fade-soft mt-8 border border-brand-gold/40 bg-brand-cream p-6 sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-brand-forest/15 pb-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{t("Invoice", "Invois")}</p>
+                <h3 className="mt-2 font-display text-3xl font-light">{invoice.invoice_number}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{t("Issued", "Dikeluarkan")} {new Date(invoice.created_at).toLocaleString(lang === "ms" ? "ms-MY" : "en-MY")} · {t("Order", "Pesanan")} {invoice.order_number}</p>
+              </div>
+              <p className="font-display text-2xl">MAQAMY</p>
+            </div>
+            <div className="mt-5 grid gap-1 text-sm">
+              <p className="font-semibold">{invoice.customer_name}</p>
+              <p className="text-muted-foreground">{invoice.customer_email} · {invoice.customer_phone}</p>
+              <p className="text-muted-foreground">{invoice.customer_address}</p>
+            </div>
+            <ul className="mt-5 border-t border-brand-forest/10 pt-4 text-sm">
+              {(invoice.items as unknown as OrderItem[]).map((item, i) => <li key={i} className="flex justify-between py-1"><span>{item.quantity} × {item.name ?? `${item.collection} ${item.package}`}</span><span>{formatRM(item.unit_price * item.quantity)}</span></li>)}
+            </ul>
+            <div className="mt-4 flex justify-between border-t border-brand-forest/15 pt-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em]">{t("Total", "Jumlah")}</p>
+              <p className="font-display text-2xl">{formatRM(invoice.total)}</p>
+            </div>
+          </div>
+        ) : (
+          <p className="animate-fade-soft mt-8 border-l-2 border-brand-gold pl-4 text-sm">{t("Your invoice will appear here once it is issued.", "Invois anda akan muncul di sini setelah dikeluarkan.")}</p>
+        )
+      ) : null}
 
       {status === "rejected" ? (
         <p className="mt-8 border-l-2 border-destructive pl-4 text-sm">{t("This order was declined. Our team will contact you about it.", "Pesanan ini telah ditolak. Pasukan kami akan menghubungi anda mengenainya.")}</p>
