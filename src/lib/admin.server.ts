@@ -171,26 +171,87 @@ export const actions: Record<string, Handler> = {
     return { ok: true };
   },
 
-  listOrders: async () => {
-    const { data, error } = await (await db()).from("orders").select("*").order("created_at", { ascending: false }).limit(500);
+  listOrders: async (_i, c) => {
+    const client = await db();
+    let q = client.from("orders").select("*").order("created_at", { ascending: false }).limit(500);
+    if (!c.master && c.team === "Delivery Team") {
+      const { data: me } = await client.from("admin_accounts").select("id").eq("username", c.u).maybeSingle();
+      q = q.eq("assigned_to", me?.id ?? "00000000-0000-0000-0000-000000000000");
+    }
+    const { data, error } = await q;
     if (error) throw new AdminError("Orders could not be loaded");
-    return data;
+    const ids = [...new Set((data ?? []).map((o) => o.assigned_to).filter(Boolean))] as string[];
+    const names = new Map<string, string>();
+    if (ids.length) {
+      const { data: accs } = await client.from("admin_accounts").select("id, username").in("id", ids);
+      for (const a of accs ?? []) names.set(a.id, a.username);
+    }
+    return (data ?? []).map((o) => ({ ...o, assigned_username: o.assigned_to ? (names.get(o.assigned_to) ?? null) : null }));
   },
-  updateOrderStatus: async (input) => {
+
+  listDeliveryTeam: async () => {
+    const { data, error } = await (await db()).from("admin_accounts").select("id, username").eq("team", "Delivery Team").order("username");
+    if (error) throw new AdminError("Delivery team could not be loaded");
+    return data ?? [];
+  },
+
+  approveOrder: async (input, c) => {
+    if (!c.master) throw new AdminError("Only the owner can approve orders.", 403);
+    const d = z.object({ id: z.string().uuid(), assign_to: z.string().uuid() }).parse(input);
+    const client = await db();
+    const { data: courier } = await client.from("admin_accounts").select("id, username, team").eq("id", d.assign_to).maybeSingle();
+    if (!courier || courier.team !== "Delivery Team") throw new AdminError("Choose a member of the Delivery Team.", 400);
+    const { data: order, error } = await client.from("orders").select("*").eq("id", d.id).single();
+    if (error || !order) throw new AdminError("Order not found.", 404);
+    if (order.status !== "pending") throw new AdminError("This order was already handled.", 409);
+    const items = (order.items ?? []) as { collection: string; package: string; quantity: number }[];
+    for (const item of items) {
+      const { data: p } = await client.from("products").select("id, stock").eq("collection", item.collection).eq("package", item.package).maybeSingle();
+      if (p) await client.from("products").update({ stock: Math.max(0, p.stock - item.quantity) }).eq("id", p.id);
+    }
+    const u = await client.from("orders").update({ status: "approved", assigned_to: courier.id, approved_by: c.u }).eq("id", d.id);
+    if (u.error) throw new AdminError("Order could not be approved.");
+    const inv = await client.from("invoices").insert({
+      order_id: order.id, order_number: order.order_number, user_id: order.user_id,
+      customer_name: order.customer_name, customer_email: order.customer_email,
+      customer_phone: order.customer_phone, customer_address: order.customer_address,
+      items: order.items, total: order.total,
+    }).select("invoice_number").single();
+    if (inv.error) throw new AdminError("Order approved, but the invoice could not be created.");
+    return { ok: true, invoice_number: inv.data.invoice_number, assigned_to: courier.username };
+  },
+
+  updateOrderStatus: async (input, c) => {
     const d = z.object({ id: z.string().uuid(), status: z.enum(ORDER_STATUSES) }).parse(input);
     const client = await db();
-    const { data: order, error } = await client.from("orders").select("status, items").eq("id", d.id).single();
+    const { data: order, error } = await client.from("orders").select("status, items, assigned_to").eq("id", d.id).single();
     if (error || !order) throw new AdminError("Order not found.", 404);
-    if (order.status === "pending" && d.status === "approved") {
-      const items = (order.items ?? []) as { collection: string; package: string; quantity: number }[];
-      for (const item of items) {
-        const { data: p } = await client.from("products").select("id, stock").eq("collection", item.collection).eq("package", item.package).maybeSingle();
-        if (p) await client.from("products").update({ stock: Math.max(0, p.stock - item.quantity) }).eq("id", p.id);
-      }
+    if (!c.master) {
+      if (c.team !== "Delivery Team") throw new AdminError("Only the owner or the Delivery Team can update orders.", 403);
+      const { data: me } = await client.from("admin_accounts").select("id").eq("username", c.u).maybeSingle();
+      if (!me || order.assigned_to !== me.id) throw new AdminError("This order is assigned to someone else.", 403);
+      if (!["preparing", "shipped", "delivered"].includes(d.status)) throw new AdminError("The Delivery Team can only move an order to preparing, shipped or delivered.", 403);
+      if (order.status === "pending" || order.status === "rejected") throw new AdminError("This order is not approved yet.", 409);
+    } else if (order.status === "pending" && d.status === "approved") {
+      throw new AdminError("Use Approve and assign a Delivery Team member instead.", 400);
     }
     const u = await client.from("orders").update({ status: d.status }).eq("id", d.id);
     if (u.error) throw new AdminError("Order could not be updated.");
     return { ok: true };
+  },
+
+  listInvoices: async (_i, c) => {
+    if (!c.master) throw new AdminError("Only the owner can view invoices.", 403);
+    const { data, error } = await (await db()).from("invoices").select("*").order("created_at", { ascending: false }).limit(500);
+    if (error) throw new AdminError("Invoices could not be loaded");
+    return data ?? [];
+  },
+  searchInvoice: async (input, c) => {
+    if (!c.master) throw new AdminError("Only the owner can view invoices.", 403);
+    const d = z.object({ order_number: z.string().trim().min(3).max(40) }).parse(input);
+    const { data, error } = await (await db()).from("invoices").select("*").ilike("order_number", `%${d.order_number}%`).order("created_at", { ascending: false }).limit(20);
+    if (error) throw new AdminError("Invoice search failed.");
+    return data ?? [];
   },
 
   listCustomers: async () => {
