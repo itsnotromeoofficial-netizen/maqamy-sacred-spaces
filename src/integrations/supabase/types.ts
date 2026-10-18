@@ -71,8 +71,63 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          created_at: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          invoice_number: string
+          items: Json
+          order_id: string
+          order_number: string
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          invoice_number?: string
+          items?: Json
+          order_id: string
+          order_number: string
+          total?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          invoice_number?: string
+          items?: Json
+          order_id?: string
+          order_number?: string
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
+          approved_by: string | null
+          assigned_to: string | null
           created_at: string
           customer_address: string
           customer_email: string
@@ -87,6 +142,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approved_by?: string | null
+          assigned_to?: string | null
           created_at?: string
           customer_address: string
           customer_email: string
@@ -101,6 +158,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approved_by?: string | null
+          assigned_to?: string | null
           created_at?: string
           customer_address?: string
           customer_email?: string
@@ -114,7 +173,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
