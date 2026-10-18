@@ -84,32 +84,46 @@ function AdminPage() {
 
 /* ---------------- Orders ---------------- */
 
-function OrdersPanel() {
+function OrdersPanel({ session }: { session: AdminSession }) {
   const listFn = listAdminOrders;
   const statusFn = updateOrderStatus;
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
+  const [couriers, setCouriers] = useState<DeliveryMember[] | null>(null);
+  const [assigning, setAssigning] = useState<string | null>(null);
+  const [assignTo, setAssignTo] = useState("");
   const refresh = () => listFn().then(setOrders).catch((e) => toast.error(errorText(e, "Orders could not be loaded")));
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => { void refresh(); if (session.master) listDeliveryTeam().then(setCouriers).catch(() => setCouriers([])); }, []);
   const shown = useMemo(() => (orders ?? []).filter((o) => filter === "all" || o.status === filter), [orders, filter]);
   const pending = (orders ?? []).filter((o) => o.status === "pending").length;
+  const isDelivery = !session.master && session.team === "Delivery Team";
 
   const setStatus = async (order: Order, status: OrderStatus) => {
     try { await statusFn({ data: { id: order.id, status } }); toast.success(`${order.order_number} · ${ORDER_LABELS[status]}`); await refresh(); }
     catch (e) { toast.error(errorText(e, "Order could not be updated.")); }
   };
+  const approve = async (order: Order) => {
+    try {
+      const r = await approveOrder({ data: { id: order.id, assign_to: assignTo } });
+      toast.success(`${order.order_number} approved · assigned to ${r.assigned_to} · invoice ${r.invoice_number}`);
+      setAssigning(null); setAssignTo(""); await refresh();
+    } catch (e) { toast.error(errorText(e, "Order could not be approved.")); }
+  };
 
   if (!orders) return <Loading />;
   return <section>
     <div className="flex flex-wrap items-end justify-between gap-4">
-      <div><p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Incoming orders</p><h2 className="mt-2 font-display text-4xl font-light">{pending} awaiting approval</h2></div>
+      <div><p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{isDelivery ? "Assigned to you" : "Incoming orders"}</p><h2 className="mt-2 font-display text-4xl font-light">{isDelivery ? `${orders.length} deliveries` : `${pending} awaiting approval`}</h2></div>
       <select value={filter} onChange={(e) => setFilter(e.target.value as OrderStatus | "all")} className="h-10 border border-brand-gold/30 bg-card px-3 text-sm">
         <option value="all">All orders</option>
         {ORDER_STATUSES.map((s) => <option key={s} value={s}>{ORDER_LABELS[s]}</option>)}
       </select>
     </div>
+    {session.master && couriers !== null && couriers.length === 0 && pending > 0 ? (
+      <p className="mt-4 border-l-2 border-brand-gold bg-card py-3 pl-4 text-sm">No Delivery Team members yet — add one in the Admin team tab before approving orders.</p>
+    ) : null}
     <div className="mt-6 space-y-3">
-      {shown.length === 0 ? <Empty text="No orders here yet." /> : shown.map((order) => {
+      {shown.length === 0 ? <Empty text={isDelivery ? "Nothing assigned to you yet." : "No orders here yet."} /> : shown.map((order) => {
         const items = order.items as unknown as OrderItem[];
         return <article key={order.id} className="animate-fade-soft border border-brand-gold/25 bg-card p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -118,6 +132,7 @@ function OrdersPanel() {
               <h3 className="mt-1 font-display text-2xl">{order.customer_name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{order.customer_email} · {order.customer_phone}</p>
               <p className="text-sm text-muted-foreground">{order.customer_address}</p>
+              {order.assigned_username ? <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">Delivery: {order.assigned_username}</p> : null}
             </div>
             <div className="text-right">
               <StatusPill status={order.status as OrderStatus} />
@@ -128,15 +143,75 @@ function OrdersPanel() {
             {items.map((item, i) => <li key={i} className="flex justify-between py-1"><span>{item.quantity} × {item.name ?? `${item.collection} ${item.package}`}</span><span>{formatRM(item.unit_price * item.quantity)}</span></li>)}
           </ul>
           <div className="mt-5 flex flex-wrap gap-2">
-            {order.status === "pending" ? <>
-              <Button variant="maqamy" size="sm" onClick={() => void setStatus(order, "approved")}>Approve</Button>
-              <Button variant="ghost" size="sm" onClick={() => void setStatus(order, "rejected")}>Decline</Button>
-            </> : order.status !== "rejected" ? (
+            {order.status === "pending" && session.master ? (
+              assigning === order.id ? (
+                <div className="animate-fade-soft flex flex-wrap items-center gap-2">
+                  <select value={assignTo} onChange={(e) => setAssignTo(e.target.value)} className="h-9 border border-brand-gold/30 bg-card px-2 text-sm">
+                    <option value="">Assign to…</option>
+                    {(couriers ?? []).map((m) => <option key={m.id} value={m.id}>{m.username}</option>)}
+                  </select>
+                  <Button variant="maqamy" size="sm" disabled={!assignTo} onClick={() => void approve(order)}>Approve & assign</Button>
+                  <Button variant="ghost" size="sm" onClick={() => { setAssigning(null); setAssignTo(""); }}>Cancel</Button>
+                </div>
+              ) : <>
+                <Button variant="maqamy" size="sm" disabled={!couriers || couriers.length === 0} onClick={() => setAssigning(order.id)}>Approve</Button>
+                <Button variant="ghost" size="sm" onClick={() => void setStatus(order, "rejected")}>Decline</Button>
+              </>
+            ) : order.status !== "pending" && order.status !== "rejected" ? (
               <select value={order.status} onChange={(e) => void setStatus(order, e.target.value as OrderStatus)} className="h-8 border border-brand-gold/30 bg-card px-2 text-xs">
-                {ORDER_STATUSES.filter((s) => s !== "pending").map((s) => <option key={s} value={s}>{ORDER_LABELS[s]}</option>)}
+                {(isDelivery ? (["preparing", "shipped", "delivered"] as OrderStatus[]) : ORDER_STATUSES.filter((s) => s !== "pending")).map((s) => <option key={s} value={s}>{ORDER_LABELS[s]}</option>)}
               </select>
             ) : null}
           </div>
+        </article>;
+      })}
+    </div>
+  </section>;
+}
+
+/* ---------------- Invoices ---------------- */
+
+function InvoicesPanel() {
+  const [invoices, setInvoices] = useState<AdminInvoice[] | null>(null);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  useEffect(() => { listAdminInvoices().then(setInvoices).catch((e) => toast.error(errorText(e, "Invoices could not be loaded"))); }, []);
+  const search = async () => {
+    if (query.trim().length < 3) return;
+    setSearching(true);
+    try { setInvoices(await searchInvoices({ data: { order_number: query.trim() } })); }
+    catch (e) { toast.error(errorText(e, "Search failed.")); }
+    finally { setSearching(false); }
+  };
+  const reset = () => { setQuery(""); listAdminInvoices().then(setInvoices).catch(() => {}); };
+
+  if (!invoices) return <Loading />;
+  return <section>
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div><p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Generated invoices</p><h2 className="mt-2 font-display text-4xl font-light">{invoices.length} invoices</h2></div>
+      <div className="flex gap-2">
+        <Input placeholder="Search by order ID, e.g. MQ-1A2B3C4D" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void search(); }} className="w-64 bg-card" />
+        <Button variant="maqamy" size="sm" disabled={searching || query.trim().length < 3} onClick={() => void search()}>Search</Button>
+        {query ? <Button variant="ghost" size="sm" onClick={reset}>Clear</Button> : null}
+      </div>
+    </div>
+    <div className="mt-6 space-y-3">
+      {invoices.length === 0 ? <Empty text="No invoices found." /> : invoices.map((inv) => {
+        const items = inv.items as unknown as OrderItem[];
+        return <article key={inv.id} className="animate-fade-soft border border-brand-gold/25 bg-card p-5 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{inv.invoice_number} · order {inv.order_number}</p>
+              <h3 className="mt-1 font-display text-2xl">{inv.customer_name}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{inv.customer_email} · {inv.customer_phone}</p>
+              <p className="text-sm text-muted-foreground">{inv.customer_address}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Issued {new Date(inv.created_at).toLocaleString()}</p>
+            </div>
+            <p className="font-display text-3xl">{formatRM(inv.total)}</p>
+          </div>
+          <ul className="mt-4 border-t border-brand-forest/10 pt-4 text-sm">
+            {items.map((item, i) => <li key={i} className="flex justify-between py-1"><span>{item.quantity} × {item.name ?? `${item.collection} ${item.package}`}</span><span>{formatRM(item.unit_price * item.quantity)}</span></li>)}
+          </ul>
         </article>;
       })}
     </div>
