@@ -7,14 +7,22 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { formatRM } from "@/lib/maqamy-products";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { useCart } from "@/lib/use-cart";
+import { createCheckoutSession } from "@/utils/payments.functions";
 import { trWord, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/cart")({
+  validateSearch: (search: Record<string, unknown>): { order?: string; payment?: string } => ({
+    order: typeof search.order === "string" ? search.order : undefined,
+    payment: typeof search.payment === "string" ? search.payment : undefined,
+  }),
   head: () => ({ meta: [
     { title: "Your Cart — MAQAMY" },
-    { name: "description", content: "Review your saved MAQAMY prayer-space collections and prepare your purchase consultation." },
+    { name: "description", content: "Review your saved MAQAMY prayer-space collections and complete your purchase with secure payment." },
     { property: "og:title", content: "Your Cart — MAQAMY" },
     { property: "og:description", content: "Your selected MAQAMY prayer-space collections." },
     { property: "og:type", content: "website" },
@@ -24,28 +32,68 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
+  const { order: returnedOrder, payment: returnedPayment } = Route.useSearch();
   const { cart, total, itemCount, userEmail, loading, updateQuantity, removeItem, signOut, reload } = useCart();
   const [placing, setPlacing] = useState(false);
   const { t, lang } = useLang();
   const [placed, setPlaced] = useState<string | null>(null);
+  const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
+
   const placeOrder = async () => {
     setPlacing(true);
     const { data, error } = await supabase.rpc("place_order");
+    if (error || !data) {
+      setPlacing(false);
+      toast.error(t("Your order could not be placed. Please try again.", "Pesanan anda tidak dapat dibuat. Sila cuba lagi."));
+      return;
+    }
+    const orderNumber = data as string;
+    const result = await createCheckoutSession({
+      data: {
+        orderNumber,
+        returnUrl: `${window.location.origin}/cart?order=${orderNumber}&payment=returned&session_id={CHECKOUT_SESSION_ID}`,
+        environment: getStripeEnvironment(),
+      },
+    });
     setPlacing(false);
-    if (error || !data) { toast.error(t("Your order could not be placed. Please try again.", "Pesanan anda tidak dapat dibuat. Sila cuba lagi.")); return; }
-    setPlaced(data);
-    toast.success(t(`Order ${data} received.`, `Pesanan ${data} diterima.`));
-    await reload();
+    if ("error" in result || !result.clientSecret) {
+      setPlaced(orderNumber);
+      toast.error(t("Your order was received, but payment could not begin. Please try paying again from your orders page.", "Pesanan anda diterima, tetapi pembayaran tidak dapat dimulakan. Sila cuba bayar semula dari halaman pesanan anda."));
+      return;
+    }
+    setPlaced(orderNumber);
+    setCheckoutSecret(result.clientSecret);
   };
+
+  const returned = returnedOrder && returnedPayment === "returned";
+
   return (
     <main className="min-h-screen bg-brand-cream text-brand-forest">
+      <PaymentTestModeBanner />
       <SiteHeader tone="dark" itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} />
       <section className="px-5 py-16 sm:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Your selection", "Pilihan anda")}</p>
           <h1 className="mt-4 font-display text-6xl font-light leading-none sm:text-8xl">{t("The cart.", "Troli.")}</h1>
           <p className="mt-6 max-w-xl text-sm leading-7 text-muted-foreground">{t("A considered overview of the prayer spaces you have selected for your home.", "Gambaran teliti ruang solat yang telah anda pilih untuk rumah anda.")}</p>
-          {loading ? <div className="mx-auto my-24 h-12 w-1 animate-spin-bar bg-brand-gold" /> : placed ? <OrderPlaced number={placed} /> : !userEmail ? <SignedOut /> : cart.length === 0 ? <EmptyCart /> : (
+          {loading ? <div className="mx-auto my-24 h-12 w-1 animate-spin-bar bg-brand-gold" /> : returned ? (
+            <OrderReturned orderNumber={returnedOrder!} />
+          ) : checkoutSecret && placed ? (
+            <div className="animate-fade-soft mt-14">
+              <div className="mb-10 border-y border-brand-gold/25 py-10 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{t("Order received", "Pesanan diterima")}</p>
+                <h2 className="mt-4 font-display text-5xl font-light">{placed}</h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">{t("One step remains — complete your payment below to confirm the order.", "Tinggal satu langkah — lengkapkan pembayaran anda di bawah untuk mengesahkan pesanan.")}</p>
+              </div>
+              <div className="border border-brand-gold/25 bg-card p-4 shadow-gold sm:p-8">
+                <StripeEmbeddedCheckout
+                  fetchClientSecret={async () => checkoutSecret}
+                />
+              </div>
+            </div>
+          ) : placed ? (
+            <OrderPlaced number={placed} />
+          ) : !userEmail ? <SignedOut /> : cart.length === 0 ? <EmptyCart /> : (
             <div className="mt-14 grid gap-10 lg:grid-cols-[1.4fr_0.6fr] lg:items-start">
               <div className="space-y-4">
                 {cart.map((item) => (
@@ -62,8 +110,8 @@ function CartPage() {
               <aside className="border border-brand-gold/30 bg-brand-forest p-6 text-brand-cream lg:sticky lg:top-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold-soft">{t("Summary", "Ringkasan")}</p>
                 <div className="mt-8 flex items-baseline justify-between border-b border-brand-cream/20 pb-6"><span className="text-sm">{t("Estimated total", "Anggaran jumlah")}</span><strong className="font-display text-4xl">{formatRM(total)}+</strong></div>
-                <p className="mt-5 text-xs leading-6 text-brand-cream/70">{t("Your order is sent to our team for approval. You will receive an order number instantly and can follow its progress.", "Pesanan anda dihantar kepada pasukan kami untuk kelulusan. Anda akan menerima nombor pesanan serta-merta dan boleh mengikuti perkembangannya.")}</p>
-                <Button variant="gold" size="lg" className="mt-8 w-full" disabled={placing} onClick={() => void placeOrder()}>{placing ? t("Placing order…", "Membuat pesanan…") : t("Place order", "Buat pesanan")} <ArrowRight /></Button>
+                <p className="mt-5 text-xs leading-6 text-brand-cream/70">{t("You will receive an order number instantly, then complete payment securely on this page. Our team reviews every order before it is prepared.", "Anda akan menerima nombor pesanan serta-merta, kemudian lengkapkan pembayaran dengan selamat di halaman ini. Pasukan kami menyemak setiap pesanan sebelum ia disediakan.")}</p>
+                <Button variant="gold" size="lg" className="mt-8 w-full" disabled={placing} onClick={() => void placeOrder()}>{placing ? t("Preparing payment…", "Menyediakan pembayaran…") : t("Place order & pay", "Buat pesanan & bayar")} <ArrowRight /></Button>
               </aside>
             </div>
           )}
@@ -78,3 +126,5 @@ function SignedOut() { const { t } = useLang(); return <div className="mt-14 bor
 function EmptyCart() { const { t } = useLang(); return <div className="mt-14 border-y border-brand-gold/25 py-20 text-center"><ShoppingBag className="mx-auto size-9 text-brand-gold" /><h2 className="mt-5 font-display text-4xl font-light">{t("Your cart is ready for a collection.", "Troli anda sedia untuk sebuah koleksi.")}</h2><Button asChild variant="maqamy" size="lg" className="mt-7"><Link to="/collections">{t("Explore Noor & Janna", "Terokai Noor & Janna")} <ArrowRight /></Link></Button></div>; }
 
 function OrderPlaced({ number }: { number: string }) { const { t } = useLang(); return <div className="animate-fade-soft mt-14 border-y border-brand-gold/25 py-20 text-center"><p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{t("Order received", "Pesanan diterima")}</p><h2 className="mt-5 font-display text-5xl font-light">{number}</h2><p className="mx-auto mt-4 max-w-md text-sm leading-7 text-muted-foreground">{t("Thank you. Our team will review and approve your order shortly. Keep this number — you can follow every step on your orders page.", "Terima kasih. Pasukan kami akan menyemak dan meluluskan pesanan anda tidak lama lagi. Simpan nombor ini — anda boleh mengikuti setiap langkah di halaman pesanan anda.")}</p><Button asChild variant="gold" size="lg" className="mt-7"><Link to="/orders">{t("Track my orders", "Jejak pesanan saya")} <ArrowRight /></Link></Button></div>; }
+
+function OrderReturned({ orderNumber }: { orderNumber: string }) { const { t } = useLang(); return <div className="animate-fade-soft mt-14 border-y border-brand-gold/25 py-20 text-center"><p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{t("Payment complete", "Pembayaran selesai")}</p><h2 className="mt-5 font-display text-5xl font-light">{orderNumber}</h2><p className="mx-auto mt-4 max-w-md text-sm leading-7 text-muted-foreground">{t("Thank you — your payment has been received and your order is now awaiting our team's approval. Keep this number — you can follow every step on your orders page.", "Terima kasih — pembayaran anda telah diterima dan pesanan anda kini menunggu kelulusan pasukan kami. Simpan nombor ini — anda boleh mengikuti setiap langkah di halaman pesanan anda.")}</p><Button asChild variant="gold" size="lg" className="mt-7"><Link to="/orders">{t("Track my orders", "Jejak pesanan saya")} <ArrowRight /></Link></Button></div>; }
