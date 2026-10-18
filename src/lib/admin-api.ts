@@ -69,8 +69,15 @@ export const saveAdminProduct = ({ data }: D<Record<string, unknown>>) => call<P
 export const adjustAdminStock = ({ data }: D<{ id: string; change: number }>) => call<{ stock: number }>("adjustStock", data);
 export const setAdminStock = ({ data }: D<{ id: string; stock: number }>) => call<{ stock: number }>("setStock", data);
 export const deleteAdminProduct = ({ data }: D<{ id: string }>) => call("deleteProduct", data);
-export const listAdminOrders = () => call<Order[]>("listOrders");
+export type AdminOrder = Order & { assigned_username: string | null };
+export const listAdminOrders = () => call<AdminOrder[]>("listOrders");
 export const updateOrderStatus = ({ data }: D<{ id: string; status: OrderStatus }>) => call("updateOrderStatus", data);
+export type DeliveryMember = { id: string; username: string };
+export const listDeliveryTeam = () => call<DeliveryMember[]>("listDeliveryTeam");
+export const approveOrder = ({ data }: D<{ id: string; assign_to: string }>) => call<{ ok: true; invoice_number: string; assigned_to: string }>("approveOrder", data);
+export type AdminInvoice = Tables<"invoices">;
+export const listAdminInvoices = () => call<AdminInvoice[]>("listInvoices");
+export const searchInvoices = ({ data }: D<{ order_number: string }>) => call<AdminInvoice[]>("searchInvoice", data);
 export type AdminCustomer = Tables<"profiles"> & { banned_until: string | null; orders: number };
 export const listAdminCustomers = () => call<AdminCustomer[]>("listCustomers");
 export const banCustomer = ({ data }: D<{ id: string; duration: "30d" | "permanent" | "none" }>) => call("banCustomer", data);
