@@ -16,11 +16,31 @@ export function useBanners() {
 
 export function BannerCarousel({ banners, tone = "light" }: { banners: Banner[]; tone?: "light" | "dark" }) {
   const [index, setIndex] = useState(0);
+  const [soundOn, setSoundOn] = useState(false);
   const timer = useRef(0);
+  const videos = useRef(new Map<string, HTMLVideoElement>());
   const count = banners.length;
   const current = banners[index % Math.max(count, 1)];
 
   const next = () => setIndex((value) => (value + 1) % count);
+
+  // Browsers block autoplay-with-sound until the visitor interacts once;
+  // the first tap/scroll/keypress anywhere unmutes the current video.
+  useEffect(() => {
+    const enable = () => setSoundOn(true);
+    window.addEventListener("pointerdown", enable, { once: true });
+    window.addEventListener("keydown", enable, { once: true });
+    window.addEventListener("touchstart", enable, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", enable);
+      window.removeEventListener("keydown", enable);
+      window.removeEventListener("touchstart", enable);
+    };
+  }, []);
+
+  useEffect(() => {
+    for (const video of videos.current.values()) video.muted = !soundOn;
+  }, [soundOn, index]);
 
   useEffect(() => {
     window.clearTimeout(timer.current);
