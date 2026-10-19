@@ -34,7 +34,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
   };
   return (
     <header className={`relative z-40 border-b ${borderClass} ${textClass}`}>
-      <div className="mx-auto grid h-28 max-w-[1440px] grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2 px-5 sm:h-32 sm:px-8 lg:h-40 lg:grid-cols-[1fr_auto_1fr] lg:gap-8 lg:px-12">
+      <div className="mx-auto grid h-24 max-w-[1440px] grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2 px-5 sm:h-28 sm:px-8 lg:h-32 lg:grid-cols-[1fr_auto_1fr] lg:gap-8 lg:px-12">
         <div className="flex min-w-0 items-center gap-5">
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((value) => !value)} className={`${textClass} lg:hidden`}>{open ? <X /> : <Menu />}</Button>
           <div className="hidden lg:block"><LanguageToggle /></div>
@@ -44,7 +44,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
             <Button asChild variant="ghost" size="sm" className={`hidden lg:inline-flex ${textClass}`}><Link to="/auth" search={{ redirect: "/collections" }}><UserRound /> {t("Account", "Akaun")}</Link></Button>
           )}
         </div>
-        <Link to="/" aria-label="MAQAMY introduction" onClick={onLogoClick} className="mx-auto block w-full max-w-48 sm:max-w-64 lg:w-80 lg:max-w-none">
+        <Link to="/" aria-label="MAQAMY introduction" onClick={onLogoClick} className="mx-auto block w-full max-w-40 sm:max-w-52 lg:w-64 lg:max-w-none">
           <img src={brandAssets.logo} alt="MAQAMY" className={`h-auto w-full ${light ? "brightness-0 invert" : ""}`} />
         </Link>
         <div className="flex justify-end">

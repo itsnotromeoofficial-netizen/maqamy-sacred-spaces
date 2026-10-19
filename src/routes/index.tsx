@@ -60,11 +60,11 @@ function IntroductionPage() {
       <section className="maqamy-introduction relative overflow-hidden">
         <img src={brandAssets.desert} alt="A solitary tree in a quiet desert landscape" className="maqamy-landscape absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-brand-forest/45" />
-        <div className="maqamy-introduction relative mx-auto flex max-w-7xl flex-col items-center justify-center px-5 py-14 text-center sm:px-8 lg:px-12 lg:py-20">
-          <p className="animate-fade-soft max-w-2xl text-xs font-semibold uppercase leading-6 text-brand-gold-soft">{t("Inspired by the Islamic understanding of Ḥuḍūr al-Qalb", "Diilhamkan oleh pemahaman Islam tentang Ḥuḍūr al-Qalb")}</p>
-          <h1 className="maqamy-arrival mt-5 max-w-5xl text-balance font-display text-5xl font-light leading-[1.12] sm:text-6xl lg:text-7xl">{t("A Space for the Heart", "Ruang untuk Hati")}<br /><span className="italic text-brand-gold-soft">{t("to Be Present.", "Hadir.")}</span></h1>
-          <div className="maqamy-arrival-late mt-7 flex w-full flex-col items-center gap-7 lg:mt-9">
-            <p className="max-w-lg text-sm leading-7 text-brand-cream/90 sm:text-base">{t("Devotion cannot be designed, but its essence can be invited and nurtured through thoughtful spaces.", "Pengabdian tidak boleh direka, namun intipatinya dapat diundang dan dipupuk melalui ruang yang dirancang dengan teliti.")}</p>
+        <div className="maqamy-introduction relative mx-auto flex max-w-7xl flex-col items-center justify-center px-5 py-10 text-center sm:px-8 lg:px-12 lg:py-14">
+          <p className="animate-fade-soft max-w-2xl text-[10px] font-semibold uppercase leading-5 text-brand-gold-soft">{t("Inspired by the Islamic understanding of Ḥuḍūr al-Qalb", "Diilhamkan oleh pemahaman Islam tentang Ḥuḍūr al-Qalb")}</p>
+          <h1 className="maqamy-arrival mt-4 max-w-4xl text-balance font-display text-3xl font-light leading-[1.15] sm:text-4xl lg:text-5xl">{t("A Space for the Heart", "Ruang untuk Hati")}<br /><span className="italic text-brand-gold-soft">{t("to Be Present.", "Hadir.")}</span></h1>
+          <div className="maqamy-arrival-late mt-6 flex w-full flex-col items-center gap-5 lg:mt-7">
+            <p className="max-w-md text-xs leading-6 text-brand-cream/90 sm:text-sm">{t("Devotion cannot be designed, but its essence can be invited and nurtured through thoughtful spaces.", "Pengabdian tidak boleh direka, namun intipatinya dapat diundang dan dipupuk melalui ruang yang dirancang dengan teliti.")}</p>
             <div className="grid w-full max-w-xl gap-3 sm:grid-cols-2">
               <Button asChild variant="gold" size="lg" className="group rounded-none"><Link to="/collections">{t("View collections", "Lihat koleksi")} <ArrowRight className="transition-transform group-hover:translate-x-1" /></Link></Button>
               <Button asChild variant="cream" size="lg" className="group rounded-none"><Link to="/story">{t("Discover our intention", "Kenali niat kami")} <ArrowRight className="transition-transform group-hover:translate-x-1" /></Link></Button>
