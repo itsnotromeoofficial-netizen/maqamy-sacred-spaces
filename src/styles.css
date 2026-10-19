@@ -96,6 +96,8 @@
   --brand-gold-soft: oklch(0.79 0.087 86.2);
   --brand-ink: oklch(0.152 0.018 145.2);
   --brand-mist: oklch(0.964 0.009 93.2);
+  --banner-title-foreground: oklch(1 0 0);
+  --banner-title-outline: oklch(0.12 0 0);
   --highlight: oklch(0.238 0.061 150.8);
   --highlight-foreground: oklch(0.958 0.02 88.3);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -212,6 +214,12 @@
 
 .maqamy-introduction {
   min-height: calc(100svh - 188px);
+}
+.maqamy-banner-title {
+  color: var(--banner-title-foreground);
+  -webkit-text-stroke: 2px var(--banner-title-outline);
+  paint-order: stroke fill;
+  text-shadow: 0 2px 4px var(--banner-title-outline);
 }
 .maqamy-arrival {
   animation: maqamy-fade-soft 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;

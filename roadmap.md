@@ -1,5 +1,10 @@
 # MAQAMY rebuild
 
+## Banner refinements
+- [x] Outline banner titles for clear contrast on light and dark media
+- [x] Add neat direct-link and upload controls with media detection
+- [x] Verify title contrast and admin media selection
+
 - [x] Make the introduction the dedicated home page
 - [x] Move the brand story and highlighted PDF wording to its own page
 - [x] Move Noor and Janna to a dedicated collections page with uncropped images
