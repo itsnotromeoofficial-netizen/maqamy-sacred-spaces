@@ -32,7 +32,7 @@ function PrivacyPage() {
       <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:py-12">
         <section className="py-12 lg:py-20">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Privacy policy", "Dasar privasi")}</p>
-          <h1 className="mt-4 font-display text-5xl font-light leading-none sm:text-7xl">
+          <h1 className="mt-4 font-display text-3xl font-light leading-tight sm:text-4xl">
             MAQAMY Living Concepts
           </h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">

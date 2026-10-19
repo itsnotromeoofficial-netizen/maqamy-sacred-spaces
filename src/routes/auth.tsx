@@ -231,7 +231,7 @@ function AuthPage() {
             <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-full invert" />
           </div>
           <div className="absolute bottom-10 left-10 max-w-md text-brand-cream">
-            <p className="font-display text-5xl font-light italic leading-tight">{t("A place to return.", "Tempat untuk kembali.")}</p>
+            <p className="font-display text-3xl font-light italic leading-tight">{t("A place to return.", "Tempat untuk kembali.")}</p>
             <p className="mt-4 text-sm leading-7 text-brand-cream/80">
               {t("Sign in to preserve your selected prayer-space collection, delivery details, and consultation cart.", "Log masuk untuk menyimpan koleksi ruang solat pilihan anda, butiran penghantaran dan troli anda.")}
             </p>
@@ -251,7 +251,7 @@ function AuthPage() {
               <div className="mb-8 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Customer account", "Akaun pelanggan")}</p>
-                  <h1 className="mt-2 font-display text-4xl font-light text-brand-forest sm:text-5xl">
+                  <h1 className="mt-2 font-display text-2xl font-light text-brand-forest sm:text-3xl">
                     {verify ? t("Verify", "Sahkan") : mode === "register" ? t("Register", "Daftar") : t("Sign in", "Log masuk")}
                   </h1>
                 </div>
