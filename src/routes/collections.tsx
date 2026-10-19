@@ -84,6 +84,7 @@ function CollectionsPage() {
         <ProductDetail key={selected.key} item={selected} signedIn={Boolean(userEmail)} onAdd={addToCart} onBack={() => setSelectedKey(null)} />
       ) : (
         <>
+          <BannerCarousel banners={banners} tone="dark" />
           <section className="px-5 pb-10 pt-10 sm:px-8 lg:px-12 lg:pb-14 lg:pt-14">
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
