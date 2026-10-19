@@ -71,7 +71,7 @@ function AdminPage() {
     </header>
     <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
       <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Private administration</p>
-      <h1 className="mt-3 font-display text-5xl font-light sm:text-7xl">Store control.</h1>
+      <h1 className="mt-3 font-display text-3xl font-light sm:text-4xl">Store control.</h1>
       <nav className="mt-10 flex gap-1 overflow-x-auto border-b border-brand-gold/30">
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`-mb-px whitespace-nowrap border-b-2 px-5 py-3 text-sm font-semibold transition-colors duration-300 ${tab === t.id ? "border-brand-forest text-brand-forest" : "border-transparent text-muted-foreground hover:text-brand-forest"}`}>{t.label}</button>)}
       </nav>
@@ -432,7 +432,7 @@ function AdminLogin({ onSuccess }: { onSuccess: (s: AdminSession) => void }) {
     <section className="animate-fade-soft w-full max-w-md border border-brand-gold/35 bg-brand-ink/40 p-7 shadow-maqamy sm:p-10">
       <img src={brandAssets.logo} alt="MAQAMY" className="w-28 brightness-0 invert" />
       <div className="mt-12 flex items-center gap-3 text-brand-gold-soft"><ShieldCheck className="size-5" /><p className="text-xs font-semibold uppercase tracking-[0.3em]">Private administration</p></div>
-      <h1 className="mt-4 font-display text-5xl font-light">Welcome back.</h1>
+      <h1 className="mt-4 font-display text-3xl font-light">Welcome back.</h1>
       <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(null); try { onSuccess(await loginAdmin({ data: { username, password } })); } catch (e) { setError(errorText(e, "Those details were not recognised.")); } finally { setBusy(false); } }}>
         <Field label="Username"><Input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
         <Field label="Password"><Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>

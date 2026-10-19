@@ -39,7 +39,7 @@ function OrdersPage() {
       <section className="px-5 py-16 sm:px-8 lg:py-24">
         <div className="mx-auto max-w-5xl">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{t("Your orders", "Pesanan anda")}</p>
-          <h1 className="mt-4 font-display text-6xl font-light leading-none sm:text-8xl">{t("Order journey.", "Perjalanan pesanan.")}</h1>
+          <h1 className="mt-4 font-display text-3xl font-light leading-tight sm:text-4xl">{t("Order journey.", "Perjalanan pesanan.")}</h1>
           {loading || (userEmail && !orders) ? <div className="mx-auto my-24 h-12 w-1 animate-spin-bar bg-brand-gold" /> : !userEmail ? (
             <Notice title={t("Sign in to see your orders.", "Log masuk untuk melihat pesanan anda.")} cta={<Link to="/auth" search={{ redirect: "/orders" }}>{t("Sign in", "Log masuk")} <ArrowRight /></Link>} />
           ) : orders!.length === 0 ? (

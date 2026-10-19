@@ -40,7 +40,7 @@ function StoryPage() {
       <section className="grid min-h-[78svh] lg:grid-cols-2">
         <div className="flex flex-col justify-center px-5 py-20 sm:px-8 lg:pl-[max(3rem,calc((100vw-80rem)/2+3rem))] lg:pr-12">
           <p className="text-xs font-semibold uppercase text-brand-gold">{t("Malaysian design house", "Rumah reka bentuk Malaysia")}</p>
-          <h1 className="mt-5 max-w-xl font-display text-6xl font-light leading-[1.05] sm:text-7xl">{t("The MAQAMY Story", "Kisah MAQAMY")}</h1>
+          <h1 className="mt-5 max-w-xl font-display text-3xl font-light leading-[1.1] sm:text-4xl">{t("The MAQAMY Story", "Kisah MAQAMY")}</h1>
           <p className="mt-8 max-w-lg font-display text-2xl italic leading-8 text-muted-foreground">{t("Designed for the presence of the heart.", "Direka untuk kehadiran hati.")}</p>
         </div>
         <div className="min-h-[55svh] bg-brand-mist p-5 sm:p-8 lg:p-12">
@@ -61,7 +61,7 @@ function StoryPage() {
       </section>
       <section className="bg-brand-forest px-5 py-20 text-brand-cream sm:px-8 lg:py-28">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
-          <h2 className="max-w-3xl font-display text-4xl font-light leading-tight sm:text-6xl">{t("MAQAMY — Designed for the presence of the heart.", "MAQAMY — Direka untuk kehadiran hati.")}</h2>
+          <h2 className="max-w-3xl font-display text-2xl font-light leading-tight sm:text-3xl">{t("MAQAMY — Designed for the presence of the heart.", "MAQAMY — Direka untuk kehadiran hati.")}</h2>
           <Button asChild variant="gold" size="lg"><Link to="/collections">{t("Explore Noor & Janna", "Terokai Noor & Janna")} <ArrowRight /></Link></Button>
         </div>
       </section>
