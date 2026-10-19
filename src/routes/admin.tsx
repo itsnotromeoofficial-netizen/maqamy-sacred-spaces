@@ -11,6 +11,7 @@ import {
   adjustAdminStock, approveOrder, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminProduct, deleteCustomer,
   getAdminSession, listAdminAccounts, listAdminCustomers, listAdminInvoices, listAdminOrders, listAdminProducts, listDeliveryTeam, loginAdmin,
   logoutAdmin, saveAdminProduct, searchInvoices, setAdminStock, updateOrderStatus,
+  deleteAdminBanner, listAdminBanners, saveAdminBanner, uploadAdminBanner, type AdminBanner,
   type AdminAccount, type AdminCustomer, type AdminInvoice, type AdminOrder, type AdminSession, type DeliveryMember,
 } from "@/lib/admin-api";
 import { brandAssets, formatRM } from "@/lib/maqamy-products";
@@ -18,7 +19,7 @@ import { ORDER_LABELS, ORDER_STATUSES, parseList, type OrderItem, type OrderStat
 
 type Product = Tables<"products">;
 type Order = AdminOrder;
-type Tab = "orders" | "products" | "customers" | "admins" | "invoices";
+type Tab = "orders" | "products" | "customers" | "admins" | "invoices" | "banners";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [
@@ -56,7 +57,7 @@ function AdminPage() {
       { id: "products" as Tab, label: "Products" },
       { id: "customers" as Tab, label: "Customers" },
     ]),
-    ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "admins" as Tab, label: "Admin team" }] : []),
+    ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "banners" as Tab, label: "Banners" }, { id: "admins" as Tab, label: "Admin team" }] : []),
   ];
 
   return <main className="min-h-screen bg-brand-mist text-brand-forest">
@@ -76,7 +77,7 @@ function AdminPage() {
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`-mb-px whitespace-nowrap border-b-2 px-5 py-3 text-sm font-semibold transition-colors duration-300 ${tab === t.id ? "border-brand-forest text-brand-forest" : "border-transparent text-muted-foreground hover:text-brand-forest"}`}>{t.label}</button>)}
       </nav>
       <div key={tab} className="animate-fade-soft py-10">
-        {tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : <AdminsPanel />}
+        {tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
       </div>
     </div>
   </main>;
