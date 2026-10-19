@@ -3,7 +3,7 @@
 ## Banner refinements
 - [x] Outline banner titles for clear contrast on light and dark media
 - [x] Add neat direct-link and upload controls with media detection
-- [ ] Verify title contrast and admin media selection
+- [x] Verify title contrast and admin media selection
 
 - [x] Make the introduction the dedicated home page
 - [x] Move the brand story and highlighted PDF wording to its own page
