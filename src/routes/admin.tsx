@@ -445,3 +445,110 @@ function AdminLogin({ onSuccess }: { onSuccess: (s: AdminSession) => void }) {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.15em]"><span>{label}</span>{children}</label>; }
+
+/* ---------------- Banners ---------------- */
+
+function BannersPanel() {
+  const [banners, setBanners] = useState<AdminBanner[] | null>(null);
+  const [editing, setEditing] = useState<AdminBanner | null>(null);
+  const [adding, setAdding] = useState(false);
+  const refresh = () => listAdminBanners().then(setBanners).catch((e) => toast.error(errorText(e, "Banners could not be loaded")));
+  useEffect(() => { void refresh(); }, []);
+
+  const remove = async (banner: AdminBanner) => {
+    try { await deleteAdminBanner({ data: { id: banner.id } }); toast.success("Banner deleted"); await refresh(); }
+    catch (e) { toast.error(errorText(e, "Banner could not be deleted.")); }
+  };
+
+  if (!banners) return <Loading />;
+  return <section>
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div><p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Home & collections carousel</p><h2 className="mt-2 font-display text-4xl font-light">{banners.length} banner{banners.length === 1 ? "" : "s"}</h2></div>
+      <Button variant="maqamy" onClick={() => { setAdding(true); setEditing(null); }}><Plus /> Add banner</Button>
+    </div>
+    <p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">Videos play automatically and slide away when they finish; pictures show for 5 seconds. The slides loop on the landing page and at the top of the collections page.</p>
+
+    {adding || editing ? <BannerForm banner={editing} nextOrder={banners.length} onDone={async () => { setAdding(false); setEditing(null); await refresh(); }} onCancel={() => { setAdding(false); setEditing(null); }} /> : null}
+
+    <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {banners.map((banner) => (
+        <article key={banner.id} className="border border-brand-gold/25 bg-card">
+          <div className="aspect-video bg-brand-ink">
+            {banner.kind === "video" ? <video src={banner.url} className="h-full w-full object-cover" muted playsInline /> : <img src={banner.url} alt={banner.title} className="h-full w-full object-cover" />}
+          </div>
+          <div className="p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-gold">{banner.kind} · order {banner.display_order}{banner.active ? "" : " · hidden"}</p>
+            <p className="mt-1 truncate text-sm font-semibold">{banner.title || "Untitled"}</p>
+            <div className="mt-4 flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => { setEditing(banner); setAdding(false); }}>Edit</Button>
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={() => void remove(banner)}><Trash2 /></Button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+    {!banners.length ? <Empty text="No banners yet — add a video or picture to feature at the top of the site." /> : null}
+  </section>;
+}
+
+function BannerForm({ banner, nextOrder, onDone, onCancel }: { banner: AdminBanner | null; nextOrder: number; onDone: () => void; onCancel: () => void }) {
+  const [kind, setKind] = useState<"image" | "video">(banner?.kind === "video" ? "video" : "image");
+  const [url, setUrl] = useState(banner?.url ?? "");
+  const [title, setTitle] = useState(banner?.title ?? "");
+  const [order, setOrder] = useState(banner?.display_order ?? nextOrder);
+  const [active, setActive] = useState(banner?.active ?? true);
+  const [busy, setBusy] = useState(false);
+
+  const upload = async (file: File) => {
+    setBusy(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.onerror = () => reject(new Error("Could not read the file."));
+        reader.readAsDataURL(file);
+      });
+      const r = await uploadAdminBanner({ data: { kind, filename: file.name, content_type: file.type, base64 } });
+      setUrl(r.url);
+      toast.success("Uploaded");
+    } catch (e) { toast.error(errorText(e, "Upload failed.")); }
+    finally { setBusy(false); }
+  };
+
+  const save = async () => {
+    if (!url) { toast.error("Add a link or upload a file first."); return; }
+    setBusy(true);
+    try {
+      await saveAdminBanner({ data: { ...(banner ? { id: banner.id } : {}), kind, url, title, display_order: order, active } });
+      toast.success("Banner saved");
+      onDone();
+    } catch (e) { toast.error(errorText(e, "Banner could not be saved.")); setBusy(false); }
+  };
+
+  return <div className="animate-fade-soft mt-8 border border-brand-gold/30 bg-card p-6">
+    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{banner ? "Edit banner" : "New banner"}</p>
+    <div className="mt-5 grid gap-5 sm:grid-cols-2">
+      <Field label="Type">
+        <div className="flex gap-2">
+          {(["image", "video"] as const).map((k) => <Button key={k} type="button" variant={kind === k ? "maqamy" : "outline"} size="sm" onClick={() => setKind(k)}>{k === "image" ? "Picture" : "Video"}</Button>)}
+        </div>
+      </Field>
+      <Field label="Title (optional)"><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Shown on the slide" /></Field>
+      <Field label="Link"><Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" /></Field>
+      <Field label={`Or upload a ${kind === "image" ? "picture" : "video"}`}>
+        <Input type="file" accept={kind === "image" ? "image/*" : "video/*"} disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); }} />
+      </Field>
+      <Field label="Slide order"><Input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value) || 0)} /></Field>
+      <Field label="Visibility">
+        <div className="flex gap-2">
+          <Button type="button" variant={active ? "maqamy" : "outline"} size="sm" onClick={() => setActive(true)}>Showing</Button>
+          <Button type="button" variant={!active ? "maqamy" : "outline"} size="sm" onClick={() => setActive(false)}>Hidden</Button>
+        </div>
+      </Field>
+    </div>
+    <div className="mt-6 flex gap-2">
+      <Button variant="maqamy" disabled={busy} onClick={() => void save()}><Save /> {busy ? "Working…" : "Save banner"}</Button>
+      <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+    </div>
+  </div>;
+}
