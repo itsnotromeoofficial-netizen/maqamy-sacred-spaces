@@ -40,6 +40,7 @@ function CollectionsPage() {
   const { products } = useProducts();
   const { t } = useLang();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const banners = useBanners();
 
   const items: GridItem[] = collections.flatMap((collection) =>
     collection.packages.map((pkg) => {
