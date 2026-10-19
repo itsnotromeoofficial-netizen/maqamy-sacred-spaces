@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
@@ -21,119 +21,190 @@ export const Route = createFileRoute("/collections")({
   component: CollectionsPage,
 });
 
+type GridItem = {
+  key: string;
+  collection: string;
+  packageName: string;
+  name: string;
+  price: number;
+  image: string | null;
+  imageAlt: string;
+  stock: number;
+  collectionData?: ProductCollection;
+  product?: CatalogueProduct;
+};
+
 function CollectionsPage() {
   const { itemCount, userEmail, addToCart, signOut } = useCart();
   const { products } = useProducts();
   const { t } = useLang();
-  const extras = products.filter((product) => !collections.some((collection) => collection.name === product.collection));
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  const items: GridItem[] = collections.flatMap((collection) =>
+    collection.packages.map((pkg) => {
+      const product = products.find((item) => item.collection === collection.name && item.package === pkg.name);
+      return {
+        key: `${collection.name}-${pkg.name}`,
+        collection: collection.name,
+        packageName: pkg.name,
+        name: `${collection.name} ${pkg.name}`,
+        price: product?.price ?? pkg.price,
+        image: collection.image,
+        imageAlt: collection.imageAlt,
+        stock: product?.stock ?? 0,
+        collectionData: collection,
+        product,
+      };
+    }),
+  );
+  const extras = products
+    .filter((product) => !collections.some((collection) => collection.name === product.collection))
+    .map((product) => ({
+      key: `extra-${product.id}`,
+      collection: product.collection,
+      packageName: product.package,
+      name: product.name,
+      price: product.price,
+      image: product.image_url,
+      imageAlt: product.name,
+      stock: product.stock,
+      product,
+    }));
+
+  const all = [...items, ...extras];
+  const selected = all.find((item) => item.key === selectedKey) ?? null;
 
   return (
     <main className="bg-brand-cream text-brand-forest">
       <SiteHeader itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} tone="dark" />
 
-      <section className="px-5 pb-16 pt-20 sm:px-8 lg:px-12 lg:pb-24 lg:pt-28">
-        <div className="mx-auto max-w-5xl text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
-          <h1 className="mt-8 font-display text-5xl font-light italic leading-[1.05] sm:text-7xl">{t("Two expressions of peace", "Dua ekspresi ketenangan")}</h1>
-          <p className="mx-auto mt-8 max-w-md text-sm leading-8 text-muted-foreground">
-            {t("Complete prayer environments, considered from the mihrab to the final object.", "Persekitaran solat yang lengkap, dirancang dari mihrab hingga objek terakhir.")}
-          </p>
-        </div>
-      </section>
+      {selected ? (
+        <ProductDetail key={selected.key} item={selected} signedIn={Boolean(userEmail)} onAdd={addToCart} onBack={() => setSelectedKey(null)} />
+      ) : (
+        <>
+          <section className="px-5 pb-10 pt-10 sm:px-8 lg:px-12 lg:pb-14 lg:pt-14">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
+              <h1 className="mt-4 font-display text-3xl font-light italic leading-[1.1] sm:text-4xl">{t("Two expressions of peace", "Dua ekspresi ketenangan")}</h1>
+              <p className="mx-auto mt-4 max-w-md text-xs leading-6 text-muted-foreground">
+                {t("Complete prayer environments, considered from the mihrab to the final object.", "Persekitaran solat yang lengkap, dirancang dari mihrab hingga objek terakhir.")}
+              </p>
+            </div>
+          </section>
 
-      {collections.map((collection, index) => (
-        <CollectionChapter
-          key={collection.name}
-          collection={collection}
-          products={products.filter((product) => product.collection === collection.name)}
-          index={index}
-          signedIn={Boolean(userEmail)}
-          onAdd={addToCart}
-        />
-      ))}
-
-      {extras.length > 0 ? <AdditionalProducts products={extras} signedIn={Boolean(userEmail)} onAdd={addToCart} /> : null}
+          <section className="px-5 pb-16 sm:px-8 lg:px-12 lg:pb-24">
+            <div className="mx-auto grid max-w-6xl grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+              {all.map((item) => (
+                <ProductCard key={item.key} item={item} onOpen={() => setSelectedKey(item.key)} />
+              ))}
+            </div>
+          </section>
+        </>
+      )}
 
       <SiteFooter />
     </main>
   );
 }
 
-function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
-  collection: ProductCollection;
-  products: CatalogueProduct[];
-  index: number;
+function ProductCard({ item, onOpen }: { item: GridItem; onOpen: () => void }) {
+  const { t, lang } = useLang();
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group flex flex-col border border-brand-forest/10 bg-card text-left transition-all duration-300 hover:-translate-y-1 hover:border-brand-forest/30 hover:shadow-maqamy"
+    >
+      <div className="maqamy-product-image flex aspect-square items-center justify-center overflow-hidden bg-brand-mist p-4 sm:p-6">
+        {item.image ? (
+          <img src={item.image} alt={item.imageAlt} className="h-full w-full object-contain" loading="lazy" />
+        ) : (
+          <span className="font-display text-3xl italic text-brand-forest/20">{item.collection}</span>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col gap-1 p-3 sm:p-5">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.3em] text-brand-gold">{item.collection}</p>
+        <h3 className="font-display text-base font-light leading-snug sm:text-xl">{trWord(item.packageName, lang)}</h3>
+        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+          <p className="font-display text-sm sm:text-lg">{formatRM(item.price)}{item.packageName === "Bespoke" ? "+" : ""}</p>
+          <span className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${item.stock > 0 ? "text-muted-foreground" : "text-destructive"}`}>
+            {item.stock > 0 ? t(`${item.stock} left`, `${item.stock} lagi`) : t("Sold out", "Habis")}
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function ProductDetail({ item, signedIn, onAdd, onBack }: {
+  item: GridItem;
   signedIn: boolean;
   onAdd: ReturnType<typeof useCart>["addToCart"];
+  onBack: () => void;
 }) {
   const { t, lang } = useLang();
-  const ms = lang === "ms" ? msCollections[collection.name] : undefined;
-  const [selected, setSelected] = useState(collection.packages.find((item) => item.badge)?.name ?? collection.packages[0]?.name ?? "");
-  const editions = collection.packages.map((fallback) => {
-    const product = products.find((item) => item.package === fallback.name);
-    return {
-      fallback,
-      price: product?.price ?? fallback.price,
-      includes: product?.specifications?.length ? product.specifications : fallback.includes,
-      stock: product?.stock ?? 0,
-    };
-  });
-  const current = editions.find((item) => item.fallback.name === selected) ?? editions[0];
-  if (!current) return null;
-  const priceLabel = (price: number, name: string) => `${formatRM(price)}${name === "Bespoke" ? "+" : ""}`;
+  const collection = item.collectionData;
+  const ms = collection ? (lang === "ms" ? msCollections[collection.name] : undefined) : undefined;
+  const includes = item.product?.specifications?.length
+    ? item.product.specifications
+    : collection?.packages.find((pkg) => pkg.name === item.packageName)?.includes ?? [];
 
   return (
-    <article className="border-t border-brand-forest/10">
-      <div className="mx-auto max-w-[1400px] px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16 xl:gap-24">
-          <figure className="maqamy-product-image min-w-0 self-start bg-brand-mist p-3 sm:p-6">
-            <img src={collection.image} alt={collection.imageAlt} className="mx-auto block h-auto w-full object-contain" />
+    <section className="animate-page-in px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+      <div className="mx-auto max-w-6xl">
+        <Button variant="ghost" size="sm" onClick={onBack} className="mb-6 -ml-2 text-brand-forest">
+          <ArrowLeft /> {t("Back to collections", "Kembali ke koleksi")}
+        </Button>
+
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-14">
+          <figure className="maqamy-product-image min-w-0 self-start bg-brand-mist p-4 sm:p-8">
+            {item.image ? (
+              <img src={item.image} alt={item.imageAlt} className="mx-auto block h-auto w-full object-contain" />
+            ) : (
+              <span className="grid aspect-square place-items-center font-display text-4xl italic text-brand-forest/20">{item.collection}</span>
+            )}
           </figure>
 
-          <div className="min-w-0 lg:sticky lg:top-8 lg:self-start">
+          <div className="min-w-0 lg:sticky lg:top-6 lg:self-start">
             <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">
-              {String(index + 1).padStart(2, "0")} — {ms?.subtitle ?? collection.subtitle}
+              {collection ? (ms?.subtitle ?? collection.subtitle) : item.collection}
             </p>
-            <h2 className="mt-5 font-display text-6xl font-light uppercase leading-none sm:text-7xl xl:text-8xl">{collection.name}</h2>
-            <p className="mt-6 font-display text-2xl font-light italic leading-snug sm:text-3xl">“{ms?.quote ?? collection.quote}”</p>
-            <p className="mt-5 text-sm leading-7 text-muted-foreground">{ms?.story ?? collection.story}</p>
+            <h1 className="mt-3 font-display text-3xl font-light uppercase leading-tight sm:text-4xl">{item.name}</h1>
+            {collection ? <p className="mt-4 font-display text-lg font-light italic leading-snug sm:text-xl">“{ms?.quote ?? collection.quote}”</p> : null}
+            <p className="mt-4 text-xs leading-6 text-muted-foreground">
+              {collection ? (ms?.story ?? collection.story) : item.product?.description}
+            </p>
 
-            <div className="mt-10 border-t border-brand-forest/15 pt-8">
+            {item.product?.features?.length ? (
+              <ul className="mt-4 space-y-1 text-xs leading-6 text-muted-foreground">
+                {item.product.features.map((feature) => <li key={feature}>— {feature}</li>)}
+              </ul>
+            ) : null}
+            {item.product?.colours?.length ? (
+              <p className="mt-3 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Colours", "Warna")}</span> · {item.product.colours.join(", ")}</p>
+            ) : null}
+            {item.product?.varieties?.length ? (
+              <p className="mt-2 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Varieties", "Variasi")}</span> · {item.product.varieties.join(", ")}</p>
+            ) : null}
+
+            <div className="mt-8 border-t border-brand-forest/15 pt-6">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("Select an edition", "Pilih edisi")}</p>
-                <p className="font-display text-4xl font-light">{priceLabel(current.price, current.fallback.name)}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("Edition", "Edisi")}</p>
+                <p className="font-display text-2xl font-light">{formatRM(item.price)}{item.packageName === "Bespoke" ? "+" : ""}</p>
               </div>
-              <div className="mt-6 grid gap-3" role="radiogroup" aria-label={`${collection.name} editions`}>
-                {editions.map(({ fallback, price, includes, stock }) => {
-                  const active = fallback.name === selected;
-                  return (
-                    <Button
-                      key={fallback.name}
-                      type="button"
-                      variant="ghost"
-                      role="radio"
-                      aria-checked={active}
-                      onClick={() => setSelected(fallback.name)}
-                      className={`grid h-auto grid-cols-[minmax(0,1fr)_auto] gap-4 whitespace-normal rounded-none border px-5 py-4 text-left font-normal hover:bg-brand-mist hover:text-brand-forest ${active ? "border-brand-forest bg-brand-mist" : "border-brand-forest/15 hover:border-brand-forest/40"}`}
-                    >
-                      <span className="min-w-0">
-                        <span className="flex flex-wrap items-baseline gap-3">
-                          <span className="font-display text-2xl">{trWord(fallback.name, lang)}</span>
-                          {fallback.badge ? <span className="text-[9px] font-semibold uppercase tracking-[0.35em] text-brand-gold">{trWord(fallback.badge, lang)}</span> : null}
-                        </span>
-                        <span className="mt-1 block text-xs leading-6 text-muted-foreground">{includes.map((w) => trWord(w, lang)).join(" · ")}</span>
-                        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">{stock > 0 ? t(`${stock} available`, `${stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}</span>
-                      </span>
-                      <span className="font-display text-xl">{priceLabel(price, fallback.name)}</span>
-                    </Button>
-                  );
-                })}
-              </div>
+              {includes.length ? (
+                <ul className="mt-4 space-y-2 text-xs leading-6 text-muted-foreground">
+                  {includes.map((include) => <li key={include} className="border-b border-brand-forest/5 pb-2 last:border-0">{trWord(include, lang)}</li>)}
+                </ul>
+              ) : null}
+              <p className={`mt-4 text-[10px] font-semibold uppercase tracking-[0.3em] ${item.stock > 0 ? "text-muted-foreground" : "text-destructive"}`}>
+                {item.stock > 0 ? t(`${item.stock} available`, `${item.stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}
+              </p>
 
-              <div className="mt-6 grid gap-2 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
+              <div className="mt-6 grid gap-2">
                 {signedIn ? (
-                  <Button variant="maqamy" size="lg" className="w-full" disabled={current.stock < 1} onClick={() => void onAdd(collection.name, current.fallback.name)}>
-                    {current.stock > 0 ? t(`Add ${current.fallback.name} to cart`, `Tambah ${trWord(current.fallback.name, lang)} ke troli`) : t("Out of stock", "Kehabisan stok")}
+                  <Button variant="maqamy" size="lg" className="w-full" disabled={item.stock < 1} onClick={() => void onAdd(item.collection, item.packageName)}>
+                    <ShoppingBag /> {item.stock > 0 ? t("Add to cart", "Tambah ke troli") : t("Out of stock", "Kehabisan stok")}
                   </Button>
                 ) : (
                   <Button asChild variant="maqamy" size="lg" className="w-full">
@@ -148,67 +219,12 @@ function CollectionChapter({ collection, products, index, signedIn, onAdd }: {
           </div>
         </div>
 
-        <div className="mx-auto mt-20 grid max-w-6xl gap-14 md:grid-cols-2 lg:mt-28">
-          <DetailList title={t("Details", "Butiran")} items={ms?.details ?? collection.details} />
-          <DetailList title={t("The collection", "Koleksi")} items={ms?.collection ?? collection.collection} />
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function AdditionalProducts({ products, signedIn, onAdd }: {
-  products: CatalogueProduct[];
-  signedIn: boolean;
-  onAdd: ReturnType<typeof useCart>["addToCart"];
-}) {
-  const { t } = useLang();
-  return (
-    <section className="border-t border-brand-forest/10 px-5 py-20 sm:px-8 lg:px-12 lg:py-32">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-16 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("New additions", "Tambahan baharu")}</p>
-          <h2 className="mt-6 font-display text-5xl font-light italic sm:text-6xl">{t("More from MAQAMY", "Lagi daripada MAQAMY")}</h2>
-        </div>
-
-        <div className="grid gap-x-10 gap-y-20 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => (
-            <article key={product.id} className="group flex flex-col">
-              <div className="mb-8 flex aspect-[4/5] items-center justify-center overflow-hidden bg-brand-mist">
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <span className="font-display text-5xl italic text-brand-forest/20">{product.collection}</span>
-                )}
-              </div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-brand-gold">{product.collection} — {product.package}</p>
-              <h3 className="mt-4 font-display text-3xl font-light">{product.name}</h3>
-              <p className="mt-3 text-sm leading-7 text-muted-foreground">{product.description}</p>
-              {product.features.length ? <ul className="mt-4 space-y-1 text-sm text-muted-foreground">{product.features.map((f) => <li key={f}>— {f}</li>)}</ul> : null}
-              {product.colours.length ? <p className="mt-4 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Colours", "Warna")}</span> · {product.colours.join(", ")}</p> : null}
-              {product.varieties.length ? <p className="mt-2 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Varieties", "Variasi")}</span> · {product.varieties.join(", ")}</p> : null}
-              <p className="mt-6 font-display text-2xl">{formatRM(product.price)}</p>
-              <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                {product.stock > 0 ? t(`${product.stock} available`, `${product.stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}
-              </p>
-              <div className="mt-6">
-                {signedIn ? (
-                  <Button variant="maqamy" className="w-full" disabled={product.stock < 1} onClick={() => void onAdd(product.collection, product.package)}>
-                    {product.stock > 0 ? t("Add to cart", "Tambah ke troli") : t("Out of stock", "Kehabisan stok")}
-                  </Button>
-                ) : (
-                  <Button asChild variant="maqamy" className="w-full" disabled={product.stock < 1}>
-                    <Link to="/auth" search={{ redirect: "/collections" }}>{product.stock > 0 ? t("Sign in to add", "Log masuk untuk menambah") : t("Out of stock", "Kehabisan stok")}</Link>
-                  </Button>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
+        {collection ? (
+          <div className="mx-auto mt-14 grid max-w-4xl gap-10 md:grid-cols-2">
+            <DetailList title={t("Details", "Butiran")} items={ms?.details ?? collection.details} />
+            <DetailList title={t("The collection", "Koleksi")} items={ms?.collection ?? collection.collection} />
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -217,9 +233,9 @@ function AdditionalProducts({ products, signedIn, onAdd }: {
 function DetailList({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <p className="border-b border-brand-forest/15 pb-4 text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{title}</p>
-      <ul className="mt-6 space-y-5 text-sm leading-7 text-muted-foreground">
-        {items.map((item) => <li key={item} className="border-b border-brand-forest/5 pb-5 last:border-0">{item}</li>)}
+      <p className="border-b border-brand-forest/15 pb-3 text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{title}</p>
+      <ul className="mt-4 space-y-3 text-xs leading-6 text-muted-foreground">
+        {items.map((item) => <li key={item} className="border-b border-brand-forest/5 pb-3 last:border-0">{item}</li>)}
       </ul>
     </div>
   );
