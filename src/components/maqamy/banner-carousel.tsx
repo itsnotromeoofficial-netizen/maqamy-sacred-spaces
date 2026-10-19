@@ -16,11 +16,31 @@ export function useBanners() {
 
 export function BannerCarousel({ banners, tone = "light" }: { banners: Banner[]; tone?: "light" | "dark" }) {
   const [index, setIndex] = useState(0);
+  const [soundOn, setSoundOn] = useState(false);
   const timer = useRef(0);
+  const videos = useRef(new Map<string, HTMLVideoElement>());
   const count = banners.length;
   const current = banners[index % Math.max(count, 1)];
 
   const next = () => setIndex((value) => (value + 1) % count);
+
+  // Browsers block autoplay-with-sound until the visitor interacts once;
+  // the first tap/scroll/keypress anywhere unmutes the current video.
+  useEffect(() => {
+    const enable = () => setSoundOn(true);
+    window.addEventListener("pointerdown", enable, { once: true });
+    window.addEventListener("keydown", enable, { once: true });
+    window.addEventListener("touchstart", enable, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", enable);
+      window.removeEventListener("keydown", enable);
+      window.removeEventListener("touchstart", enable);
+    };
+  }, []);
+
+  useEffect(() => {
+    for (const video of videos.current.values()) video.muted = !soundOn;
+  }, [soundOn, index]);
 
   useEffect(() => {
     window.clearTimeout(timer.current);
@@ -49,11 +69,16 @@ export function BannerCarousel({ banners, tone = "light" }: { banners: Banner[];
                 <video
                   src={banner.url}
                   className="h-full w-full object-cover"
-                  muted
+                  muted={!soundOn}
                   playsInline
                   autoPlay={active}
                   onEnded={next}
-                  ref={(el) => { if (el && active) { el.currentTime = 0; void el.play().catch(() => undefined); } }}
+                  ref={(el) => {
+                    if (!el) { videos.current.delete(banner.id); return; }
+                    videos.current.set(banner.id, el);
+                    el.muted = !soundOn;
+                    if (active) { el.currentTime = 0; void el.play().catch(() => undefined); }
+                  }}
                 />
               ) : (
                 <img src={banner.url} alt={banner.title || "MAQAMY feature"} className="h-full w-full object-cover" />
@@ -64,6 +89,20 @@ export function BannerCarousel({ banners, tone = "light" }: { banners: Banner[];
             </div>
           );
         })}
+        {current.kind === "video" ? (
+          <button
+            type="button"
+            aria-label={soundOn ? "Mute video sound" : "Turn video sound on"}
+            onClick={() => setSoundOn((on) => !on)}
+            className={`absolute bottom-4 left-5 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition-all duration-300 sm:left-8 ${dark ? "bg-brand-forest/10 text-brand-forest hover:bg-brand-forest/20" : "bg-brand-cream/15 text-brand-cream hover:bg-brand-cream/30"}`}
+          >
+            {soundOn ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M11 5 6 9H2v6h4l5 4V5Z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 5.5a9 9 0 0 1 0 13" /></svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M11 5 6 9H2v6h4l5 4V5Z" /><line x1="22" y1="9" x2="16" y2="15" /><line x1="16" y1="9" x2="22" y2="15" /></svg>
+            )}
+          </button>
+        ) : null}
         {count > 1 ? (
           <div className="absolute bottom-4 right-5 flex gap-1.5 sm:right-8">
             {banners.map((banner, i) => (
