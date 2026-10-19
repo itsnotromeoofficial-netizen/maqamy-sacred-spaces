@@ -31,7 +31,7 @@ type GridItem = {
   imageAlt: string;
   stock: number;
   collectionData?: ProductCollection;
-  product?: CatalogueProduct;
+  product?: CatalogueProduct | undefined;
 };
 
 function CollectionsPage() {
