@@ -84,7 +84,7 @@ export function BannerCarousel({ banners, tone = "light" }: { banners: Banner[];
                 <img src={banner.url} alt={banner.title || "MAQAMY feature"} className="h-full w-full object-cover" />
               )}
               {banner.title ? (
-                <p className={`absolute bottom-5 left-5 text-[10px] font-semibold uppercase tracking-[0.35em] sm:left-8 ${dark ? "text-brand-forest" : "text-brand-cream"}`}>{banner.title}</p>
+                <p className={`maqamy-banner-title absolute left-5 right-5 break-words text-sm font-semibold uppercase leading-6 sm:left-8 sm:right-8 ${banner.kind === "video" ? "bottom-16" : "bottom-8"}`}>{banner.title}</p>
               ) : null}
             </div>
           );

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Ban, LogOut, Minus, PackageX, PackagePlus, Plus, Save, ShieldCheck, Trash2, UserPlus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Ban, LogOut, Minus, PackageX, PackagePlus, Plus, Save, ShieldCheck, Trash2, Upload, UserPlus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -500,6 +500,9 @@ function BannerForm({ banner, nextOrder, onDone, onCancel }: { banner: AdminBann
   const [busy, setBusy] = useState(false);
 
   const upload = async (file: File) => {
+    const detectedKind = file.type.startsWith("video/") ? "video" : file.type.startsWith("image/") ? "image" : null;
+    if (!detectedKind) { toast.error("Choose an image or video file."); return; }
+    setKind(detectedKind);
     setBusy(true);
     try {
       const base64 = await new Promise<string>((resolve, reject) => {
@@ -508,7 +511,7 @@ function BannerForm({ banner, nextOrder, onDone, onCancel }: { banner: AdminBann
         reader.onerror = () => reject(new Error("Could not read the file."));
         reader.readAsDataURL(file);
       });
-      const r = await uploadAdminBanner({ data: { kind, filename: file.name, content_type: file.type, base64 } });
+      const r = await uploadAdminBanner({ data: { kind: detectedKind, filename: file.name, content_type: file.type, base64 } });
       setUrl(r.url);
       toast.success("Uploaded");
     } catch (e) { toast.error(errorText(e, "Upload failed.")); }
@@ -517,6 +520,10 @@ function BannerForm({ banner, nextOrder, onDone, onCancel }: { banner: AdminBann
 
   const save = async () => {
     if (!url) { toast.error("Add a link or upload a file first."); return; }
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("Invalid protocol");
+    } catch { toast.error("Enter a valid direct image or video URL."); return; }
     setBusy(true);
     try {
       await saveAdminBanner({ data: { ...(banner ? { id: banner.id } : {}), kind, url, title, display_order: order, active } });
@@ -534,10 +541,7 @@ function BannerForm({ banner, nextOrder, onDone, onCancel }: { banner: AdminBann
         </div>
       </Field>
       <Field label="Title (optional)"><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Shown on the slide" /></Field>
-      <Field label="Link"><Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" /></Field>
-      <Field label={`Or upload a ${kind === "image" ? "picture" : "video"}`}>
-        <Input type="file" accept={kind === "image" ? "image/*" : "video/*"} disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); }} />
-      </Field>
+      <BannerMediaInput url={url} kind={kind} busy={busy} onUrl={setUrl} onKind={setKind} onUpload={upload} />
       <Field label="Slide order"><Input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value) || 0)} /></Field>
       <Field label="Visibility">
         <div className="flex gap-2">
@@ -550,5 +554,58 @@ function BannerForm({ banner, nextOrder, onDone, onCancel }: { banner: AdminBann
       <Button variant="maqamy" disabled={busy} onClick={() => void save()}><Save /> {busy ? "Working…" : "Save banner"}</Button>
       <Button variant="ghost" onClick={onCancel}>Cancel</Button>
     </div>
+  </div>;
+}
+
+function BannerMediaInput({ url, kind, busy, onUrl, onKind, onUpload }: {
+  url: string; kind: "image" | "video"; busy: boolean;
+  onUrl: (url: string) => void; onKind: (kind: "image" | "video") => void; onUpload: (file: File) => Promise<void>;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [detected, setDetected] = useState<"image" | "video" | null>(null);
+  useEffect(() => {
+    setDetected(null);
+    let parsed: URL;
+    try { parsed = new URL(url); } catch { return; }
+    if (!["http:", "https:"].includes(parsed.protocol)) return;
+    const image = new Image();
+    const video = document.createElement("video");
+    let disposed = false;
+    const finish = (value: "image" | "video") => {
+      if (disposed) return;
+      disposed = true;
+      setDetected(value);
+      onKind(value);
+    };
+    const timer = window.setTimeout(() => {
+      image.onload = () => finish("image");
+      video.onloadedmetadata = () => finish("video");
+      video.preload = "metadata";
+      video.muted = true;
+      image.src = url;
+      video.src = url;
+    }, 350);
+    return () => {
+      disposed = true;
+      window.clearTimeout(timer);
+      image.onload = null;
+      image.src = "";
+      video.onloadedmetadata = null;
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [url, onKind]);
+
+  return <div className="space-y-3 sm:col-span-2">
+    <label htmlFor="banner-media-url" className="block text-xs font-semibold uppercase tracking-[0.15em]">Image or video URL</label>
+    <div className="flex flex-col gap-3 sm:flex-row">
+      <Input id="banner-media-url" type="url" value={url} disabled={busy} onChange={(e) => onUrl(e.target.value.trim())} placeholder="Paste a direct image or video URL" className="min-w-0 flex-1" />
+      <Button type="button" variant="outline" disabled={busy} onClick={() => input.current?.click()}><Upload /> {busy ? "Uploading…" : "Upload Here"}</Button>
+      <input ref={input} type="file" accept="image/*,video/*" className="hidden" aria-label="Upload banner media" disabled={busy} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void onUpload(file); }} />
+    </div>
+    {detected ? <p role="status" className="text-xs text-muted-foreground">{detected === "image" ? "Image" : "Video"} detected</p> : null}
+    {detected ? <div className="aspect-video max-w-sm overflow-hidden rounded border border-border bg-muted">
+      {kind === "video" ? <video src={url} controls muted playsInline className="h-full w-full object-contain" /> : <img src={url} alt="Banner preview" className="h-full w-full object-contain" />}
+    </div> : null}
   </div>;
 }
