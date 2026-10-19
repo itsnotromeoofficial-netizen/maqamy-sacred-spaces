@@ -69,11 +69,16 @@ export function BannerCarousel({ banners, tone = "light" }: { banners: Banner[];
                 <video
                   src={banner.url}
                   className="h-full w-full object-cover"
-                  muted
+                  muted={!soundOn}
                   playsInline
                   autoPlay={active}
                   onEnded={next}
-                  ref={(el) => { if (el && active) { el.currentTime = 0; void el.play().catch(() => undefined); } }}
+                  ref={(el) => {
+                    if (!el) { videos.current.delete(banner.id); return; }
+                    videos.current.set(banner.id, el);
+                    el.muted = !soundOn;
+                    if (active) { el.currentTime = 0; void el.play().catch(() => undefined); }
+                  }}
                 />
               ) : (
                 <img src={banner.url} alt={banner.title || "MAQAMY feature"} className="h-full w-full object-cover" />
