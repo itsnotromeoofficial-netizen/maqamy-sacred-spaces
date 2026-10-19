@@ -38,6 +38,36 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          active: boolean
+          created_at: string
+          display_order: number
+          id: string
+          kind: string
+          title: string
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          id?: string
+          kind?: string
+          title?: string
+          url: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          id?: string
+          kind?: string
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           collection: string
