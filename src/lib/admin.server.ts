@@ -314,4 +314,54 @@ export const actions: Record<string, Handler> = {
     if (error) throw new AdminError("Admin could not be removed.");
     return { ok: true };
   },
+
+  /* ---------- Banners (home + collections carousel) ---------- */
+
+  listBanners: async () => {
+    const { data, error } = await (await db()).from("banners").select("*").order("display_order");
+    if (error) throw new AdminError("Banners could not be loaded");
+    return data ?? [];
+  },
+  saveBanner: async (input, c) => {
+    master(c);
+    const d = z.object({
+      id: z.string().uuid().optional(),
+      kind: z.enum(["image", "video"]),
+      url: z.string().url().max(2000),
+      title: z.string().trim().max(120),
+      display_order: z.number().int().min(0).max(100_000),
+      active: z.boolean(),
+    }).parse(input);
+    const client = await db();
+    const { id, ...values } = d;
+    const r = id ? await client.from("banners").update(values).eq("id", id).select().single() : await client.from("banners").insert(values).select().single();
+    if (r.error) throw new AdminError("Banner could not be saved.");
+    return r.data;
+  },
+  deleteBanner: async (input, c) => {
+    master(c);
+    const { id } = idOnly.parse(input);
+    const { error } = await (await db()).from("banners").delete().eq("id", id);
+    if (error) throw new AdminError("Banner could not be deleted.");
+    return { ok: true };
+  },
+  uploadBanner: async (input, c) => {
+    master(c);
+    const d = z.object({
+      kind: z.enum(["image", "video"]),
+      filename: z.string().trim().min(1).max(200),
+      content_type: z.string().trim().min(3).max(100),
+      base64: z.string().min(10).max(140_000_000),
+    }).parse(input);
+    if (d.kind === "image" && !d.content_type.startsWith("image/")) throw new AdminError("That file is not an image.");
+    if (d.kind === "video" && !d.content_type.startsWith("video/")) throw new AdminError("That file is not a video.");
+    const safe = d.filename.replace(/[^A-Za-z0-9._-]/g, "-").slice(-80);
+    const path = `${Date.now()}-${safe}`;
+    const client = await db();
+    const up = await client.storage.from("banners").upload(path, Buffer.from(d.base64, "base64"), { contentType: d.content_type, upsert: false });
+    if (up.error) throw new AdminError("Upload failed. Try a smaller file.");
+    const signed = await client.storage.from("banners").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+    if (signed.error || !signed.data?.signedUrl) throw new AdminError("Upload failed. Try again.");
+    return { url: signed.data.signedUrl };
+  },
 };
