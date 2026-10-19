@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { BannerCarousel, useBanners } from "@/components/maqamy/banner-carousel";
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
 import { brandAssets } from "@/lib/maqamy-products";
@@ -27,6 +28,7 @@ function IntroductionPage() {
   const tapTimer = useRef(0);
   const { itemCount, userEmail, signOut } = useCart();
   const { t } = useLang();
+  const banners = useBanners();
   useEffect(() => {
     const timer = window.setTimeout(() => setOpening(false), 1800);
     return () => window.clearTimeout(timer);
@@ -57,6 +59,7 @@ function IntroductionPage() {
   return (
     <main className="bg-brand-forest text-brand-cream">
       <div className="bg-brand-cream"><SiteHeader tone="dark" itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
+      <BannerCarousel banners={banners} />
       <section className="maqamy-introduction relative overflow-hidden">
         <img src={brandAssets.desert} alt="A solitary tree in a quiet desert landscape" className="maqamy-landscape absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-brand-forest/45" />

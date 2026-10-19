@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 
+import { BannerCarousel, useBanners } from "@/components/maqamy/banner-carousel";
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
 import { collections, formatRM, type ProductCollection } from "@/lib/maqamy-products";
