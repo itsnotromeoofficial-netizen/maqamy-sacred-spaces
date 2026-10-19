@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 
+import { BannerCarousel, useBanners } from "@/components/maqamy/banner-carousel";
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
 import { collections, formatRM, type ProductCollection } from "@/lib/maqamy-products";
@@ -39,6 +40,7 @@ function CollectionsPage() {
   const { products } = useProducts();
   const { t } = useLang();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const banners = useBanners();
 
   const items: GridItem[] = collections.flatMap((collection) =>
     collection.packages.map((pkg) => {
@@ -82,6 +84,7 @@ function CollectionsPage() {
         <ProductDetail key={selected.key} item={selected} signedIn={Boolean(userEmail)} onAdd={addToCart} onBack={() => setSelectedKey(null)} />
       ) : (
         <>
+          <BannerCarousel banners={banners} tone="dark" />
           <section className="px-5 pb-10 pt-10 sm:px-8 lg:px-12 lg:pb-14 lg:pt-14">
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>

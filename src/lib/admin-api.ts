@@ -86,3 +86,8 @@ export type AdminAccount = { id: string; username: string; team: string; created
 export const listAdminAccounts = () => call<AdminAccount[]>("listAdmins");
 export const createAdminAccount = ({ data }: D<{ username: string; team: string; password: string }>) => call("createAdmin", data);
 export const deleteAdminAccount = ({ data }: D<{ id: string }>) => call("deleteAdmin", data);
+export type AdminBanner = Tables<"banners">;
+export const listAdminBanners = () => call<AdminBanner[]>("listBanners");
+export const saveAdminBanner = ({ data }: D<Record<string, unknown>>) => call<AdminBanner>("saveBanner", data);
+export const deleteAdminBanner = ({ data }: D<{ id: string }>) => call("deleteBanner", data);
+export const uploadAdminBanner = ({ data }: D<{ kind: "image" | "video"; filename: string; content_type: string; base64: string }>) => call<{ url: string }>("uploadBanner", data);
