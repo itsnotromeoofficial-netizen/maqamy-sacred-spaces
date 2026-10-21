@@ -80,7 +80,9 @@ export async function currentAdminClaims(claims: Claims): Promise<Claims | null>
 export async function runAdminAction(action: string, input: unknown, claims: Claims) {
   if (!Object.hasOwn(actions, action)) throw new AdminError("Unknown action.");
   if (!canAdminPerform(action, claims)) throw new AdminError("Your team does not have permission for this action.", 403);
-  return actions[action](input, claims);
+  const handler = actions[action];
+  if (!handler) throw new AdminError("Unknown action.");
+  return handler(input, claims);
 }
 
 /* ---------- Rate limiting ---------- */

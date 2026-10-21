@@ -5,7 +5,7 @@ async function markOrderPaid(session: { id: string; currency?: string | null; am
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: order, error: readError } = await supabaseAdmin.from("orders").select("id, total, payment_amount, user_id").eq("payment_session_id", session.id).eq("payment_environment", env).maybeSingle();
   if (readError) throw new Error("Payment binding could not be read.");
-  if (!order || session.metadata?.order_id !== order.id || session.metadata?.userId !== order.user_id) throw new Error("Payment does not match an order.");
+  if (!order || session.metadata?.['order_id'] !== order.id || session.metadata?.['userId'] !== order.user_id) throw new Error("Payment does not match an order.");
   if (status === "paid" && (session.currency !== "myr" || session.amount_total == null || session.amount_total < (order.payment_amount ?? order.total * 100))) throw new Error("Payment amount does not match.");
   const { error } = await supabaseAdmin
     .from("orders")
