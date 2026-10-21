@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { typographySchema, typographyVariables } from "@/lib/typography";
+import { typographyCss, typographySchema } from "@/lib/typography";
 
 export const typographyQuery = {
   queryKey: ["website-typography"],
@@ -17,5 +17,5 @@ export const typographyQuery = {
 
 export function TypographyProvider({ children }: { children: ReactNode }) {
   const { data = {} } = useQuery(typographyQuery);
-  return <div className="website-typography" style={typographyVariables(data) as CSSProperties}>{children}</div>;
+  return <div className="website-typography"><style>{typographyCss(data)}</style>{children}</div>;
 }

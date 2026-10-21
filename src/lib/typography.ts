@@ -28,6 +28,7 @@ export function typographyVariables(settings: TypographySettings, device?: Typog
   const result: Record<string, string> = {};
   for (const role of typographyRoles) {
     for (const mode of ["mobile", "desktop"] as const) {
+      if (device && mode !== device) continue;
       const value = settings[role.key]?.[mode];
       if (value != null) result[`--type-${role.key}-${device ? "preview" : mode}`] = `${value}px`;
       else if (device === mode) result[`--type-${role.key}-preview`] = `${role[mode]}px`;
@@ -35,4 +36,14 @@ export function typographyVariables(settings: TypographySettings, device?: Typog
     }
   }
   return result;
+}
+
+export function typographyCss(settings: TypographySettings) {
+  return (["mobile", "desktop"] as const).map((device) => {
+    const rules = typographyRoles.flatMap(({ key }) => {
+      const value = settings[key]?.[device];
+      return value == null ? [] : [`.website-typography .type-${key} { font-size: ${value}px !important; line-height: ${key === "heading" || key.includes("Heading") || key.startsWith("product") ? "1.2" : "1.6"}; }`];
+    }).join("\n");
+    return `@media (${device === "mobile" ? "max-width: 1023px" : "min-width: 1024px"}) { ${rules} }`;
+  }).join("\n");
 }

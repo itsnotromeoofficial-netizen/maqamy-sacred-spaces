@@ -14,6 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguagePicker } from "@/components/maqamy/language-picker";
+import { TypographyProvider } from "@/components/maqamy/typography-provider";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -117,7 +118,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div key={pathname} className="animate-page-in">
-        <Outlet />
+        {pathname.startsWith("/admin") ? <Outlet /> : <TypographyProvider><Outlet /></TypographyProvider>}
       </div>
       {pathname.startsWith("/admin") ? null : <LanguagePicker />}
       <Toaster richColors position="top-center" />
