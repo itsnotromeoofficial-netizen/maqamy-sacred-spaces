@@ -65,7 +65,7 @@ function IntroductionPage() {
         <div className="absolute inset-0 bg-brand-forest/45" />
         <div className="maqamy-introduction relative mx-auto flex max-w-7xl flex-col items-center justify-center px-5 py-10 text-center sm:px-8 lg:px-12 lg:py-14">
           <p className="type-label animate-fade-soft max-w-2xl text-[10px] font-semibold uppercase leading-5 text-brand-gold-soft">{t("Inspired by the Islamic understanding of Ḥuḍūr al-Qalb", "Diilhamkan oleh pemahaman Islam tentang Ḥuḍūr al-Qalb")}</p>
-          <h1 className="type-homeHeading maqamy-arrival mt-4 max-w-4xl text-balance font-display text-3xl font-light leading-[1.15] sm:text-4xl lg:text-5xl">{t("A Space for the Heart", "Ruang untuk Hati")}<br /><span className="type-body italic text-brand-gold-soft">{t("to Be Present.", "Hadir.")}</span></h1>
+          <h1 className="type-homeHeading maqamy-arrival mt-4 max-w-4xl text-balance font-display text-3xl font-light leading-[1.15] sm:text-4xl lg:text-5xl">{t("A Space for the Heart", "Ruang untuk Hati")}<br /><span className="italic text-brand-gold-soft">{t("to Be Present.", "Hadir.")}</span></h1>
           <div className="maqamy-arrival-late mt-6 flex w-full flex-col items-center gap-5 lg:mt-7">
             <p className="type-homeQuote max-w-md text-xs leading-6 text-brand-cream/90 sm:text-sm">{t("Devotion cannot be designed, but its essence can be invited and nurtured through thoughtful spaces.", "Pengabdian tidak boleh direka, namun intipatinya dapat diundang dan dipupuk melalui ruang yang dirancang dengan teliti.")}</p>
             <div className="grid w-full max-w-xl gap-3 sm:grid-cols-2">

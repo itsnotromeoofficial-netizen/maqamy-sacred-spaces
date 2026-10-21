@@ -43,8 +43,8 @@ export function typographyCss(settings: TypographySettings) {
     const rules = typographyRoles.flatMap(({ key }) => {
       const value = settings[key]?.[device];
       const selectors = key === "control" ? ".website-typography button, .website-typography input, .website-typography textarea, .website-typography select, .website-typography [data-slot=button], .website-typography label" : key === "navigation" ? ".website-typography header nav, .website-typography header a, .website-typography header button" : key === "footer" ? ".website-typography footer, .website-typography footer a, .website-typography footer p" : `.website-typography .type-${key}`;
-      return value == null ? [] : [`${selectors} { font-size: ${value}px !important; line-height: ${key === "heading" || key.includes("Heading") || key.startsWith("product") ? "1.2" : "1.6"}; }`];
+      return value == null ? [] : [`${selectors} { font-size: ${value}px !important; overflow-wrap: anywhere; line-height: ${key === "heading" || key.includes("Heading") || key.startsWith("product") ? "1.2" : "1.6"}; }`];
     }).join("\n");
     return `@media (${device === "mobile" ? "max-width: 1023px" : "min-width: 1024px"}) { ${rules} }`;
-  }).join("\n");
+  }).join("\n") + "\n.website-typography button, .website-typography [data-slot=button] { white-space: normal; height: auto; min-height: 2.5rem; }";
 }
