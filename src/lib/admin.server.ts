@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { ORDER_STATUSES } from "./orders";
 import { typographySchema } from "./typography";
+import { adminClaimsSchema, canAdminPerform, safeMediaUrl, type AdminClaims } from "./security-policy";
 
 /**
  * Admin back office. Runs only on the Lovable-hosted server (it needs the
@@ -14,7 +15,7 @@ export class AdminError extends Error {
   constructor(message: string, public status = 400) { super(message); }
 }
 
-type Claims = { u: string; team: string; master: boolean; exp: number };
+type Claims = AdminClaims;
 const TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
 
 function secret() {
@@ -31,14 +32,15 @@ export function issueToken(c: Omit<Claims, "exp">) {
 }
 
 export function verifyToken(token: string | null): Claims | null {
-  if (!token) return null;
+  if (!token || token.length > 2048) return null;
+  if (token.split(".").length !== 2) return null;
   const [body, sig] = token.split(".");
   if (!body || !sig) return null;
   const a = Buffer.from(sig); const b = Buffer.from(sign(body));
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
   try {
-    const c = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as Claims;
-    return c.exp > Date.now() ? c : null;
+    const parsed = adminClaimsSchema.safeParse(JSON.parse(Buffer.from(body, "base64url").toString("utf8")));
+    return parsed.success && parsed.data.exp > Date.now() ? parsed.data : null;
   } catch { return null; }
 }
 
@@ -64,6 +66,23 @@ async function db() {
   return supabaseAdmin;
 }
 
+export async function currentAdminClaims(claims: Claims): Promise<Claims | null> {
+  if (claims.master) {
+    return claims.u === process.env["MAQAMY_ADMIN_USERNAME"] && claims.team === "Owner" ? claims : null;
+  }
+  // Identity UUIDs prevent a removed account's token being reused after its username is recreated.
+  if (!claims.accountId) return null;
+  const { data, error } = await (await db()).from("admin_accounts").select("id, username, team").eq("id", claims.accountId).eq("username", claims.u).maybeSingle();
+  if (error) throw new AdminError("Account access could not be checked. Please try again.", 503);
+  return data ? { ...claims, u: data.username, team: data.team, master: false } : null;
+}
+
+export async function runAdminAction(action: string, input: unknown, claims: Claims) {
+  if (!Object.hasOwn(actions, action)) throw new AdminError("Unknown action.");
+  if (!canAdminPerform(action, claims)) throw new AdminError("Your team does not have permission for this action.", 403);
+  return actions[action](input, claims);
+}
+
 /* ---------- Rate limiting ---------- */
 
 export async function rateLimit(bucket: string, key: string, windowSeconds: number, max: number) {
@@ -79,7 +98,8 @@ const MAX_FAILS_PER_IP = 5;
 const MAX_FAILS_PER_USER = 10;
 
 export async function login(input: unknown, ip: string) {
-  const data = z.object({ username: z.string().trim().min(1).max(100), password: z.string().min(1).max(200) }).parse(input);
+  const data = z.object({ username: z.string().trim().min(1).max(100), password: z.string().min(1).max(200), website: z.string().max(200).optional() }).strict().parse(input);
+  if (data.website) throw new AdminError("Those details were not recognised.", 401);
   const client = await db();
   const user = data.username.toLowerCase();
   const [ipFails, userFails] = await Promise.all([
@@ -96,8 +116,8 @@ export async function login(input: unknown, ip: string) {
   if (ownerUser && ownerPass && matches(data.username, ownerUser) && matches(data.password, ownerPass)) {
     claims = { u: ownerUser, team: "Owner", master: true };
   } else {
-    const { data: account } = await client.from("admin_accounts").select("username, team, password_hash").eq("username", data.username).maybeSingle();
-    if (account && verifyPassword(data.password, account.password_hash)) claims = { u: account.username, team: account.team, master: false };
+    const { data: account } = await client.from("admin_accounts").select("id, username, team, password_hash").eq("username", data.username).maybeSingle();
+    if (account && verifyPassword(data.password, account.password_hash)) claims = { u: account.username, team: account.team, master: false, accountId: account.id };
   }
 
   if (!claims) {
@@ -124,7 +144,7 @@ const productSchema = z.object({
   specifications: list, features: list, colours: list, varieties: list,
   price: z.number().int().min(0).max(10_000_000),
   stock: z.number().int().min(0).max(1_000_000),
-  image_url: z.string().url().max(1000).nullable().or(z.literal("")),
+  image_url: safeMediaUrl.nullable().or(z.literal("")),
   display_order: z.number().int().min(0).max(100_000),
 });
 const idOnly = z.object({ id: z.string().uuid() });
@@ -341,7 +361,7 @@ export const actions: Record<string, Handler> = {
     const d = z.object({
       id: z.string().uuid().optional(),
       kind: z.enum(["image", "video"]),
-      url: z.string().url().max(2000),
+      url: safeMediaUrl,
       title: z.string().trim().max(120),
       display_order: z.number().int().min(0).max(100_000),
       active: z.boolean(),
