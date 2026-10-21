@@ -52,12 +52,13 @@ function AdminPage() {
   if (!session.authenticated) return <AdminLogin onSuccess={setSession} />;
 
   const isDelivery = !session.master && session.team === "Delivery Team";
+  const isSales = !session.master && session.team === "Sales Team";
   const tabs: { id: Tab; label: string }[] = [
-    { id: "orders", label: isDelivery ? "My deliveries" : "Orders" },
-    ...(isDelivery ? [] : [
+    ...(session.master || isDelivery || isSales ? [{ id: "orders" as Tab, label: isDelivery ? "My deliveries" : "Orders" }] : []),
+    ...(session.master || isSales ? [
       { id: "products" as Tab, label: "Products" },
       { id: "customers" as Tab, label: "Customers" },
-    ]),
+    ] : []),
     ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "banners" as Tab, label: "Banners" }, { id: "typography" as Tab, label: "Typography" }, { id: "admins" as Tab, label: "Admin team" }] : []),
   ];
 
@@ -78,7 +79,7 @@ function AdminPage() {
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`-mb-px whitespace-nowrap border-b-2 px-5 py-3 text-sm font-semibold transition-colors duration-300 ${tab === t.id ? "border-brand-forest text-brand-forest" : "border-transparent text-muted-foreground hover:text-brand-forest"}`}>{t.label}</button>)}
       </nav>
       <div key={tab} className="animate-fade-soft py-10">
-        {tab === "typography" && session.master ? <TypographyPanel /> : tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
+        {tabs.length === 0 ? <p className="text-sm text-muted-foreground">This team has no store-management permissions.</p> : tab === "typography" && session.master ? <TypographyPanel /> : tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
       </div>
     </div>
   </main>;
@@ -429,13 +430,14 @@ function Loading() { return <div className="mx-auto my-16 h-12 w-1 animate-spin-
 function Empty({ text }: { text: string }) { return <p className="border border-dashed border-brand-gold/40 py-14 text-center text-sm text-muted-foreground">{text}</p>; }
 
 function AdminLogin({ onSuccess }: { onSuccess: (s: AdminSession) => void }) {
-  const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState<string | null>(null);
+  const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [website, setWebsite] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState<string | null>(null);
   return <main className="flex min-h-screen items-center justify-center bg-brand-forest px-5 text-brand-cream">
     <section className="animate-fade-soft w-full max-w-md border border-brand-gold/35 bg-brand-ink/40 p-7 shadow-maqamy sm:p-10">
       <img src={brandAssets.logo} alt="MAQAMY" className="w-28 brightness-0 invert" />
       <div className="mt-12 flex items-center gap-3 text-brand-gold-soft"><ShieldCheck className="size-5" /><p className="text-xs font-semibold uppercase tracking-[0.3em]">Private administration</p></div>
       <h1 className="mt-4 font-display text-3xl font-light">Welcome back.</h1>
-      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(null); try { onSuccess(await loginAdmin({ data: { username, password } })); } catch (e) { setError(errorText(e, "Those details were not recognised.")); } finally { setBusy(false); } }}>
+      <form className="mt-8 space-y-5" onSubmit={async (event) => { event.preventDefault(); setBusy(true); setError(null); try { onSuccess(await loginAdmin({ data: { username, password, website } })); } catch (e) { setError(errorText(e, "Those details were not recognised.")); } finally { setBusy(false); } }}>
+        <div hidden aria-hidden="true"><label>Website<input name="website" autoComplete="off" tabIndex={-1} value={website} onChange={(e) => setWebsite(e.target.value)} /></label></div>
         <Field label="Username"><Input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
         <Field label="Password"><Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="border-brand-cream/25 bg-transparent text-brand-cream" /></Field>
         {error ? <p className="animate-fade-soft text-sm text-brand-gold-soft">{error}</p> : null}

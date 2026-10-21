@@ -56,7 +56,7 @@ export async function getAdminSession(): Promise<AdminSession> {
   try { return await call<AdminSession>("session"); }
   catch (e) { if (e instanceof AdminApiError && e.status === 401) return signedOut; throw e; }
 }
-export async function loginAdmin({ data }: { data: { username: string; password: string } }) {
+export async function loginAdmin({ data }: { data: { username: string; password: string; website?: string } }) {
   const r = await call<{ token: string; session: AdminSession }>("login", data);
   setToken(r.token);
   return r.session;
