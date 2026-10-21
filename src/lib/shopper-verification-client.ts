@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 export async function shopperVerificationRequest(body: unknown, signal?: AbortSignal) {
   const { data } = await supabase.auth.getSession();
   const endpoint = ["localhost", "127.0.0.1"].includes(window.location.hostname) ? "/api/public/shopper-verify" : "https://maqamy-sacred-spaces.lovable.app/api/public/shopper-verify";
-  const response = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json", ...(data.session ? { authorization: `Bearer ${data.session.access_token}` } : {}) }, body: JSON.stringify(body), signal });
+  const response = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json", ...(data.session ? { authorization: `Bearer ${data.session.access_token}` } : {}) }, body: JSON.stringify(body), ...(signal ? { signal } : {}) });
   if (!response.ok) { const result = await response.json(); throw new Error(result.error ?? "Verification unavailable."); }
   if (!response.headers.get("content-type")?.includes("ndjson")) return response.json();
   const reader = response.body?.getReader();
