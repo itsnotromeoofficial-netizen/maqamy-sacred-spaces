@@ -1,6 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import { z } from "zod";
+import { safeReturnUrl } from "@/lib/security-policy";
+
+const orderItemSchema = z.object({ collection: z.string().min(1).max(60), package: z.string().min(1).max(60), quantity: z.number().int().min(1).max(10), unit_price: z.number().int().nonnegative() });
 
 type CheckoutSessionResult =
   | { clientSecret: string; orderNumber: string }
@@ -48,20 +52,17 @@ async function resolveOrCreateCustomer(
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { orderNumber: string; returnUrl: string; environment: StripeEnv }) => {
-    if (!/^MQ-[A-Z0-9]{6,12}$/.test(data.orderNumber)) throw new Error("Invalid order");
-    return data;
-  })
+  .inputValidator(z.object({ orderNumber: z.string().regex(/^MQ-[A-Z0-9]{6,12}$/), returnUrl: z.string().max(2000).refine(safeReturnUrl, "Invalid payment return address"), environment: z.enum(["sandbox", "live"]) }).strict())
   .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
     try {
       const { supabase, userId } = context;
       const { data: { user } } = await supabase.auth.getUser();
 
-      const { data: cartItems, error: cartError } = await supabase
-        .from("cart_items")
-        .select("collection, package, quantity")
-        .eq("user_id", userId);
-      if (cartError || !cartItems?.length) throw new Error("Your cart is empty.");
+      const { data: order, error: orderError } = await supabase.from("orders").select("*").eq("order_number", data.orderNumber).eq("user_id", userId).maybeSingle();
+      if (orderError || !order) throw new Error("Order not found.");
+      if (order.payment_status === "paid" || order.status === "rejected") throw new Error("This order is not eligible for payment.");
+      // place_order clears the cart; checkout must use the immutable order snapshot.
+      const cartItems = z.array(orderItemSchema).min(1).max(100).parse(order.items);
 
       const priceIds = [...new Set(cartItems.map((item) => priceIdFor(item.collection, item.package)))];
       const stripe = createStripeClient(data.environment);
@@ -73,10 +74,11 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         throw new Error("One or more items in your cart are not available for online payment. Please contact us.");
       }
 
-      const lineItems = cartItems.map((item) => ({
-        price: priceByLookup.get(priceIdFor(item.collection, item.package))!.id,
-        quantity: Math.min(Math.max(item.quantity, 1), 10),
-      }));
+      const lineItems = cartItems.map((item) => {
+        const price = priceByLookup.get(priceIdFor(item.collection, item.package));
+        if (!price || price.currency !== "myr" || price.unit_amount !== item.unit_price * 100) throw new Error("This order's price needs review before payment. Please contact MAQAMY.");
+        return { price: price.id, quantity: item.quantity };
+      });
 
       const customerId = await resolveOrCreateCustomer(stripe, {
         ...(user?.email ? { email: user.email } : {}),
@@ -91,8 +93,14 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         customer: customerId,
         automatic_tax: { enabled: true },
         payment_intent_data: { description: `MAQAMY order ${data.orderNumber}` },
-        metadata: { userId, order_number: data.orderNumber, managed_payments: "false" },
+        metadata: { userId, order_id: order.id, order_number: data.orderNumber, managed_payments: "false" },
+      }, {
+        idempotencyKey: `maqamy-${order.id}-${data.environment}`,
       });
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const binding = await supabaseAdmin.from("orders").update({ payment_session_id: session.id, payment_environment: data.environment, payment_amount: order.total * 100 }).eq("id", order.id).eq("user_id", userId);
+      if (binding.error) throw new Error("Payment could not be attached to your order.");
 
       return { clientSecret: session.client_secret ?? "", orderNumber: data.orderNumber };
     } catch (error) {
