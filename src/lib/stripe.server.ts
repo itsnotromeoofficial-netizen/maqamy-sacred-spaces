@@ -1,6 +1,7 @@
 // Shared Stripe utility — all Stripe API calls go through the Lovable connector
 // gateway. The keys in env are gateway connection identifiers, not raw secret keys.
 import Stripe from 'stripe';
+import { timingSafeEqual } from 'node:crypto';
 
 const getEnv = (key: string): string => {
   const value = process.env[key];
@@ -100,7 +101,7 @@ export async function verifyWebhook(req: Request, env: StripeEnv): Promise<{ typ
   }
 
   const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (age > 300) {
+  if (!Number.isFinite(age) || age > 300) {
     throw new Error("Webhook timestamp too old");
   }
 
@@ -118,7 +119,7 @@ export async function verifyWebhook(req: Request, env: StripeEnv): Promise<{ typ
   );
   const expected = Buffer.from(new Uint8Array(signed)).toString('hex');
 
-  if (!v1Signatures.includes(expected)) {
+  if (!v1Signatures.some((value) => /^[a-f0-9]{64}$/.test(value) && timingSafeEqual(Buffer.from(value, 'hex'), Buffer.from(expected, 'hex')))) {
     throw new Error("Invalid webhook signature");
   }
 

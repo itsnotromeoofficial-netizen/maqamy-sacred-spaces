@@ -166,6 +166,9 @@ export type Database = {
           id: string
           items: Json
           order_number: string
+          payment_amount: number | null
+          payment_environment: string | null
+          payment_session_id: string | null
           payment_status: string
           status: string
           total: number
@@ -183,6 +186,9 @@ export type Database = {
           id?: string
           items?: Json
           order_number?: string
+          payment_amount?: number | null
+          payment_environment?: string | null
+          payment_session_id?: string | null
           payment_status?: string
           status?: string
           total?: number
@@ -200,6 +206,9 @@ export type Database = {
           id?: string
           items?: Json
           order_number?: string
+          payment_amount?: number | null
+          payment_environment?: string | null
+          payment_session_id?: string | null
           payment_status?: string
           status?: string
           total?: number
