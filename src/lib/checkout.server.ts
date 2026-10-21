@@ -89,7 +89,6 @@ export async function checkoutForOrder(data: CheckoutRequest, context: { supabas
         ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
-        automatic_tax: { enabled: true },
         payment_intent_data: { description: `MAQAMY order ${data.orderNumber}` },
         metadata: { userId, order_id: order.id, order_number: data.orderNumber, managed_payments: "false" },
       }, {
