@@ -12,7 +12,7 @@ import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { formatRM } from "@/lib/maqamy-products";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { useCart } from "@/lib/use-cart";
-import { createCheckoutSession } from "@/utils/payments.functions";
+import { requestCheckout } from "@/lib/checkout-api";
 import { trWord, useLang } from "@/lib/i18n";
 import { ShopperChallenge } from "@/components/maqamy/shopper-challenge";
 
@@ -40,34 +40,35 @@ function CartPage() {
   const [placing, setPlacing] = useState(false);
   const [shopperProof, setShopperProof] = useState<string | null>(null);
   const { t, lang } = useLang();
-  const [placed, setPlaced] = useState<string | null>(null);
+  const [placed, setPlaced] = useState<string | null>(returnedPayment === "retry" ? returnedOrder ?? null : null);
   const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const placeOrder = async () => {
     if (!shopperProof) { toast.error(t("Complete shopper verification first.", "Lengkapkan pengesahan pembeli dahulu.")); return; }
     setPlacing(true);
-    const { data, error } = await supabase.rpc("place_order");
-    if (error || !data) {
-      setPlacing(false);
-      toast.error(t("Your order could not be placed. Please try again.", "Pesanan anda tidak dapat dibuat. Sila cuba lagi."));
-      return;
-    }
-    const orderNumber = data as string;
-    const result = await createCheckoutSession({
-      data: {
+    setPaymentError(null);
+    try {
+      const environment = getStripeEnvironment();
+      let orderNumber = placed;
+      if (!orderNumber) {
+        const { data, error } = await supabase.rpc("place_order").abortSignal(AbortSignal.timeout(30_000));
+        if (error || typeof data !== "string") throw new Error(error?.message ?? t("Your order could not be placed. Please try again.", "Pesanan anda tidak dapat dibuat. Sila cuba lagi."));
+        orderNumber = data;
+        setPlaced(orderNumber);
+      }
+      const secret = await requestCheckout({
         orderNumber,
         returnUrl: `${window.location.origin}/cart?order=${orderNumber}&payment=returned&session_id={CHECKOUT_SESSION_ID}`,
-        environment: getStripeEnvironment(),
-      },
-    });
-    setPlacing(false);
-    if ("error" in result || !result.clientSecret) {
-      setPlaced(orderNumber);
-      toast.error(t("Your order was received, but payment could not begin. Please try paying again from your orders page.", "Pesanan anda diterima, tetapi pembayaran tidak dapat dimulakan. Sila cuba bayar semula dari halaman pesanan anda."));
-      return;
-    }
-    setPlaced(orderNumber);
-    setCheckoutSecret(result.clientSecret);
+        environment,
+      });
+      setCheckoutSecret(secret);
+      void reload();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t("Payment could not begin. Please try again.", "Pembayaran tidak dapat dimulakan. Sila cuba lagi.");
+      setPaymentError(message);
+      toast.error(message);
+    } finally { setPlacing(false); }
   };
 
   const returned = returnedOrder && returnedPayment === "returned";
@@ -97,7 +98,13 @@ function CartPage() {
               </div>
             </div>
           ) : placed ? (
-            <OrderPlaced number={placed} />
+            <div className="mt-14 border-y border-brand-gold/25 py-12 text-center">
+              <h2 className="type-heading font-display text-3xl">{placed}</h2>
+              <p className="type-body mt-4 text-sm">{t("Your order is saved. Payment has not been completed.", "Pesanan anda disimpan. Pembayaran belum selesai.")}</p>
+              {paymentError ? <p role="alert" className="mx-auto mt-4 max-w-xl text-sm text-destructive">{paymentError}</p> : null}
+              {!shopperProof ? <div className="mx-auto mt-6 max-w-sm"><ShopperChallenge purpose="checkout" onVerified={setShopperProof} /></div> : null}
+              <Button variant="gold" className="mt-6" disabled={placing || !shopperProof} onClick={() => void placeOrder()}>{placing ? t("Preparing payment…", "Menyediakan pembayaran…") : t("Retry payment", "Cuba pembayaran semula")} <ArrowRight /></Button>
+            </div>
           ) : !userEmail ? <SignedOut /> : cart.length === 0 ? <EmptyCart /> : (
             <div className="mt-14 grid gap-10 lg:grid-cols-[1.4fr_0.6fr] lg:items-start">
               <div className="space-y-4">
@@ -117,6 +124,7 @@ function CartPage() {
                 <div className="mt-8 flex items-baseline justify-between border-b border-brand-cream/20 pb-6"><span className="type-body text-sm">{t("Estimated total", "Anggaran jumlah")}</span><strong className="font-display text-4xl type-price">{formatRM(total)}+</strong></div>
                 <p className="type-body mt-5 text-xs leading-6 text-brand-cream/70">{t("You will receive an order number instantly, then complete payment securely on this page. Our team reviews every order before it is prepared.", "Anda akan menerima nombor pesanan serta-merta, kemudian lengkapkan pembayaran dengan selamat di halaman ini. Pasukan kami menyemak setiap pesanan sebelum ia disediakan.")}</p>
                 <div className="mt-6 bg-card p-4 text-foreground"><ShopperChallenge purpose="checkout" onVerified={setShopperProof} /></div>
+                {paymentError ? <p role="alert" className="mt-4 text-sm text-brand-cream">{paymentError}</p> : null}
                 <Button variant="gold" size="lg" className="mt-8 w-full" disabled={placing || !shopperProof} onClick={() => void placeOrder()}>{placing ? t("Preparing payment…", "Menyediakan pembayaran…") : t("Place order & pay", "Buat pesanan & bayar")} <ArrowRight /></Button>
               </aside>
             </div>
