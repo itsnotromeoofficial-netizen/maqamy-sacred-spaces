@@ -64,6 +64,12 @@ export async function checkoutForOrder(data: CheckoutRequest, context: { supabas
 
       const priceIds = [...new Set(cartItems.map((item) => priceIdFor(item.collection, item.package)))];
       const stripe = createStripeClient(data.environment);
+      // Reuse a bound open session; never create a second payable session on retry.
+      if (order.payment_session_id) {
+        const existing = await stripe.checkout.sessions.retrieve(order.payment_session_id);
+        if (existing.status === "open" && existing.client_secret) return { clientSecret: existing.client_secret, orderNumber: data.orderNumber };
+        throw new Error("This payment session is no longer open. Please contact MAQAMY before paying again.");
+      }
       const priceList = await stripe.prices.list({ lookup_keys: priceIds, limit: 100 });
       const priceByLookup = new Map(priceList.data.map((price) => [price.lookup_key, price]));
 
@@ -92,7 +98,8 @@ export async function checkoutForOrder(data: CheckoutRequest, context: { supabas
         payment_intent_data: { description: `MAQAMY order ${data.orderNumber}` },
         metadata: { userId, order_id: order.id, order_number: data.orderNumber, managed_payments: "false" },
       }, {
-        idempotencyKey: `maqamy-${order.id}-${data.environment}`,
+        // A new payload version avoids Stripe replaying the previous unsupported-tax error.
+        idempotencyKey: `maqamy-${order.id}-${data.environment}-tax-unavailable`,
       });
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
