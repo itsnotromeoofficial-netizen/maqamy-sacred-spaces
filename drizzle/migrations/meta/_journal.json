@@ -57,6 +57,13 @@
       "when": 1792555839058,
       "tag": "0007_shopper_bot_challenges",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792557299693,
+      "tag": "0008_retire_ai_shopper_verification",
+      "breakpoints": true
     }
   ]
 }

@@ -48,7 +48,7 @@ function PrivacyPage() {
             ["Perkongsian", "MAQAMY tidak menjual maklumat pelanggan. Butiran hanya boleh dikongsi apabila perlu untuk memenuhi permintaan pelanggan, mengatur penghantaran, menyediakan sokongan pemasangan, atau mematuhi kewajipan undang-undang."],
             ["Kawalan pelanggan", "Pelanggan boleh meminta pembetulan atau pemadaman maklumat akaun dan penghantaran, tertakluk kepada maklumat yang perlu disimpan oleh MAQAMY atas sebab perniagaan atau undang-undang yang sah."],
             ["Hak cipta", "MAQAMY Living Concepts serta persembahan, bahasa produk, identiti koleksi dan bahan jenama MAQAMY adalah hak cipta © 2026."],
-            ["Pengesahan pembeli", "Semasa pendaftaran e-mel dan pembayaran, kami menggunakan cabaran serta AI untuk menilai kemungkinan automasi. Hanya bilangan klik, kekunci, fokus, tampalan, masa berlalu dan penunjuk automasi dihantar kepada Lovable AI; bukan teks yang ditaip, kata laluan, nama, e-mel atau alamat. Keputusan yang tidak pasti meminta cabaran baharu, bukan larangan kekal. Rekod keselamatan disimpan secara peribadi."],
+            ["Pengesahan pembeli", "Pendaftaran e-mel dan pembayaran menggunakan pengesahan klik ringkas. Semakan ini tidak menghantar corak interaksi atau butiran peribadi kepada model AI."],
           ] : [
             ["Information we collect", "Name, phone number, email address, delivery address, account login details, cart selections, preferred collection, package selection, and messages shared for consultation or order handling."],
             ["How we use it", "Customer information is used to manage accounts, save cart items, prepare purchase conversations, support delivery planning, answer enquiries, and improve the MAQAMY customer experience."],
@@ -56,7 +56,7 @@ function PrivacyPage() {
             ["Sharing", "MAQAMY does not sell customer information. Details may be shared only when needed to fulfil a customer request, arrange delivery, provide installation support, or comply with legal obligations."],
             ["Customer control", "Customers may request correction or removal of account and delivery information, subject to any information MAQAMY must retain for legitimate business or legal reasons."],
             ["Copyright", "MAQAMY Living Concepts and the MAQAMY presentation, product language, collection identity, and brand materials are copyrighted © 2026."],
-            ["Shopper verification", "During email registration and checkout, we use challenges and AI to assess likely automation. Only aggregate click, key, focus and paste counts, elapsed time and an automation indicator are sent to Lovable AI—not typed text, passwords, names, email or addresses. Uncertain results request another challenge rather than a permanent ban. Security records are kept privately."],
+            ["Shopper verification", "Email registration and checkout use a simple click confirmation. This check does not send interaction patterns or personal details to an AI model."],
           ]).map(([title, body]) => (
             <article key={title} className="border border-brand-gold/25 bg-card p-5 shadow-gold">
               <h2 className="type-heading font-display text-3xl font-light">{title}</h2>

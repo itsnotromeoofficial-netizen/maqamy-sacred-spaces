@@ -1,5 +1,10 @@
 # MAQAMY rebuild
 
+## Verification and Typography fixes
+- [x] Replace AI verification with a click-to-pass check without network requests
+- [x] Repair admin Typography loading and verify owner save/persistence plus older-service read fallback
+- [x] Verify signup and signed-in checkout no longer depend on AI proofs
+
 ## Shopper AI bot checks
 - [x] Add single-use shopper challenges and server enforcement at signup/order creation
 - [x] Assess aggregate interaction signals with Lovable AI, with retry challenges for uncertain results
