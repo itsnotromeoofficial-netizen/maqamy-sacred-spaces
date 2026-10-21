@@ -97,12 +97,20 @@ export async function handleShopperVerification(request: Request) {
         send({ state: "checking" });
         const heartbeat = setInterval(() => { try { send({ state: "checking" }); } catch { clearInterval(heartbeat); } }, 10000);
         try {
-          const assessment = await assessShopperSignals(input.signals, request);
+          // An uncertain AI decision gets one fresh, server-validated step-up question.
+          // Accessibility/autofill must not trap real shoppers in endless model retries.
+          const assessment = challenge.risk === "uncertain" ? { risk: "low" as const, reason: "ordinary" as const } : await assessShopperSignals(input.signals, request);
           const retry = needsAnotherChallenge(assessment.risk);
           const proof = retry ? null : crypto.randomUUID();
           const saved = await supabaseAdmin.from("shopper_challenges").update({ risk: assessment.risk, signals: input.signals, proof }).eq("id", input.id);
           if (saved.error) throw new ShopperError("Verification could not be saved.", 503);
-          send(proof ? { proof } : { retry: true, message: "We couldn't verify this attempt. Please complete a new challenge." });
+          if (assessment.risk === "uncertain") {
+            const random = crypto.getRandomValues(new Uint32Array(2));
+            const left = (random[0] ?? 0) % 8 + 2; const right = (random[1] ?? 0) % 8 + 2;
+            const next = await supabaseAdmin.from("shopper_challenges").insert({ purpose: challenge.purpose, binding: challenge.binding, answer: left + right, risk: "uncertain" }).select("id").single();
+            if (next.error) throw new ShopperError("The extra challenge could not be created.", 503);
+            send({ retry: true, challenge: { id: next.data.id, left, right } });
+          } else send(proof ? { proof } : { retry: true, message: "We couldn't verify this attempt. Please complete a new challenge." });
         } catch (error) { send({ error: error instanceof ShopperError ? error.message : "Verification unavailable.", status: error instanceof ShopperError ? error.status : 503 }); }
         finally { clearInterval(heartbeat); controller.close(); }
       },

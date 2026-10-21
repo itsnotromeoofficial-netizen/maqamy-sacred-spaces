@@ -38,7 +38,7 @@ export function ShopperChallenge({ purpose, email, onVerified }: { purpose: "sig
       const { start: began, ...counts } = events.current;
       const result = await shopperVerificationRequest({ action: "assess", id: challenge.id, answer: Number(answer), website, signals: { ...counts, elapsedMs: Math.min(3600000, Math.round(performance.now() - began)), webdriver: navigator.webdriver === true } }, abort.signal);
       if (result.proof) { setVerified(true); onVerifiedRef.current(result.proof); }
-      else { setChallenge(null); setError(t("Please complete a new challenge to continue.", "Sila lengkapkan cabaran baharu untuk meneruskan.")); }
+      else { setChallenge(result.challenge ?? null); setAnswer(""); setError(t("Please complete one more challenge to continue.", "Sila lengkapkan satu lagi cabaran untuk meneruskan.")); }
     } catch (e) { if (!abort.signal.aborted) { setChallenge(null); setError(e instanceof Error ? e.message : t("Verification unavailable.", "Pengesahan tidak tersedia.")); } }
     finally { if (!abort.signal.aborted) setBusy(false); }
   }

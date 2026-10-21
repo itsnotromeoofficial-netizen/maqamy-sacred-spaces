@@ -7,7 +7,7 @@ export async function shopperVerificationRequest(body: unknown, signal?: AbortSi
   if (!response.headers.get("content-type")?.includes("ndjson")) return response.json();
   const reader = response.body?.getReader();
   if (!reader) throw new Error("Verification unavailable.");
-  let buffer = ""; const decoder = new TextDecoder(); let final: { proof?: string; error?: string; retry?: boolean; message?: string } | undefined;
+  let buffer = ""; const decoder = new TextDecoder(); let final: { proof?: string; error?: string; retry?: boolean; message?: string; challenge?: { id: string; left: number; right: number } } | undefined;
   while (true) {
     const { done, value } = await reader.read(); if (done) break;
     buffer += decoder.decode(value, { stream: true });
