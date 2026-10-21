@@ -14,6 +14,7 @@
 - Typography may use the existing public read-only settings policy when an older hosted admin service lacks its read action; all settings writes remain owner-authorized on the hosted admin endpoint.
 - Enforce admin permissions centrally on the server and resolve staff UUID/team on every request; deleted/recreated usernames must not revive old tokens.
 - Bind Stripe checkout and webhook updates to the authenticated customer's immutable order snapshot, session ID and environment; never let browser metadata or cart prices establish payment ownership.
+- External-host checkout calls the token-authenticated Lovable payment endpoint; share order processing with server functions so Vercel never needs payment secrets.
 - Keep banner media probing in the browser-side admin input, using native image/video loading so extensionless direct media URLs are detected without server fetches.
 - Keep public-page mastheads in SiteHeader with a centred logo and separate navigation row so desktop and mobile share the same brand hierarchy.
 - Keep bilingual brand-story paragraphs in a shared browser-safe copy module so the story page renders matching English and Malay narratives.

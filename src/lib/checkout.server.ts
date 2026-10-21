@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import { z } from "zod";
-import { checkoutRequestSchema, type CheckoutRequest } from "./checkout-policy";
+import { type CheckoutRequest } from "./checkout-policy";
 
 const orderItemSchema = z.object({ collection: z.string().min(1).max(60), package: z.string().min(1).max(60), quantity: z.number().int().min(1).max(10), unit_price: z.number().int().nonnegative() });
 

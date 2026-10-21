@@ -1,110 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
-import { z } from "zod";
-import { safeReturnUrl } from "@/lib/security-policy";
-
-const orderItemSchema = z.object({ collection: z.string().min(1).max(60), package: z.string().min(1).max(60), quantity: z.number().int().min(1).max(10), unit_price: z.number().int().nonnegative() });
-
-type CheckoutSessionResult =
-  | { clientSecret: string; orderNumber: string }
-  | { error: string };
-
-// Cart items map to the payment catalog ids created at enable time. New
-// admin-created products must follow the same slug to be purchasable online.
-function priceIdFor(collection: string, packageName: string): string {
-  return `${collection.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_${packageName.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_oneoff`;
-}
-
-async function resolveOrCreateCustomer(
-  stripe: ReturnType<typeof createStripeClient>,
-  options: { email?: string; userId?: string },
-): Promise<string> {
-  if (options.userId && !/^[a-zA-Z0-9_-]+$/.test(options.userId)) {
-    throw new Error("Invalid userId");
-  }
-  if (options.userId) {
-    const found = await stripe.customers.search({
-      query: `metadata['userId']:'${options.userId}'`,
-      limit: 1,
-    });
-    const matched = found.data[0];
-    if (matched) return matched.id;
-  }
-  if (options.email) {
-    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    const customer = existing.data[0];
-    if (customer) {
-      if (options.userId && customer.metadata?.['userId'] !== options.userId) {
-        await stripe.customers.update(customer.id, {
-          metadata: { ...customer.metadata, ['userId']: options.userId },
-        });
-      }
-      return customer.id;
-    }
-  }
-  const created = await stripe.customers.create({
-    ...(options.email && { email: options.email }),
-    ...(options.userId && { metadata: { userId: options.userId } }),
-  });
-  return created.id;
-}
+import { checkoutRequestSchema } from "@/lib/checkout-policy";
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ orderNumber: z.string().regex(/^MQ-[A-Z0-9]{6,12}$/), returnUrl: z.string().max(2000).refine(safeReturnUrl, "Invalid payment return address"), environment: z.enum(["sandbox", "live"]) }).strict())
-  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
-    try {
-      const { supabase, userId } = context;
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const { data: order, error: orderError } = await supabase.from("orders").select("*").eq("order_number", data.orderNumber).eq("user_id", userId).maybeSingle();
-      if (orderError || !order) throw new Error("Order not found.");
-      if (order.payment_status === "paid" || order.status === "rejected") throw new Error("This order is not eligible for payment.");
-      if (order.payment_environment && order.payment_environment !== data.environment) throw new Error("This order already has a payment in another environment.");
-      // place_order clears the cart; checkout must use the immutable order snapshot.
-      const cartItems = z.array(orderItemSchema).min(1).max(100).parse(order.items);
-
-      const priceIds = [...new Set(cartItems.map((item) => priceIdFor(item.collection, item.package)))];
-      const stripe = createStripeClient(data.environment);
-      const priceList = await stripe.prices.list({ lookup_keys: priceIds, limit: 100 });
-      const priceByLookup = new Map(priceList.data.map((price) => [price.lookup_key, price]));
-
-      const missing = priceIds.filter((id) => !priceByLookup.has(id));
-      if (missing.length) {
-        throw new Error("One or more items in your cart are not available for online payment. Please contact us.");
-      }
-
-      const lineItems = cartItems.map((item) => {
-        const price = priceByLookup.get(priceIdFor(item.collection, item.package));
-        if (!price || price.currency !== "myr" || price.unit_amount !== item.unit_price * 100) throw new Error("This order's price needs review before payment. Please contact MAQAMY.");
-        return { price: price.id, quantity: item.quantity };
-      });
-
-      const customerId = await resolveOrCreateCustomer(stripe, {
-        ...(user?.email ? { email: user.email } : {}),
-        userId,
-      });
-
-      const session = await stripe.checkout.sessions.create({
-        line_items: lineItems,
-        mode: "payment",
-        ui_mode: "embedded_page",
-        return_url: data.returnUrl,
-        customer: customerId,
-        automatic_tax: { enabled: true },
-        payment_intent_data: { description: `MAQAMY order ${data.orderNumber}` },
-        metadata: { userId, order_id: order.id, order_number: data.orderNumber, managed_payments: "false" },
-      }, {
-        idempotencyKey: `maqamy-${order.id}-${data.environment}`,
-      });
-
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const binding = await supabaseAdmin.from("orders").update({ payment_session_id: session.id, payment_environment: data.environment, payment_amount: order.total * 100 }).eq("id", order.id).eq("user_id", userId);
-      if (binding.error) throw new Error("Payment could not be attached to your order.");
-
-      return { clientSecret: session.client_secret ?? "", orderNumber: data.orderNumber };
-    } catch (error) {
-      return { error: getStripeErrorMessage(error) };
-    }
+  .inputValidator(checkoutRequestSchema)
+  .handler(async ({ data, context }) => {
+    const { checkoutForOrder } = await import("@/lib/checkout.server");
+    return checkoutForOrder(data, context);
   });
