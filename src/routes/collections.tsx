@@ -87,9 +87,9 @@ function CollectionsPage() {
           <BannerCarousel banners={banners} tone="dark" />
           <section className="px-5 pb-10 pt-10 sm:px-8 lg:px-12 lg:pb-14 lg:pt-14">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
-              <h1 className="mt-4 font-display text-3xl font-light italic leading-[1.1] sm:text-4xl">{t("Two expressions of peace", "Dua ekspresi ketenangan")}</h1>
-              <p className="mx-auto mt-4 max-w-md text-xs leading-6 text-muted-foreground">
+              <p className="type-label text-[10px] font-semibold uppercase tracking-[0.5em] text-brand-gold">Sakinah</p>
+              <h1 className="type-heading mt-4 font-display text-3xl font-light italic leading-[1.1] sm:text-4xl">{t("Two expressions of peace", "Dua ekspresi ketenangan")}</h1>
+              <p className="type-body mx-auto mt-4 max-w-md text-xs leading-6 text-muted-foreground">
                 {t("Complete prayer environments, considered from the mihrab to the final object.", "Persekitaran solat yang lengkap, dirancang dari mihrab hingga objek terakhir.")}
               </p>
             </div>
@@ -122,14 +122,14 @@ function ProductCard({ item, onOpen }: { item: GridItem; onOpen: () => void }) {
         {item.image ? (
           <img src={item.image} alt={item.imageAlt} className="h-full w-full object-contain" loading="lazy" />
         ) : (
-          <span className="font-display text-3xl italic text-brand-forest/20">{item.collection}</span>
+          <span className="type-body font-display text-3xl italic text-brand-forest/20">{item.collection}</span>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-5">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.3em] text-brand-gold">{item.collection}</p>
-        <h3 className="font-display text-base font-light leading-snug sm:text-xl">{trWord(item.packageName, lang)}</h3>
+        <p className="type-label text-[9px] font-semibold uppercase tracking-[0.3em] text-brand-gold">{item.collection}</p>
+        <h3 className="type-productCard font-display text-base font-light leading-snug sm:text-xl">{trWord(item.packageName, lang)}</h3>
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-          <p className="font-display text-sm sm:text-lg">{formatRM(item.price)}{item.packageName === "Bespoke" ? "+" : ""}</p>
+          <p className="font-display text-sm sm:text-lg type-price">{formatRM(item.price)}{item.packageName === "Bespoke" ? "+" : ""}</p>
           <span className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${item.stock > 0 ? "text-muted-foreground" : "text-destructive"}`}>
             {item.stock > 0 ? t(`${item.stock} left`, `${item.stock} lagi`) : t("Sold out", "Habis")}
           </span>
@@ -164,39 +164,39 @@ function ProductDetail({ item, signedIn, onAdd, onBack }: {
             {item.image ? (
               <img src={item.image} alt={item.imageAlt} className="mx-auto block h-auto w-full object-contain" />
             ) : (
-              <span className="grid aspect-square place-items-center font-display text-4xl italic text-brand-forest/20">{item.collection}</span>
+              <span className="type-body grid aspect-square place-items-center font-display text-4xl italic text-brand-forest/20">{item.collection}</span>
             )}
           </figure>
 
           <div className="min-w-0 lg:sticky lg:top-6 lg:self-start">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">
+            <p className="type-label text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">
               {collection ? (ms?.subtitle ?? collection.subtitle) : item.collection}
             </p>
-            <h1 className="mt-3 font-display text-3xl font-light uppercase leading-tight sm:text-4xl">{item.name}</h1>
-            {collection ? <p className="mt-4 font-display text-lg font-light italic leading-snug sm:text-xl">“{ms?.quote ?? collection.quote}”</p> : null}
-            <p className="mt-4 text-xs leading-6 text-muted-foreground">
+            <h1 className="type-productDetail mt-3 font-display text-3xl font-light uppercase leading-tight sm:text-4xl">{item.name}</h1>
+            {collection ? <p className="type-body mt-4 font-display text-lg font-light italic leading-snug sm:text-xl">“{ms?.quote ?? collection.quote}”</p> : null}
+            <p className="type-body mt-4 text-xs leading-6 text-muted-foreground">
               {collection ? (ms?.story ?? collection.story) : item.product?.description}
             </p>
 
             {item.product?.features?.length ? (
-              <ul className="mt-4 space-y-1 text-xs leading-6 text-muted-foreground">
+              <ul className="type-body mt-4 space-y-1 text-xs leading-6 text-muted-foreground">
                 {item.product.features.map((feature) => <li key={feature}>— {feature}</li>)}
               </ul>
             ) : null}
             {item.product?.colours?.length ? (
-              <p className="mt-3 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Colours", "Warna")}</span> · {item.product.colours.join(", ")}</p>
+              <p className="type-body mt-3 text-xs text-muted-foreground"><span className="type-label font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Colours", "Warna")}</span> · {item.product.colours.join(", ")}</p>
             ) : null}
             {item.product?.varieties?.length ? (
-              <p className="mt-2 text-xs text-muted-foreground"><span className="font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Varieties", "Variasi")}</span> · {item.product.varieties.join(", ")}</p>
+              <p className="type-body mt-2 text-xs text-muted-foreground"><span className="type-label font-semibold uppercase tracking-[0.2em] text-brand-forest">{t("Varieties", "Variasi")}</span> · {item.product.varieties.join(", ")}</p>
             ) : null}
 
             <div className="mt-8 border-t border-brand-forest/15 pt-6">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("Edition", "Edisi")}</p>
-                <p className="font-display text-2xl font-light">{formatRM(item.price)}{item.packageName === "Bespoke" ? "+" : ""}</p>
+                <p className="type-label text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{t("Edition", "Edisi")}</p>
+                <p className="font-display text-2xl font-light type-price">{formatRM(item.price)}{item.packageName === "Bespoke" ? "+" : ""}</p>
               </div>
               {includes.length ? (
-                <ul className="mt-4 space-y-2 text-xs leading-6 text-muted-foreground">
+                <ul className="type-body mt-4 space-y-2 text-xs leading-6 text-muted-foreground">
                   {includes.map((include) => <li key={include} className="border-b border-brand-forest/5 pb-2 last:border-0">{trWord(include, lang)}</li>)}
                 </ul>
               ) : null}
@@ -236,8 +236,8 @@ function ProductDetail({ item, signedIn, onAdd, onBack }: {
 function DetailList({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <p className="border-b border-brand-forest/15 pb-3 text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{title}</p>
-      <ul className="mt-4 space-y-3 text-xs leading-6 text-muted-foreground">
+      <p className="type-label border-b border-brand-forest/15 pb-3 text-[10px] font-semibold uppercase tracking-[0.45em] text-brand-gold">{title}</p>
+      <ul className="type-body mt-4 space-y-3 text-xs leading-6 text-muted-foreground">
         {items.map((item) => <li key={item} className="border-b border-brand-forest/5 pb-3 last:border-0">{item}</li>)}
       </ul>
     </div>

@@ -31,11 +31,11 @@ function PrivacyPage() {
       <SiteHeader tone="dark" itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} />
       <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:py-12">
         <section className="py-12 lg:py-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Privacy policy", "Dasar privasi")}</p>
-          <h1 className="mt-4 font-display text-3xl font-light leading-tight sm:text-4xl">
+          <p className="type-label text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Privacy policy", "Dasar privasi")}</p>
+          <h1 className="type-heading mt-4 font-display text-3xl font-light leading-tight sm:text-4xl">
             MAQAMY Living Concepts
           </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
+          <p className="type-body mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
             {t("MAQAMY Living Concepts respects the privacy of every customer. This policy explains how customer information is collected, used, and protected when creating an account, adding products to cart, or requesting a purchase consultation.", "MAQAMY Living Concepts menghormati privasi setiap pelanggan. Dasar ini menerangkan cara maklumat pelanggan dikumpul, digunakan dan dilindungi semasa mencipta akaun, menambah produk ke troli, atau meminta perundingan pembelian.")}
           </p>
         </section>
@@ -57,8 +57,8 @@ function PrivacyPage() {
             ["Copyright", "MAQAMY Living Concepts and the MAQAMY presentation, product language, collection identity, and brand materials are copyrighted © 2026."],
           ]).map(([title, body]) => (
             <article key={title} className="border border-brand-gold/25 bg-card p-5 shadow-gold">
-              <h2 className="font-display text-3xl font-light">{title}</h2>
-              <p className="mt-3 text-sm leading-7 text-muted-foreground">{body}</p>
+              <h2 className="type-heading font-display text-3xl font-light">{title}</h2>
+              <p className="type-body mt-3 text-sm leading-7 text-muted-foreground">{body}</p>
             </article>
           ))}
         </section>

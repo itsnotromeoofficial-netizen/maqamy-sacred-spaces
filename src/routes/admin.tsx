@@ -3,6 +3,7 @@ import { Ban, LogOut, Minus, PackageX, PackagePlus, Plus, Save, ShieldCheck, Tra
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { TypographyPanel } from "@/components/maqamy/typography-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +20,7 @@ import { ORDER_LABELS, ORDER_STATUSES, parseList, type OrderItem, type OrderStat
 
 type Product = Tables<"products">;
 type Order = AdminOrder;
-type Tab = "orders" | "products" | "customers" | "admins" | "invoices" | "banners";
+type Tab = "typography" | "orders" | "products" | "customers" | "admins" | "invoices" | "banners";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [
@@ -57,7 +58,7 @@ function AdminPage() {
       { id: "products" as Tab, label: "Products" },
       { id: "customers" as Tab, label: "Customers" },
     ]),
-    ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "banners" as Tab, label: "Banners" }, { id: "admins" as Tab, label: "Admin team" }] : []),
+    ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "banners" as Tab, label: "Banners" }, { id: "typography" as Tab, label: "Typography" }, { id: "admins" as Tab, label: "Admin team" }] : []),
   ];
 
   return <main className="min-h-screen bg-brand-mist text-brand-forest">
@@ -77,7 +78,7 @@ function AdminPage() {
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`-mb-px whitespace-nowrap border-b-2 px-5 py-3 text-sm font-semibold transition-colors duration-300 ${tab === t.id ? "border-brand-forest text-brand-forest" : "border-transparent text-muted-foreground hover:text-brand-forest"}`}>{t.label}</button>)}
       </nav>
       <div key={tab} className="animate-fade-soft py-10">
-        {tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
+        {tab === "typography" && session.master ? <TypographyPanel /> : tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
       </div>
     </div>
   </main>;

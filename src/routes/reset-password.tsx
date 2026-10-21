@@ -71,18 +71,18 @@ function ResetPasswordPage() {
     <main className="flex min-h-screen items-center justify-center bg-brand-cream px-5 py-10 text-brand-forest">
       <div className="w-full max-w-md border border-brand-gold/30 bg-card p-6 shadow-maqamy">
         <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto mb-6 w-24" />
-        <h1 className="font-display text-4xl font-light">{t("Reset password", "Tetapkan semula kata laluan")}</h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+        <h1 className="type-accountHeading font-display text-4xl font-light">{t("Reset password", "Tetapkan semula kata laluan")}</h1>
+        <p className="type-body mt-3 text-sm leading-6 text-muted-foreground">
           {hasRecovery
             ? t("Enter a new password for your customer account.", "Masukkan kata laluan baharu untuk akaun anda.")
             : t("Open this page from the password reset email to set a new password.", "Buka halaman ini daripada e-mel tetapan semula untuk menetapkan kata laluan baharu.")}
         </p>
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          <Label className="block text-sm font-semibold">
+          <Label className="type-control block text-sm font-semibold">
             <span className="mb-2 block">{t("New password", "Kata laluan baharu")}</span>
             <Input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" required />
           </Label>
-          <Label className="block text-sm font-semibold">
+          <Label className="type-control block text-sm font-semibold">
             <span className="mb-2 block">{t("Confirm password", "Sahkan kata laluan")}</span>
             <Input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" required />
           </Label>

@@ -49,7 +49,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
         </Link>
         <div className="flex justify-end">
           <Button asChild variant="ghost" className={`h-10 w-10 shrink-0 px-0 lg:w-auto lg:gap-3 lg:px-3 ${textClass}`} aria-label={`Cart with ${itemCount} items`}>
-            <Link to="/cart"><ShoppingBag /><span className="hidden lg:inline">{t("Cart", "Troli")}{itemCount > 0 ? ` · ${itemCount}` : ""}</span>{itemCount > 0 ? <span className="text-[10px] lg:hidden">{itemCount}</span> : null}</Link>
+            <Link to="/cart"><ShoppingBag /><span className="type-navigation hidden lg:inline">{t("Cart", "Troli")}{itemCount > 0 ? ` · ${itemCount}` : ""}</span>{itemCount > 0 ? <span className="type-navigation text-[10px] lg:hidden">{itemCount}</span> : null}</Link>
           </Button>
         </div>
       </div>
@@ -92,7 +92,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
         <div className="text-center sm:text-left">
           <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto w-48 brightness-0 invert sm:mx-0" />
-          <p className="mt-5 text-xs uppercase text-brand-cream/60">MAQAMY Living Concepts © 2026</p>
+          <p className="type-footer mt-5 text-xs uppercase text-brand-cream/60">MAQAMY Living Concepts © 2026</p>
         </div>
         <div className="flex flex-wrap gap-6 text-sm text-brand-cream/70">
           <Link to="/story">{t("Our story", "Kisah kami")}</Link><Link to="/collections">{t("Collections", "Koleksi")}</Link><Link to="/cart">{t("Cart", "Troli")}</Link><Link to="/orders">{t("My orders", "Pesanan saya")}</Link><Link to="/privacy">{t("Privacy", "Privasi")}</Link>

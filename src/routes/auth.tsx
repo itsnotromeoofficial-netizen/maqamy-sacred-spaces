@@ -231,8 +231,8 @@ function AuthPage() {
             <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-full invert" />
           </div>
           <div className="absolute bottom-10 left-10 max-w-md text-brand-cream">
-            <p className="font-display text-3xl font-light italic leading-tight">{t("A place to return.", "Tempat untuk kembali.")}</p>
-            <p className="mt-4 text-sm leading-7 text-brand-cream/80">
+            <p className="type-body font-display text-3xl font-light italic leading-tight">{t("A place to return.", "Tempat untuk kembali.")}</p>
+            <p className="type-body mt-4 text-sm leading-7 text-brand-cream/80">
               {t("Sign in to preserve your selected prayer-space collection, delivery details, and consultation cart.", "Log masuk untuk menyimpan koleksi ruang solat pilihan anda, butiran penghantaran dan troli anda.")}
             </p>
           </div>
@@ -250,8 +250,8 @@ function AuthPage() {
             <div className="border border-brand-gold/30 bg-card p-5 shadow-maqamy sm:p-8">
               <div className="mb-8 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Customer account", "Akaun pelanggan")}</p>
-                  <h1 className="mt-2 font-display text-2xl font-light text-brand-forest sm:text-3xl">
+                  <p className="type-label text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{t("Customer account", "Akaun pelanggan")}</p>
+                  <h1 className="type-accountHeading mt-2 font-display text-2xl font-light text-brand-forest sm:text-3xl">
                     {verify ? t("Verify", "Sahkan") : mode === "register" ? t("Register", "Daftar") : t("Sign in", "Log masuk")}
                   </h1>
                 </div>
@@ -260,9 +260,9 @@ function AuthPage() {
 
               {verify ? (
                 <>
-                  {notice ? <p className="mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
-                  <p className="mb-5 text-sm leading-6 text-muted-foreground">
-                    {t("Sent to", "Dihantar ke")} <span className="font-semibold text-brand-forest">{verify.email}</span>
+                  {notice ? <p className="type-body mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
+                  <p className="type-body mb-5 text-sm leading-6 text-muted-foreground">
+                    {t("Sent to", "Dihantar ke")} <span className="type-body font-semibold text-brand-forest">{verify.email}</span>
                   </p>
                   <form className="space-y-4" onSubmit={handleVerify}>
                     <Field label={t("8-digit code", "Kod 8 digit")}>
@@ -306,7 +306,7 @@ function AuthPage() {
                     <Button type="button" variant={mode === "sign-in" ? "maqamy" : "ghost"} onClick={() => setMode("sign-in")}>{t("Sign in", "Log masuk")}</Button>
                   </div>
 
-                  {notice ? <p className="mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
+                  {notice ? <p className="type-body mb-5 border border-brand-gold/30 bg-brand-mist p-3 text-sm text-brand-forest">{notice}</p> : null}
 
                   <form className="space-y-4" onSubmit={handleSubmit}>
                     {mode === "register" ? (
@@ -368,7 +368,7 @@ function AuthPage() {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <Label className="block text-sm font-semibold text-brand-forest">
+    <Label className="type-control block text-sm font-semibold text-brand-forest">
       <span className="mb-2 block">{label}</span>
       {children}
     </Label>
