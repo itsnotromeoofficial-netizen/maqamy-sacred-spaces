@@ -1,10 +1,16 @@
 # MAQAMY rebuild
 
+## Shopper AI bot checks
+- [x] Add single-use shopper challenges and server enforcement at signup/order creation
+- [x] Assess aggregate interaction signals with Lovable AI, with retry challenges for uncertain results
+- [x] Add bilingual shopper controls and privacy disclosure
+- [x] Verify live AI assessment, successful challenge completion and authenticated checkout proof/replay protection
+
 ## Security hardening
 - [x] Tighten admin permissions and revoke deleted-account sessions
 - [x] Harden request validation, media inputs and payment ownership checks
 - [x] Add basic automated-form blocking to admin sign-in
-- [ ] Add full CAPTCHA verification — blocked until Cloudflare Turnstile keys are supplied
+- [x] Add in-app shopper challenge verification with AI assessment instead of the previously pending external CAPTCHA
 - [x] Verify blocked requests and legitimate admin access
 
 ## Admin typography

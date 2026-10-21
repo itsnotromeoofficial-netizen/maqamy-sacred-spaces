@@ -10,6 +10,8 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Enforce single-use, expiring shopper proofs in the email-signup lifecycle trigger and guarded order RPC; AI receives only aggregate interaction signals and must never assign permanent bans.
+- Keep shopper verification on the Lovable-hosted endpoint for cross-host deployments, stream AI assessment over NDJSON, and persist terminal AI configuration/denial pauses without automatic retries.
 - Enforce admin permissions centrally on the server and resolve staff UUID/team on every request; deleted/recreated usernames must not revive old tokens.
 - Bind Stripe checkout and webhook updates to the authenticated customer's immutable order snapshot, session ID and environment; never let browser metadata or cart prices establish payment ownership.
 - Keep banner media probing in the browser-side admin input, using native image/video loading so extensionless direct media URLs are detected without server fetches.

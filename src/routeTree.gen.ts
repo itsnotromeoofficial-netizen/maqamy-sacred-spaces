@@ -19,6 +19,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as StoryRouteImport } from './routes/story'
 import { Route as ApiPublicAdminRouteImport } from './routes/api/public/admin'
+import { Route as ApiPublicShopperVerifyRouteImport } from './routes/api/public/shopper-verify'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -73,6 +74,11 @@ const ApiPublicAdminRoute = ApiPublicAdminRouteImport.update({
   path: '/api/public/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicShopperVerifyRoute = ApiPublicShopperVerifyRouteImport.update({
+  id: '/api/public/shopper-verify',
+  path: '/api/public/shopper-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/story': typeof StoryRoute
   '/api/public/admin': typeof ApiPublicAdminRoute
+  '/api/public/shopper-verify': typeof ApiPublicShopperVerifyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/story': typeof StoryRoute
   '/api/public/admin': typeof ApiPublicAdminRoute
+  '/api/public/shopper-verify': typeof ApiPublicShopperVerifyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/story': typeof StoryRoute
   '/api/public/admin': typeof ApiPublicAdminRoute
+  '/api/public/shopper-verify': typeof ApiPublicShopperVerifyRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/story'
     | '/api/public/admin'
+    | '/api/public/shopper-verify'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/story'
     | '/api/public/admin'
+    | '/api/public/shopper-verify'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/story'
     | '/api/public/admin'
+    | '/api/public/shopper-verify'
     | '/api/public/payments/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -195,6 +207,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   StoryRoute: typeof StoryRoute
   ApiPublicAdminRoute: typeof ApiPublicAdminRoute
+  ApiPublicShopperVerifyRoute: typeof ApiPublicShopperVerifyRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/shopper-verify': {
+      id: '/api/public/shopper-verify'
+      path: '/api/public/shopper-verify'
+      fullPath: '/api/public/shopper-verify'
+      preLoaderRoute: typeof ApiPublicShopperVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -307,6 +327,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   StoryRoute: StoryRoute,
   ApiPublicAdminRoute: ApiPublicAdminRoute,
+  ApiPublicShopperVerifyRoute: ApiPublicShopperVerifyRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

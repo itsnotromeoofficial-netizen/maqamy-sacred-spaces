@@ -50,6 +50,13 @@
       "when": 1792555453262,
       "tag": "0006_secure_checkout_binding_and_banner_access",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792555839058,
+      "tag": "0007_shopper_bot_challenges",
+      "breakpoints": true
     }
   ]
 }
