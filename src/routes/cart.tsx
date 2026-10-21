@@ -40,7 +40,7 @@ function CartPage() {
   const [placing, setPlacing] = useState(false);
   const [shopperProof, setShopperProof] = useState<string | null>(null);
   const { t, lang } = useLang();
-  const [placed, setPlaced] = useState<string | null>(null);
+  const [placed, setPlaced] = useState<string | null>(returnedPayment === "retry" ? returnedOrder ?? null : null);
   const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
@@ -102,7 +102,8 @@ function CartPage() {
               <h2 className="type-heading font-display text-3xl">{placed}</h2>
               <p className="type-body mt-4 text-sm">{t("Your order is saved. Payment has not been completed.", "Pesanan anda disimpan. Pembayaran belum selesai.")}</p>
               {paymentError ? <p role="alert" className="mx-auto mt-4 max-w-xl text-sm text-destructive">{paymentError}</p> : null}
-              <Button variant="gold" className="mt-6" disabled={placing} onClick={() => void placeOrder()}>{placing ? t("Preparing payment…", "Menyediakan pembayaran…") : t("Retry payment", "Cuba pembayaran semula")} <ArrowRight /></Button>
+              {!shopperProof ? <div className="mx-auto mt-6 max-w-sm"><ShopperChallenge purpose="checkout" onVerified={setShopperProof} /></div> : null}
+              <Button variant="gold" className="mt-6" disabled={placing || !shopperProof} onClick={() => void placeOrder()}>{placing ? t("Preparing payment…", "Menyediakan pembayaran…") : t("Retry payment", "Cuba pembayaran semula")} <ArrowRight /></Button>
             </div>
           ) : !userEmail ? <SignedOut /> : cart.length === 0 ? <EmptyCart /> : (
             <div className="mt-14 grid gap-10 lg:grid-cols-[1.4fr_0.6fr] lg:items-start">

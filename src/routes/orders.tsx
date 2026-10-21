@@ -42,11 +42,11 @@ function OrdersPage() {
           <h1 className="type-heading mt-4 font-display text-3xl font-light leading-tight sm:text-4xl">{t("Order journey.", "Perjalanan pesanan.")}</h1>
           {loading || (userEmail && !orders) ? <div className="mx-auto my-24 h-12 w-1 animate-spin-bar bg-brand-gold" /> : !userEmail ? (
             <Notice title={t("Sign in to see your orders.", "Log masuk untuk melihat pesanan anda.")} cta={<Link to="/auth" search={{ redirect: "/orders" }}>{t("Sign in", "Log masuk")} <ArrowRight /></Link>} />
-          ) : orders!.length === 0 ? (
+          ) : !orders?.length ? (
             <Notice title={t("No orders yet.", "Belum ada pesanan.")} cta={<Link to="/collections">{t("Explore collections", "Terokai koleksi")} <ArrowRight /></Link>} />
           ) : (
             <div className="mt-14 space-y-6">
-              {orders!.map((order) => <OrderCard key={order.id} order={order} />)}
+              {orders.map((order) => <OrderCard key={order.id} order={order} />)}
             </div>
           )}
         </div>
@@ -85,6 +85,7 @@ function OrderCard({ order }: { order: Tables<"orders"> }) {
         <div className="text-right">
           <p className="font-display text-3xl type-price">{formatRM(order.total)}</p>
           {canInvoice ? <Button variant="ghost" size="sm" className="mt-2" onClick={() => void toggleInvoice()}>{showInvoice ? t("Hide invoice", "Sembunyi invois") : t("View invoice", "Lihat invois")}</Button> : null}
+          {order.payment_status !== "paid" && status !== "rejected" ? <Button asChild variant="gold" size="sm" className="mt-2 ml-2"><Link to="/cart" search={{ order: order.order_number, payment: "retry" }}>{t("Pay now", "Bayar sekarang")} <ArrowRight /></Link></Button> : null}
         </div>
       </div>
 
