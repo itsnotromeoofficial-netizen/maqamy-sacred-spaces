@@ -1,5 +1,6 @@
 import type { Tables } from "@/integrations/supabase/types";
 import type { OrderStatus } from "./orders";
+import type { TypographySettings } from "./typography";
 
 /**
  * Browser client for the admin endpoint. The endpoint always lives on the
@@ -47,6 +48,8 @@ async function call<T>(action: string, data?: unknown): Promise<T> {
 
 export type AdminSession = { authenticated: boolean; username: string; team: string; master: boolean };
 const signedOut: AdminSession = { authenticated: false, username: "", team: "", master: false };
+export const getAdminTypography = () => call<TypographySettings>("getTypography");
+export const saveAdminTypography = (settings: TypographySettings) => call<TypographySettings>("saveTypography", settings);
 
 export async function getAdminSession(): Promise<AdminSession> {
   if (!getToken()) return signedOut;

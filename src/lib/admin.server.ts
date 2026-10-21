@@ -2,6 +2,7 @@ import { createHash, createHmac, pbkdf2Sync, randomBytes, timingSafeEqual } from
 import { z } from "zod";
 
 import { ORDER_STATUSES } from "./orders";
+import { typographySchema } from "./typography";
 
 /**
  * Admin back office. Runs only on the Lovable-hosted server (it needs the
@@ -133,6 +134,19 @@ type Handler = (input: unknown, c: Claims) => Promise<unknown>;
 const master = (c: Claims) => { if (!c.master) throw new AdminError("Only the owner account can manage admins.", 403); };
 
 export const actions: Record<string, Handler> = {
+  getTypography: async (_input, c) => {
+    master(c);
+    const { data, error } = await (await db()).from("typography_settings").select("settings").eq("id", "website").maybeSingle();
+    if (error) throw new AdminError("Text sizes could not be loaded.");
+    return typographySchema.parse(data?.settings ?? {});
+  },
+  saveTypography: async (input, c) => {
+    master(c);
+    const settings = typographySchema.parse(input);
+    const { error } = await (await db()).from("typography_settings").upsert({ id: "website", settings, updated_at: new Date().toISOString() });
+    if (error) throw new AdminError("Text sizes could not be saved.");
+    return settings;
+  },
   session: async (_i, c) => ({ authenticated: true, username: c.u, team: c.team, master: c.master }),
 
   listProducts: async () => {
