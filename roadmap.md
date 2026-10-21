@@ -1,5 +1,11 @@
 # MAQAMY rebuild
 
+## Shopper AI bot checks
+- [ ] Add single-use shopper challenges and server enforcement at signup/order creation
+- [ ] Assess aggregate interaction signals with Lovable AI, with retry challenges for uncertain results
+- [ ] Add bilingual shopper controls and privacy disclosure
+- [ ] Verify live AI assessment and authenticated checkout protection
+
 ## Security hardening
 - [x] Tighten admin permissions and revoke deleted-account sessions
 - [x] Harden request validation, media inputs and payment ownership checks
