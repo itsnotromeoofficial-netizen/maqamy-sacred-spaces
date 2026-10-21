@@ -1,9 +1,9 @@
 # MAQAMY rebuild
 
 ## Admin typography
-- [ ] Add saved desktop and mobile sizing for each customer page and shared navigation/banners
-- [ ] Add owner-only controls with preview and reset
-- [ ] Verify saving, persistence and customer text sizing
+- [x] Add saved desktop and mobile sizing across customer pages and shared navigation/banners
+- [x] Add owner-only controls with preview and reset
+- [x] Verify saving, persistence and customer text sizing
 
 ## Banner refinements
 - [x] Outline banner titles for clear contrast on light and dark media
