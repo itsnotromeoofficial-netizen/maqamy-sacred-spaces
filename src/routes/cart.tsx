@@ -14,6 +14,7 @@ import { getStripeEnvironment } from "@/lib/stripe";
 import { useCart } from "@/lib/use-cart";
 import { createCheckoutSession } from "@/utils/payments.functions";
 import { trWord, useLang } from "@/lib/i18n";
+import { ShopperChallenge } from "@/components/maqamy/shopper-challenge";
 
 export const Route = createFileRoute("/cart")({
   validateSearch: (search: Record<string, unknown>): { order?: string; payment?: string } => {
@@ -37,13 +38,15 @@ function CartPage() {
   const { order: returnedOrder, payment: returnedPayment } = Route.useSearch();
   const { cart, total, itemCount, userEmail, loading, updateQuantity, removeItem, signOut, reload } = useCart();
   const [placing, setPlacing] = useState(false);
+  const [shopperProof, setShopperProof] = useState<string | null>(null);
   const { t, lang } = useLang();
   const [placed, setPlaced] = useState<string | null>(null);
   const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
 
   const placeOrder = async () => {
+    if (!shopperProof) { toast.error(t("Complete shopper verification first.", "Lengkapkan pengesahan pembeli dahulu.")); return; }
     setPlacing(true);
-    const { data, error } = await supabase.rpc("place_order");
+    const { data, error } = await supabase.rpc("guarded_place_order", { _proof: shopperProof });
     if (error || !data) {
       setPlacing(false);
       toast.error(t("Your order could not be placed. Please try again.", "Pesanan anda tidak dapat dibuat. Sila cuba lagi."));
@@ -79,7 +82,7 @@ function CartPage() {
           <h1 className="type-heading mt-4 font-display text-3xl font-light leading-tight sm:text-4xl">{t("The cart.", "Troli.")}</h1>
           <p className="type-body mt-6 max-w-xl text-sm leading-7 text-muted-foreground">{t("A considered overview of the prayer spaces you have selected for your home.", "Gambaran teliti ruang solat yang telah anda pilih untuk rumah anda.")}</p>
           {loading ? <div className="mx-auto my-24 h-12 w-1 animate-spin-bar bg-brand-gold" /> : returned ? (
-            <OrderReturned orderNumber={returnedOrder!} />
+            <OrderReturned orderNumber={returnedOrder ?? ""} />
           ) : checkoutSecret && placed ? (
             <div className="animate-fade-soft mt-14">
               <div className="mb-10 border-y border-brand-gold/25 py-10 text-center">
@@ -113,7 +116,8 @@ function CartPage() {
                 <p className="type-label text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold-soft">{t("Summary", "Ringkasan")}</p>
                 <div className="mt-8 flex items-baseline justify-between border-b border-brand-cream/20 pb-6"><span className="type-body text-sm">{t("Estimated total", "Anggaran jumlah")}</span><strong className="font-display text-4xl type-price">{formatRM(total)}+</strong></div>
                 <p className="type-body mt-5 text-xs leading-6 text-brand-cream/70">{t("You will receive an order number instantly, then complete payment securely on this page. Our team reviews every order before it is prepared.", "Anda akan menerima nombor pesanan serta-merta, kemudian lengkapkan pembayaran dengan selamat di halaman ini. Pasukan kami menyemak setiap pesanan sebelum ia disediakan.")}</p>
-                <Button variant="gold" size="lg" className="mt-8 w-full" disabled={placing} onClick={() => void placeOrder()}>{placing ? t("Preparing payment…", "Menyediakan pembayaran…") : t("Place order & pay", "Buat pesanan & bayar")} <ArrowRight /></Button>
+                <div className="mt-6 bg-card p-4 text-foreground"><ShopperChallenge purpose="checkout" onVerified={setShopperProof} /></div>
+                <Button variant="gold" size="lg" className="mt-8 w-full" disabled={placing || !shopperProof} onClick={() => void placeOrder()}>{placing ? t("Preparing payment…", "Menyediakan pembayaran…") : t("Place order & pay", "Buat pesanan & bayar")} <ArrowRight /></Button>
               </aside>
             </div>
           )}

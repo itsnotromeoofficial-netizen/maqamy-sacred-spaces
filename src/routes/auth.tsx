@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { brandAssets } from "@/lib/maqamy-products";
 import { siteUrl } from "@/lib/site";
 import { tr, useLang } from "@/lib/i18n";
+import { ShopperChallenge } from "@/components/maqamy/shopper-challenge";
 
 const registerSchema = () => z.object({
   fullName: z.string().trim().min(2, tr("Enter your full name", "Masukkan nama penuh anda")).max(100, tr("Name is too long", "Nama terlalu panjang")),
@@ -63,6 +64,7 @@ function AuthPage() {
   const { t } = useLang();
   const [mode, setMode] = useState<"sign-in" | "register">("register");
   const [loading, setLoading] = useState(false);
+  const [shopperProof, setShopperProof] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [verify, setVerify] = useState<{ email: string; kind: "signup" | "recovery" } | null>(null);
   const [code, setCode] = useState("");
@@ -107,6 +109,7 @@ function AuthPage() {
     setNotice("");
 
     if (mode === "register") {
+      if (!shopperProof) { toast.error(t("Complete shopper verification first.", "Lengkapkan pengesahan pembeli dahulu.")); setLoading(false); return; }
       const parsed = registerSchema().safeParse(values);
       if (!parsed.success) {
         toast.error(parsed.error.issues[0]?.message ?? tr("Check your registration details.", "Semak butiran pendaftaran anda."));
@@ -120,7 +123,7 @@ function AuthPage() {
         password,
         options: {
           emailRedirectTo: siteUrl("/"),
-          data: { full_name: fullName, phone, address },
+          data: { full_name: fullName, phone, address, shopper_proof: shopperProof },
         },
       });
 
@@ -334,7 +337,8 @@ function AuthPage() {
                       <Input type="password" value={values.password} onChange={(event) => updateValue("password", event.target.value)} autoComplete={mode === "register" ? "new-password" : "current-password"} required />
                     </Field>
 
-                    <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading}>
+                    {mode === "register" ? <ShopperChallenge purpose="signup" email={values.email} onVerified={setShopperProof} /> : null}
+                    <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading || (mode === "register" && !shopperProof)}>
                       {loading ? <Loader2 className="animate-spin" /> : null}
                       {mode === "register" ? t("Create account", "Cipta akaun") : t("Sign in", "Log masuk")}
                     </Button>
