@@ -46,7 +46,7 @@ function CartPage() {
   const placeOrder = async () => {
     if (!shopperProof) { toast.error(t("Complete shopper verification first.", "Lengkapkan pengesahan pembeli dahulu.")); return; }
     setPlacing(true);
-    const { data, error } = await supabase.rpc("guarded_place_order", { _proof: shopperProof });
+    const { data, error } = await supabase.rpc("place_order");
     if (error || !data) {
       setPlacing(false);
       toast.error(t("Your order could not be placed. Please try again.", "Pesanan anda tidak dapat dibuat. Sila cuba lagi."));

@@ -123,7 +123,7 @@ function AuthPage() {
         password,
         options: {
           emailRedirectTo: siteUrl("/"),
-          data: { full_name: fullName, phone, address, shopper_proof: shopperProof },
+          data: { full_name: fullName, phone, address },
         },
       });
 

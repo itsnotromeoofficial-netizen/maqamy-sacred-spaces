@@ -1,6 +1,8 @@
 import type { Tables } from "@/integrations/supabase/types";
 import type { OrderStatus } from "./orders";
 import type { TypographySettings } from "./typography";
+import { typographySchema } from "./typography";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Browser client for the admin endpoint. The endpoint always lives on the
@@ -48,7 +50,16 @@ async function call<T>(action: string, data?: unknown): Promise<T> {
 
 export type AdminSession = { authenticated: boolean; username: string; team: string; master: boolean };
 const signedOut: AdminSession = { authenticated: false, username: "", team: "", master: false };
-export const getAdminTypography = () => call<TypographySettings>("getTypography");
+export const getAdminTypography = async () => {
+  try { return await call<TypographySettings>("getTypography"); }
+  catch (error) {
+    // Typography is public read-only data. Older published admin services lack this action.
+    if (!(error instanceof AdminApiError) || error.status !== 400 || error.message !== "Unknown action.") throw error;
+    const result = await supabase.from("typography_settings").select("settings").eq("id", "website").maybeSingle();
+    if (result.error) throw new Error("Text sizes could not be loaded. Please try again.");
+    return typographySchema.parse(result.data?.settings ?? {});
+  }
+};
 export const saveAdminTypography = (settings: TypographySettings) => call<TypographySettings>("saveTypography", settings);
 
 export async function getAdminSession(): Promise<AdminSession> {
