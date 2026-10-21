@@ -79,7 +79,7 @@ function AdminPage() {
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`-mb-px whitespace-nowrap border-b-2 px-5 py-3 text-sm font-semibold transition-colors duration-300 ${tab === t.id ? "border-brand-forest text-brand-forest" : "border-transparent text-muted-foreground hover:text-brand-forest"}`}>{t.label}</button>)}
       </nav>
       <div key={tab} className="animate-fade-soft py-10">
-        {tabs.length === 0 ? <p className="text-sm text-muted-foreground">This team has no store-management permissions.</p> : tab === "typography" && session.master ? <TypographyPanel /> : tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
+        {tabs.length === 0 ? <p className="text-sm text-muted-foreground">This team has no store-management permissions.</p> : tab === "typography" && session.master ? <TypographyPanel /> : tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel canManage={session.master} /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
       </div>
     </div>
   </main>;
@@ -325,7 +325,7 @@ function ProductsPanel() {
 
 type Customer = AdminCustomer;
 
-function CustomersPanel() {
+function CustomersPanel({ canManage }: { canManage: boolean }) {
   const listFn = listAdminCustomers;
   const banFn = banCustomer;
   const deleteFn = deleteCustomer;
@@ -355,13 +355,13 @@ function CustomersPanel() {
             <p className="text-sm text-muted-foreground">{c.address}</p>
             <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold">{c.orders} orders · joined {new Date(c.created_at).toLocaleDateString()}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {canManage ? <div className="flex flex-wrap gap-2">
             {c.banned_until ? <Button variant="cream" size="sm" onClick={() => void run(() => banFn({ data: { id: c.id, duration: "none" } }), `${c.full_name} unbanned.`)}>Unban</Button> : <>
               <Button variant="cream" size="sm" onClick={() => void run(() => banFn({ data: { id: c.id, duration: "30d" } }), `${c.full_name} banned for 30 days.`)}><Ban /> 30 days</Button>
               <Button variant="cream" size="sm" onClick={() => { if (window.confirm(`Ban ${c.full_name} permanently?`)) void run(() => banFn({ data: { id: c.id, duration: "permanent" } }), `${c.full_name} banned permanently.`); }}><Ban /> Permanent</Button>
             </>}
             <Button variant="ghost" size="sm" onClick={() => { if (window.confirm(`Delete ${c.full_name} and all their data? This cannot be undone.`)) void run(() => deleteFn({ data: { id: c.id } }), "Customer deleted."); }}><Trash2 /> Delete</Button>
-          </div>
+          </div> : null}
         </article>;
       })}
     </div>

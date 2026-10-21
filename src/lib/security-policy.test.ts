@@ -1,8 +1,13 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { adminClaimsSchema, canAdminPerform, safeMediaUrl, safeReturnUrl } from "./security-policy";
+import { adminClaimsSchema, canAdminPerform, safeMediaUrl, safeReturnUrl, validMediaBytes } from "./security-policy";
 const claims = { u: "test", team: "Delivery Team", master: false, exp: 2000000000000 };
 describe("admin access controls", () => {
+ it("rejects disguised HTML and SVG uploads", () => {
+  assert.equal(validMediaBytes(new TextEncoder().encode("<html>bad</html>"), "image", "image/png"), false);
+  assert.equal(validMediaBytes(new TextEncoder().encode("<svg></svg>"), "image", "image/svg+xml"), false);
+  assert.equal(validMediaBytes(new Uint8Array([137,80,78,71,13,10,26,10]), "image", "image/png"), true);
+ });
   it("delivery cannot read all customers or mutate products", () => {
     assert.equal(canAdminPerform("deleteCustomer", claims), false);
     assert.equal(canAdminPerform("listCustomers", claims), false);

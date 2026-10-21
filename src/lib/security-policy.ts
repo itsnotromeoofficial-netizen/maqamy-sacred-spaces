@@ -35,3 +35,17 @@ export function safeReturnUrl(value: string) {
     return trusted && url.pathname === "/cart" && !url.username && !url.password;
   } catch { return false; }
 }
+export function validMediaBytes(bytes: Uint8Array, kind: "image" | "video", contentType: string) {
+ const ascii = (start: number, end: number) => String.fromCharCode(...bytes.slice(start, end));
+ if (kind === "image") {
+  if (contentType === "image/png") return bytes[0] === 137 && ascii(1, 4) === "PNG";
+  if (contentType === "image/jpeg") return bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+  if (contentType === "image/gif") return ["GIF87a", "GIF89a"].includes(ascii(0, 6));
+  if (contentType === "image/webp") return ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP";
+  return false;
+ }
+ if (contentType === "video/mp4" || contentType === "video/quicktime") return ascii(4, 8) === "ftyp";
+ if (contentType === "video/webm") return bytes[0] === 26 && bytes[1] === 69 && bytes[2] === 223 && bytes[3] === 163;
+ if (contentType === "video/ogg") return ascii(0, 4) === "OggS";
+ return false;
+}

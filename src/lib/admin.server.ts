@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { ORDER_STATUSES } from "./orders";
 import { typographySchema } from "./typography";
-import { adminClaimsSchema, canAdminPerform, safeMediaUrl, type AdminClaims } from "./security-policy";
+import { adminClaimsSchema, canAdminPerform, safeMediaUrl, validMediaBytes, type AdminClaims } from "./security-policy";
 
 /**
  * Admin back office. Runs only on the Lovable-hosted server (it needs the
@@ -391,10 +391,13 @@ export const actions: Record<string, Handler> = {
     }).parse(input);
     if (d.kind === "image" && !d.content_type.startsWith("image/")) throw new AdminError("That file is not an image.");
     if (d.kind === "video" && !d.content_type.startsWith("video/")) throw new AdminError("That file is not a video.");
+    const bytes = Buffer.from(d.base64, "base64");
+    if (bytes.length > 100 * 1024 * 1024) throw new AdminError("File must be below 100 MB.", 413);
+    if (!validMediaBytes(bytes, d.kind, d.content_type)) throw new AdminError("Upload a PNG, JPEG, GIF, WebP, MP4, MOV, WebM or Ogg media file.");
     const safe = d.filename.replace(/[^A-Za-z0-9._-]/g, "-").slice(-80);
     const path = `${Date.now()}-${safe}`;
     const client = await db();
-    const up = await client.storage.from("banners").upload(path, Buffer.from(d.base64, "base64"), { contentType: d.content_type, upsert: false });
+    const up = await client.storage.from("banners").upload(path, bytes, { contentType: d.content_type, upsert: false });
     if (up.error) throw new AdminError("Upload failed. Try a smaller file.");
     const signed = await client.storage.from("banners").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
     if (signed.error || !signed.data?.signedUrl) throw new AdminError("Upload failed. Try again.");
