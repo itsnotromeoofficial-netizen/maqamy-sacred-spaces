@@ -333,6 +333,66 @@ export type Database = {
         }
         Relationships: []
       }
+      shopper_ai_state: {
+        Row: {
+          blocked: boolean
+          id: string
+          message: string | null
+        }
+        Insert: {
+          blocked?: boolean
+          id: string
+          message?: string | null
+        }
+        Update: {
+          blocked?: boolean
+          id?: string
+          message?: string | null
+        }
+        Relationships: []
+      }
+      shopper_challenges: {
+        Row: {
+          answer: number
+          assessed_at: string | null
+          binding: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          proof: string | null
+          purpose: string
+          risk: string | null
+          signals: Json | null
+        }
+        Insert: {
+          answer: number
+          assessed_at?: string | null
+          binding: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          proof?: string | null
+          purpose: string
+          risk?: string | null
+          signals?: Json | null
+        }
+        Update: {
+          answer?: number
+          assessed_at?: string | null
+          binding?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          proof?: string | null
+          purpose?: string
+          risk?: string | null
+          signals?: Json | null
+        }
+        Relationships: []
+      }
       typography_settings: {
         Row: {
           id: string
@@ -356,6 +416,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      guarded_place_order: { Args: { _proof: string }; Returns: string }
       place_order: { Args: never; Returns: string }
       rate_limit_clear: {
         Args: { _bucket: string; _key: string }
