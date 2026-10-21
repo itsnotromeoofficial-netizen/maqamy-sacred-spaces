@@ -43,6 +43,13 @@
       "when": 1792554800868,
       "tag": "0005_website_typography_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792555453262,
+      "tag": "0006_secure_checkout_binding_and_banner_access",
+      "breakpoints": true
     }
   ]
 }
