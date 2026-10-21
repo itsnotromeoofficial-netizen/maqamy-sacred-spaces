@@ -42,7 +42,8 @@ export function typographyCss(settings: TypographySettings) {
   return (["mobile", "desktop"] as const).map((device) => {
     const rules = typographyRoles.flatMap(({ key }) => {
       const value = settings[key]?.[device];
-      return value == null ? [] : [`.website-typography .type-${key} { font-size: ${value}px !important; line-height: ${key === "heading" || key.includes("Heading") || key.startsWith("product") ? "1.2" : "1.6"}; }`];
+      const selectors = key === "control" ? ".website-typography button, .website-typography input, .website-typography textarea, .website-typography select, .website-typography [data-slot=button], .website-typography label" : key === "navigation" ? ".website-typography header nav, .website-typography header a, .website-typography header button" : key === "footer" ? ".website-typography footer, .website-typography footer a, .website-typography footer p" : `.website-typography .type-${key}`;
+      return value == null ? [] : [`${selectors} { font-size: ${value}px !important; line-height: ${key === "heading" || key.includes("Heading") || key.startsWith("product") ? "1.2" : "1.6"}; }`];
     }).join("\n");
     return `@media (${device === "mobile" ? "max-width: 1023px" : "min-width: 1024px"}) { ${rules} }`;
   }).join("\n");

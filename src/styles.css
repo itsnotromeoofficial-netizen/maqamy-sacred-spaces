@@ -335,3 +335,19 @@ button:active:not(:disabled), [role="button"]:active, a:active {
     transition-duration: 0.001ms !important;
   }
 }
+
+.typography-preview { overflow-wrap: anywhere; }
+.preview-heading { font-size: var(--type-heading-preview); line-height: 1.4; }
+.preview-body { font-size: var(--type-body-preview); line-height: 1.4; }
+.preview-label { font-size: var(--type-label-preview); line-height: 1.4; }
+.preview-control { font-size: var(--type-control-preview); line-height: 1.4; }
+.preview-homeHeading { font-size: var(--type-homeHeading-preview); line-height: 1.4; }
+.preview-homeQuote { font-size: var(--type-homeQuote-preview); line-height: 1.4; }
+.preview-storyBody { font-size: var(--type-storyBody-preview); line-height: 1.4; }
+.preview-productCard { font-size: var(--type-productCard-preview); line-height: 1.4; }
+.preview-productDetail { font-size: var(--type-productDetail-preview); line-height: 1.4; }
+.preview-price { font-size: var(--type-price-preview); line-height: 1.4; }
+.preview-banner { font-size: var(--type-banner-preview); line-height: 1.4; }
+.preview-navigation { font-size: var(--type-navigation-preview); line-height: 1.4; }
+.preview-footer { font-size: var(--type-footer-preview); line-height: 1.4; }
+.preview-accountHeading { font-size: var(--type-accountHeading-preview); line-height: 1.4; }
