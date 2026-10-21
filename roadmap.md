@@ -1,9 +1,9 @@
 # MAQAMY rebuild
 
 ## Checkout recovery
-- [ ] Route payment requests from external hosting to the authenticated Lovable payment service
-- [ ] Stop stuck checkout states, show payment errors, and allow retrying the same order
-- [ ] Verify authenticated checkout and error recovery without charging a real card
+- [x] Route payment requests from external hosting to the authenticated Lovable payment service
+- [x] Stop stuck checkout states, show payment errors, and allow retrying the same order
+- [x] Verify authenticated checkout and error recovery without charging a real card
 
 ## Verification and Typography fixes
 - [x] Replace AI verification with a click-to-pass check without network requests
