@@ -61,6 +61,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const { data: order, error: orderError } = await supabase.from("orders").select("*").eq("order_number", data.orderNumber).eq("user_id", userId).maybeSingle();
       if (orderError || !order) throw new Error("Order not found.");
       if (order.payment_status === "paid" || order.status === "rejected") throw new Error("This order is not eligible for payment.");
+      if (order.payment_environment && order.payment_environment !== data.environment) throw new Error("This order already has a payment in another environment.");
       // place_order clears the cart; checkout must use the immutable order snapshot.
       const cartItems = z.array(orderItemSchema).min(1).max(100).parse(order.items);
 

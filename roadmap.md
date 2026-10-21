@@ -1,10 +1,11 @@
 # MAQAMY rebuild
 
 ## Security hardening
-- [ ] Tighten admin permissions and revoke deleted-account sessions
-- [ ] Harden request validation, media inputs and payment ownership checks
-- [ ] Add bot verification where configuration permits
-- [ ] Verify blocked requests and legitimate admin access
+- [x] Tighten admin permissions and revoke deleted-account sessions
+- [x] Harden request validation, media inputs and payment ownership checks
+- [x] Add basic automated-form blocking to admin sign-in
+- [ ] Add full CAPTCHA verification — blocked until Cloudflare Turnstile keys are supplied
+- [x] Verify blocked requests and legitimate admin access
 
 ## Admin typography
 - [x] Add saved desktop and mobile sizing across customer pages and shared navigation/banners
