@@ -73,9 +73,28 @@ export async function checkoutForOrder(data: CheckoutRequest, context: { supabas
       const priceList = await stripe.prices.list({ lookup_keys: priceIds, limit: 100 });
       const priceByLookup = new Map(priceList.data.map((price) => [price.lookup_key, price]));
 
-      const missing = priceIds.filter((id) => !priceByLookup.has(id));
-      if (missing.length) {
-        throw new Error("One or more items in your cart are not available for online payment. Please contact us.");
+      // Products added through the admin panel have no Stripe price yet.
+      // Create it on demand, bound to the order's locked-in snapshot price,
+      // reusing the same lookup key so future orders share it.
+      for (const item of cartItems) {
+        const lookupKey = priceIdFor(item.collection, item.package);
+        if (priceByLookup.has(lookupKey)) continue;
+        try {
+          const product = await stripe.products.create({ name: `${item.collection} ${item.package} edition` });
+          const price = await stripe.prices.create({
+            product: product.id,
+            currency: "myr",
+            unit_amount: item.unit_price * 100,
+            lookup_key: lookupKey,
+          });
+          priceByLookup.set(lookupKey, price);
+        } catch {
+          // A concurrent checkout may have created the price first; re-read it.
+          const refreshed = await stripe.prices.list({ lookup_keys: [lookupKey], limit: 1 });
+          const existing = refreshed.data[0];
+          if (!existing) throw new Error("One or more items in your cart are not available for online payment. Please contact us.");
+          priceByLookup.set(lookupKey, existing);
+        }
       }
 
       const lineItems = cartItems.map((item) => {

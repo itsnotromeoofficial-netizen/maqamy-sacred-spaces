@@ -18,6 +18,11 @@ describe("admin access controls", () => {
     assert.equal(canAdminPerform("banCustomer", { ...claims, team: "Sales Team" }), false);
     assert.equal(canAdminPerform("approveOrder", { ...claims, team: "Sales Team" }), false);
   });
+  it("only the owner can delete orders", () => {
+    assert.equal(canAdminPerform("deleteOrder", claims), false);
+    assert.equal(canAdminPerform("deleteOrder", { ...claims, team: "Sales Team" }), false);
+    assert.equal(canAdminPerform("deleteOrder", { ...claims, master: true }), true);
+  });
   it("unknown teams do not inherit sales permissions", () => {
     assert.equal(canAdminPerform("listCustomers", { ...claims, team: "Custom" }), false);
   });
