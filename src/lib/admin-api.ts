@@ -89,6 +89,7 @@ export const updateOrderStatus = ({ data }: D<{ id: string; status: OrderStatus 
 export type DeliveryMember = { id: string; username: string };
 export const listDeliveryTeam = () => call<DeliveryMember[]>("listDeliveryTeam");
 export const approveOrder = ({ data }: D<{ id: string; assign_to: string }>) => call<{ ok: true; invoice_number: string; assigned_to: string }>("approveOrder", data);
+export const deleteAdminOrder = ({ data }: D<{ id: string }>) => call("deleteOrder", data);
 export type AdminInvoice = Tables<"invoices">;
 export const listAdminInvoices = () => call<AdminInvoice[]>("listInvoices");
 export const searchInvoices = ({ data }: D<{ order_number: string }>) => call<AdminInvoice[]>("searchInvoice", data);

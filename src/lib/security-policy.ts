@@ -9,7 +9,7 @@ export type AdminClaims = z.infer<typeof adminClaimsSchema>;
 
 const ownerActions = new Set([
   "listAdmins", "createAdmin", "deleteAdmin", "listInvoices", "searchInvoice",
-  "approveOrder", "banCustomer", "deleteCustomer", "saveBanner", "deleteBanner",
+  "approveOrder", "deleteOrder", "banCustomer", "deleteCustomer", "saveBanner", "deleteBanner",
   "uploadBanner", "getTypography", "saveTypography",
 ]);
 const salesActions = new Set(["session", "listProducts", "saveProduct", "adjustStock", "setStock", "deleteProduct", "listCustomers", "listOrders", "listDeliveryTeam", "listBanners"]);

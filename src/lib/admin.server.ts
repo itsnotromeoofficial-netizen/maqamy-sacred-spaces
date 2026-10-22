@@ -276,6 +276,19 @@ export const actions: Record<string, Handler> = {
     return { ok: true };
   },
 
+  deleteOrder: async (input, c) => {
+    if (!c.master) throw new AdminError("Only the owner can delete orders.", 403);
+    const { id } = idOnly.parse(input);
+    const client = await db();
+    const { data: order, error } = await client.from("orders").select("id, status").eq("id", id).maybeSingle();
+    if (error || !order) throw new AdminError("Order not found.", 404);
+    if (order.status === "pending") throw new AdminError("Approve or decline this order before deleting it.", 409);
+    await client.from("invoices").delete().eq("order_id", id);
+    const del = await client.from("orders").delete().eq("id", id);
+    if (del.error) throw new AdminError("Order could not be deleted.");
+    return { ok: true };
+  },
+
   listInvoices: async (_i, c) => {
     if (!c.master) throw new AdminError("Only the owner can view invoices.", 403);
     const { data, error } = await (await db()).from("invoices").select("*").order("created_at", { ascending: false }).limit(500);
