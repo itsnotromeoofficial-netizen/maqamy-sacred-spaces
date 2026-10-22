@@ -16,6 +16,10 @@ export async function requestCheckout(input: CheckoutRequest): Promise<string> {
     });
     const body = await response.json().catch(() => null) as { clientSecret?: string; error?: string } | null;
     if (body?.error) throw new Error(body.error);
+    if (response.status === 401) throw new Error("Payment authorization was rejected. Please sign out and sign in again before retrying this order.");
+    if (response.status === 403) throw new Error("Payment is not allowed from this website. Please open maqamy.co and retry your saved order.");
+    if (response.status === 404) throw new Error("The payment service is not available at this address. Please contact MAQAMY before retrying.");
+    if (response.status >= 500) throw new Error("The payment service is temporarily unavailable. Please retry payment for this same order shortly.");
     if (!response.ok || !body?.clientSecret) throw new Error("Payment could not start. Please try again; if this continues, contact MAQAMY.");
     return body.clientSecret;
   } catch (error) {
