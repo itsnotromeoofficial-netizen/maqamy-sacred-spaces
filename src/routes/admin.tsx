@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Tables } from "@/integrations/supabase/types";
 import {
-  adjustAdminStock, approveOrder, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminProduct, deleteCustomer,
+  adjustAdminStock, approveOrder, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminOrder, deleteAdminProduct, deleteCustomer,
   getAdminSession, listAdminAccounts, listAdminCustomers, listAdminInvoices, listAdminOrders, listAdminProducts, listDeliveryTeam, loginAdmin,
   logoutAdmin, saveAdminProduct, searchInvoices, setAdminStock, updateOrderStatus,
   deleteAdminBanner, listAdminBanners, saveAdminBanner, uploadAdminBanner, type AdminBanner,
@@ -112,6 +112,11 @@ function OrdersPanel({ session }: { session: AdminSession }) {
       setAssigning(null); setAssignTo(""); await refresh();
     } catch (e) { toast.error(errorText(e, "Order could not be approved.")); }
   };
+  const removeOrder = async (order: Order) => {
+    if (!window.confirm(`Delete order ${order.order_number}? Its invoice will be removed too. This cannot be undone.`)) return;
+    try { await deleteAdminOrder({ data: { id: order.id } }); toast.success(`${order.order_number} deleted.`); await refresh(); }
+    catch (e) { toast.error(errorText(e, "Order could not be deleted.")); }
+  };
 
   if (!orders) return <Loading />;
   return <section>
@@ -165,6 +170,9 @@ function OrdersPanel({ session }: { session: AdminSession }) {
               <select value={order.status} onChange={(e) => void setStatus(order, e.target.value as OrderStatus)} className="h-8 border border-brand-gold/30 bg-card px-2 text-xs">
                 {(isDelivery ? (["preparing", "shipped", "delivered"] as OrderStatus[]) : ORDER_STATUSES.filter((s) => s !== "pending")).map((s) => <option key={s} value={s}>{ORDER_LABELS[s]}</option>)}
               </select>
+            ) : null}
+            {session.master && order.status !== "pending" ? (
+              <Button variant="ghost" size="sm" onClick={() => void removeOrder(order)}><Trash2 /> Delete</Button>
             ) : null}
           </div>
         </article>;
