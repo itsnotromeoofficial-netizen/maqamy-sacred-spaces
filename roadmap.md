@@ -1,7 +1,7 @@
 # MAQAMY rebuild
 
 ## Checkout recovery
-- [ ] Fix preview authorization by routing hosted checkout to the published payment service and verify signed-in checkout
+- [x] Fix preview authorization by routing hosted checkout to the published payment service and verify signed-in checkout
 - [x] Route payment requests from external hosting to the authenticated Lovable payment service
 - [x] Stop stuck checkout states, show payment errors, and allow retrying the same order
 - [x] Verify authenticated checkout and error recovery without charging a real card
