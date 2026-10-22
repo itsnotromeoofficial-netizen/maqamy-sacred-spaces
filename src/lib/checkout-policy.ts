@@ -10,7 +10,10 @@ export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
 
 export function checkoutEndpoint(origin: string) {
   const url = new URL(origin);
-  const local = url.hostname === "localhost" || url.hostname.endsWith(".lovable.app") || url.hostname.endsWith(".lovableproject.com");
+  // Preview hosts have a separate editor authorization gate that rejects shopper
+  // bearer tokens before our handler. Use the public hosted service everywhere
+  // except localhost, where the handler can be tested directly.
+  const local = url.hostname === "localhost";
   return `${local ? url.origin : "https://maqamy-sacred-spaces.lovable.app"}/api/public/payments/checkout`;
 }
 
