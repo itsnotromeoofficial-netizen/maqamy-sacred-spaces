@@ -6,16 +6,16 @@
 - [x] Verify checkout opens for a newly created product without charging
 
 ## Admin status confirmation
-- [ ] Require a "Confirm to change" step before moving an assigned order to another status
+- [x] Require a "Confirm to change" step before moving an assigned order to another status
 
 ## Image refresh
-- [ ] Replace home image with the 2nd uploaded image, story page with the 1st, collections page with the 4th
-- [ ] Use the remaining two uploaded images for other suitable placements
-- [ ] Verify the swapped images on desktop and mobile
+- [x] Replace home image with the 2nd uploaded image, story page with the 1st, collections page with the 4th
+- [x] Use the remaining two uploaded images for other suitable placements
+- [x] Verify the swapped images on desktop and mobile
 
 ## Admin product save failure
-- [ ] Diagnose and fix adding/editing products in the admin console
-- [ ] Verify adding and editing a product end to end
+- [x] Diagnose and fix adding/editing products in the admin console
+- [x] Verify adding and editing a product end to end
 
 ## Checkout recovery
 - [x] Fix preview authorization by routing hosted checkout to the published payment service and verify signed-in checkout
