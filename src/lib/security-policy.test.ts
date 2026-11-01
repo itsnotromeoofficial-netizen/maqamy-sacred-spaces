@@ -30,6 +30,8 @@ describe("admin access controls", () => {
     assert.equal(adminClaimsSchema.safeParse({ ...claims, master: "true" }).success, false);
   });
   it("media rejects executable and insecure URLs", () => {
+    assert.equal(safeMediaUrl.safeParse("").success, false);
+    assert.equal(safeMediaUrl.safeParse("https://").success, false);
     assert.equal(safeMediaUrl.safeParse("javascript:alert(1)").success, false);
     assert.equal(safeMediaUrl.safeParse("http://example.com/test.jpg").success, false);
     assert.equal(safeMediaUrl.safeParse("https://example.com/test.mp4").success, true);

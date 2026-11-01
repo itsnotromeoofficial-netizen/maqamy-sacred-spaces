@@ -1,8 +1,9 @@
-import jannaCollection from "@/assets/janna-collection.jpg";
-import desertImage from "@/assets/maqamy-desert.jpg";
+import authAsset from "@/assets/maqamy-auth.jpg.asset.json";
+import homeAsset from "@/assets/maqamy-home.jpg.asset.json";
+import jannaAsset from "@/assets/maqamy-janna.jpg.asset.json";
 import logoAsset from "@/assets/maqamy-logo.png.asset.json";
-import prayerSpaceImage from "@/assets/maqamy-prayer-space.jpg";
-import noorCollection from "@/assets/noor-collection.jpg";
+import noorAsset from "@/assets/maqamy-noor.jpg.asset.json";
+import storyAsset from "@/assets/maqamy-story.jpg.asset.json";
 
 export type CollectionName = "Noor" | "Janna";
 export type PackageName = "Essential" | "Signature" | "Bespoke";
@@ -28,12 +29,16 @@ export type ProductCollection = {
   packages: ProductPackage[];
 };
 
+// Asset proxy paths belong to the Lovable host, not the Vercel/custom domain.
+const assetUrl = (url: string) => new URL(url, "https://maqamy-sacred-spaces.lovable.app").href;
 export const brandAssets = {
-  // Asset proxy paths belong to the Lovable host, not the Vercel/custom domain.
-  logo: new URL(logoAsset.url, "https://maqamy-sacred-spaces.lovable.app").href,
-  desert: desertImage,
-  prayerSpace: prayerSpaceImage,
+  logo: assetUrl(logoAsset.url),
+  desert: assetUrl(homeAsset.url),
+  prayerSpace: assetUrl(storyAsset.url),
+  auth: assetUrl(authAsset.url),
 };
+const noorCollection = assetUrl(noorAsset.url);
+const jannaCollection = assetUrl(jannaAsset.url);
 
 export const collections: ProductCollection[] = [
   {

@@ -101,9 +101,16 @@ function OrdersPanel({ session }: { session: AdminSession }) {
   const pending = (orders ?? []).filter((o) => o.status === "pending").length;
   const isDelivery = !session.master && session.team === "Delivery Team";
 
+  const [pendingStatus, setPendingStatus] = useState<{ id: string; status: OrderStatus } | null>(null);
   const setStatus = async (order: Order, status: OrderStatus) => {
     try { await statusFn({ data: { id: order.id, status } }); toast.success(`${order.order_number} · ${ORDER_LABELS[status]}`); await refresh(); }
     catch (e) { toast.error(errorText(e, "Order could not be updated.")); }
+  };
+  const confirmStatus = async (order: Order) => {
+    if (pendingStatus?.id !== order.id) return;
+    const status = pendingStatus.status;
+    setPendingStatus(null);
+    await setStatus(order, status);
   };
   const approve = async (order: Order) => {
     try {
@@ -167,9 +174,17 @@ function OrdersPanel({ session }: { session: AdminSession }) {
                 <Button variant="ghost" size="sm" onClick={() => void setStatus(order, "rejected")}>Decline</Button>
               </>
             ) : order.status !== "pending" && order.status !== "rejected" ? (
-              <select value={order.status} onChange={(e) => void setStatus(order, e.target.value as OrderStatus)} className="h-8 border border-brand-gold/30 bg-card px-2 text-xs">
-                {(isDelivery ? (["preparing", "shipped", "delivered"] as OrderStatus[]) : ORDER_STATUSES.filter((s) => s !== "pending")).map((s) => <option key={s} value={s}>{ORDER_LABELS[s]}</option>)}
-              </select>
+              pendingStatus?.id === order.id ? (
+                <div className="animate-fade-soft flex flex-wrap items-center gap-2">
+                  <p className="text-xs text-muted-foreground">Change to {ORDER_LABELS[pendingStatus.status]}?</p>
+                  <Button variant="maqamy" size="sm" onClick={() => void confirmStatus(order)}>Confirm to change</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setPendingStatus(null)}>Cancel</Button>
+                </div>
+              ) : (
+                <select value={order.status} onChange={(e) => setPendingStatus({ id: order.id, status: e.target.value as OrderStatus })} className="h-8 border border-brand-gold/30 bg-card px-2 text-xs">
+                  {(isDelivery ? (["preparing", "shipped", "delivered"] as OrderStatus[]) : ORDER_STATUSES.filter((s) => s !== "pending")).map((s) => <option key={s} value={s}>{ORDER_LABELS[s]}</option>)}
+                </select>
+              )
             ) : null}
             {session.master && order.status !== "pending" ? (
               <Button variant="ghost" size="sm" onClick={() => void removeOrder(order)}><Trash2 /> Delete</Button>
