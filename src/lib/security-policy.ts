@@ -24,8 +24,10 @@ export function canAdminPerform(action: string, claims: AdminClaims) {
 }
 
 export const safeMediaUrl = z.string().url().max(2000).refine((value) => {
-  const url = new URL(value);
-  return url.protocol === "https:" && !url.username && !url.password;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password;
+  } catch { return false; }
 }, "Use a direct HTTPS image or video URL.");
 
 export function safeReturnUrl(value: string) {
