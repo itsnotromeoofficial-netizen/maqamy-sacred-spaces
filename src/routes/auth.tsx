@@ -225,7 +225,7 @@ function AuthPage() {
       <div className="grid min-h-screen lg:grid-cols-[0.95fr_1.05fr]">
         <section className="relative hidden overflow-hidden bg-brand-forest lg:block">
           <img
-            src={brandAssets.prayerSpace}
+            src={brandAssets.auth}
             alt="MAQAMY prayer space interior"
             className="h-full w-full object-cover opacity-80"
           />
