@@ -6,6 +6,7 @@ import { BannerCarousel, useBanners } from "@/components/maqamy/banner-carousel"
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
 import { collections, formatRM, type ProductCollection } from "@/lib/maqamy-products";
+import { useSiteAsset } from "@/lib/site-assets";
 import { useCart } from "@/lib/use-cart";
 import { useProducts, type CatalogueProduct } from "@/lib/use-products";
 import { msCollections, trWord, useLang } from "@/lib/i18n";
@@ -31,6 +32,7 @@ type GridItem = {
   image: string | null;
   imageAlt: string;
   stock: number;
+  availability: "available" | "preorder" | "out_of_stock";
   collectionData?: ProductCollection;
   product?: CatalogueProduct | undefined;
 };
@@ -41,6 +43,13 @@ function CollectionsPage() {
   const { t } = useLang();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const banners = useBanners();
+  const noorImage = useSiteAsset("noor");
+  const jannaImage = useSiteAsset("janna");
+  const statusOf = (product: CatalogueProduct | undefined): GridItem["availability"] => {
+    if (!product) return "out_of_stock";
+    const a = product.availability as GridItem["availability"];
+    return a === "available" && product.stock < 1 ? "out_of_stock" : a;
+  };
 
   const items: GridItem[] = collections.flatMap((collection) =>
     collection.packages.map((pkg) => {
@@ -51,9 +60,10 @@ function CollectionsPage() {
         packageName: pkg.name,
         name: `${collection.name} ${pkg.name}`,
         price: product?.price ?? pkg.price,
-        image: collection.image,
+        image: collection.name === "Noor" ? noorImage : collection.name === "Janna" ? jannaImage : collection.image,
         imageAlt: collection.imageAlt,
         stock: product?.stock ?? 0,
+        availability: statusOf(product),
         collectionData: collection,
         product,
       };
@@ -70,6 +80,7 @@ function CollectionsPage() {
       image: product.image_url,
       imageAlt: product.name,
       stock: product.stock,
+      availability: statusOf(product),
       product,
     }));
 
@@ -130,8 +141,8 @@ function ProductCard({ item, onOpen }: { item: GridItem; onOpen: () => void }) {
         <h3 className="type-productCard font-display text-base font-light leading-snug sm:text-xl">{trWord(item.packageName, lang)}</h3>
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <p className="font-display text-sm sm:text-lg type-price">{formatRM(item.price)}{item.packageName === "Bespoke" ? "+" : ""}</p>
-          <span className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${item.stock > 0 ? "text-muted-foreground" : "text-destructive"}`}>
-            {item.stock > 0 ? t(`${item.stock} left`, `${item.stock} lagi`) : t("Sold out", "Habis")}
+          <span className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${item.availability === "out_of_stock" ? "text-destructive" : item.availability === "preorder" ? "text-brand-gold" : "text-muted-foreground"}`}>
+            {item.availability === "preorder" ? t("Pre-order", "Pra-tempahan") : item.availability === "available" ? t(`${item.stock} left`, `${item.stock} lagi`) : t("Sold out", "Habis")}
           </span>
         </div>
       </div>
@@ -200,14 +211,14 @@ function ProductDetail({ item, signedIn, onAdd, onBack }: {
                   {includes.map((include) => <li key={include} className="border-b border-brand-forest/5 pb-2 last:border-0">{trWord(include, lang)}</li>)}
                 </ul>
               ) : null}
-              <p className={`mt-4 text-[10px] font-semibold uppercase tracking-[0.3em] ${item.stock > 0 ? "text-muted-foreground" : "text-destructive"}`}>
-                {item.stock > 0 ? t(`${item.stock} available`, `${item.stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}
+              <p className={`mt-4 text-[10px] font-semibold uppercase tracking-[0.3em] ${item.availability === "out_of_stock" ? "text-destructive" : item.availability === "preorder" ? "text-brand-gold" : "text-muted-foreground"}`}>
+                {item.availability === "preorder" ? t("Pre-order — pay now, we prepare it for you", "Pra-tempahan — bayar sekarang, kami sediakan untuk anda") : item.availability === "available" ? t(`${item.stock} available`, `${item.stock} tersedia`) : t("Currently unavailable", "Tiada stok buat masa ini")}
               </p>
 
               <div className="mt-6 grid gap-2">
                 {signedIn ? (
-                  <Button variant="maqamy" size="lg" className="w-full" disabled={item.stock < 1} onClick={() => void onAdd(item.collection, item.packageName)}>
-                    <ShoppingBag /> {item.stock > 0 ? t("Add to cart", "Tambah ke troli") : t("Out of stock", "Kehabisan stok")}
+                  <Button variant="maqamy" size="lg" className="w-full" disabled={item.availability === "out_of_stock"} onClick={() => void onAdd(item.collection, item.packageName)}>
+                    <ShoppingBag /> {item.availability === "preorder" ? t("Pre-order now", "Pra-tempah sekarang") : item.availability === "available" ? t("Add to cart", "Tambah ke troli") : t("Out of stock", "Kehabisan stok")}
                   </Button>
                 ) : (
                   <Button asChild variant="maqamy" size="lg" className="w-full">
