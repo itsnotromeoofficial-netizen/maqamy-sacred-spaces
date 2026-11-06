@@ -80,6 +80,7 @@ function OrderCard({ order }: { order: Tables<"orders"> }) {
         <div>
           <p className="type-label text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">{t("Order number", "Nombor pesanan")}</p>
           <h2 className="type-heading mt-2 font-display text-4xl font-light">{order.order_number}</h2>
+          {order.is_preorder ? <p className="type-label mt-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-brand-gold">{order.payment_status === "paid" ? t("Paid · Pre-ordered", "Dibayar · Pra-tempahan") : t("Pre-order", "Pra-tempahan")}</p> : null}
           <p className="type-body mt-1 text-sm text-muted-foreground">{t("Placed", "Dibuat")} {new Date(order.created_at).toLocaleString(lang === "ms" ? "ms-MY" : "en-MY")}</p>
         </div>
         <div className="text-right">
