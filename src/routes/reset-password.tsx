@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { brandAssets } from "@/lib/maqamy-products";
+import { SiteImg } from "@/components/maqamy/site-img";
 import { tr, useLang } from "@/lib/i18n";
 
 const passwordSchema = () => z
@@ -70,7 +70,7 @@ function ResetPasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-cream px-5 py-10 text-brand-forest">
       <div className="w-full max-w-md border border-brand-gold/30 bg-card p-6 shadow-maqamy">
-        <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto mb-6 w-24" />
+        <SiteImg slot="logo" alt="MAQAMY Living Concepts" className="mx-auto mb-6 w-24" />
         <h1 className="type-accountHeading font-display text-4xl font-light">{t("Reset password", "Tetapkan semula kata laluan")}</h1>
         <p className="type-body mt-3 text-sm leading-6 text-muted-foreground">
           {hasRecovery

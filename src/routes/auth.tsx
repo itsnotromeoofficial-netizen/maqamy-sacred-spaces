@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
-import { brandAssets } from "@/lib/maqamy-products";
+import { SiteImg } from "@/components/maqamy/site-img";
 import { siteUrl } from "@/lib/site";
 import { tr, useLang } from "@/lib/i18n";
 import { ShopperChallenge } from "@/components/maqamy/shopper-challenge";
@@ -224,14 +224,14 @@ function AuthPage() {
     <main className="min-h-screen bg-brand-cream text-brand-forest">
       <div className="grid min-h-screen lg:grid-cols-[0.95fr_1.05fr]">
         <section className="relative hidden overflow-hidden bg-brand-forest lg:block">
-          <img
-            src={brandAssets.auth}
+          <SiteImg
+            slot="auth"
             alt="MAQAMY prayer space interior"
             className="h-full w-full object-cover opacity-80"
           />
           <div className="absolute inset-0 bg-brand-forest/35" />
           <div className="absolute left-10 top-10 w-28">
-            <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="w-full invert" />
+            <SiteImg slot="logo" alt="MAQAMY Living Concepts" className="w-full invert" />
           </div>
           <div className="absolute bottom-10 left-10 max-w-md text-brand-cream">
             <p className="type-body font-display text-3xl font-light italic leading-tight">{t("A place to return.", "Tempat untuk kembali.")}</p>
@@ -258,7 +258,7 @@ function AuthPage() {
                     {verify ? t("Verify", "Sahkan") : mode === "register" ? t("Register", "Daftar") : t("Sign in", "Log masuk")}
                   </h1>
                 </div>
-                <img src={brandAssets.logo} alt="MAQAMY" className="w-20" />
+                <SiteImg slot="logo" alt="MAQAMY" className="w-20" />
               </div>
 
               {verify ? (
