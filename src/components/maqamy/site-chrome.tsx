@@ -3,7 +3,7 @@ import { LogOut, Menu, ShoppingBag, UserRound, X } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { brandAssets } from "@/lib/maqamy-products";
+import { SiteImg } from "@/components/maqamy/site-img";
 import { useLang } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/maqamy/language-picker";
 
@@ -45,7 +45,7 @@ export function SiteHeader({ itemCount = 0, userEmail, onSignOut, tone = "light"
           )}
         </div>
         <Link to="/" aria-label="MAQAMY introduction" onClick={onLogoClick} className="mx-auto block w-full max-w-40 sm:max-w-52 lg:w-64 lg:max-w-none">
-          <img src={brandAssets.logo} alt="MAQAMY" className={`h-auto w-full ${light ? "brightness-0 invert" : ""}`} />
+          <SiteImg slot="logo" alt="MAQAMY" className={`h-auto w-full ${light ? "brightness-0 invert" : ""}`} />
         </Link>
         <div className="flex justify-end">
           <Button asChild variant="ghost" className={`h-10 w-10 shrink-0 px-0 lg:w-auto lg:gap-3 lg:px-3 ${textClass}`} aria-label={`Cart with ${itemCount} items`}>
@@ -91,7 +91,7 @@ export function SiteFooter() {
     <footer className="bg-brand-ink px-5 py-10 text-brand-cream sm:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
         <div className="text-center sm:text-left">
-          <img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto w-48 brightness-0 invert sm:mx-0" />
+          <SiteImg slot="logo" alt="MAQAMY Living Concepts" className="mx-auto w-48 brightness-0 invert sm:mx-0" />
           <p className="type-footer mt-5 text-xs uppercase text-brand-cream/60">MAQAMY Living Concepts © 2026</p>
         </div>
         <div className="flex flex-wrap gap-6 text-sm text-brand-cream/70">

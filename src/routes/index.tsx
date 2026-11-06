@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { BannerCarousel, useBanners } from "@/components/maqamy/banner-carousel";
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
-import { brandAssets } from "@/lib/maqamy-products";
+import { SiteImg } from "@/components/maqamy/site-img";
 import { useCart } from "@/lib/use-cart";
 import { useLang } from "@/lib/i18n";
 
@@ -49,7 +49,7 @@ function IntroductionPage() {
     <main className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-brand-forest text-brand-cream">
       <Button variant="ghost" size="sm" onClick={() => setOpening(false)} className="absolute right-5 top-5 text-brand-cream"><X /> {t("Skip", "Langkau")}</Button>
       <div className="text-center">
-        <Button variant="ghost" className="h-auto p-2" aria-label="MAQAMY Living Concepts" onClick={handleLogoTap}><img src={brandAssets.logo} alt="MAQAMY Living Concepts" className="mx-auto w-60 brightness-0 invert sm:w-80" /></Button>
+        <Button variant="ghost" className="h-auto p-2" aria-label="MAQAMY Living Concepts" onClick={handleLogoTap}><SiteImg slot="logo" alt="MAQAMY Living Concepts" className="mx-auto w-60 brightness-0 invert sm:w-80" /></Button>
         <div className="mx-auto mt-10 h-12 w-1 animate-spin-bar bg-brand-gold" aria-hidden="true" />
         <p className="type-label mt-10 text-xs font-semibold uppercase tracking-[0.2em] text-brand-gold-soft">{t("A place to return", "Tempat untuk kembali")}</p>
       </div>
@@ -61,7 +61,7 @@ function IntroductionPage() {
       <div className="bg-brand-cream"><SiteHeader tone="dark" itemCount={itemCount} userEmail={userEmail} onSignOut={signOut} /></div>
       <BannerCarousel banners={banners} />
       <section className="maqamy-introduction relative overflow-hidden">
-        <img src={brandAssets.desert} alt="A solitary tree in a quiet desert landscape" className="maqamy-landscape absolute inset-0 h-full w-full object-cover" />
+        <SiteImg slot="home" alt="A solitary tree in a quiet desert landscape" className="maqamy-landscape absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-brand-forest/45" />
         <div className="maqamy-introduction relative mx-auto flex max-w-7xl flex-col items-center justify-center px-5 py-10 text-center sm:px-8 lg:px-12 lg:py-14">
           <p className="type-label animate-fade-soft max-w-2xl text-[10px] font-semibold uppercase leading-5 text-brand-gold-soft">{t("Inspired by the Islamic understanding of Ḥuḍūr al-Qalb", "Diilhamkan oleh pemahaman Islam tentang Ḥuḍūr al-Qalb")}</p>

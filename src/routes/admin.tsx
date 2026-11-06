@@ -12,15 +12,16 @@ import {
   adjustAdminStock, approveOrder, banCustomer, createAdminAccount, deleteAdminAccount, deleteAdminOrder, deleteAdminProduct, deleteCustomer,
   getAdminSession, listAdminAccounts, listAdminCustomers, listAdminInvoices, listAdminOrders, listAdminProducts, listDeliveryTeam, loginAdmin,
   logoutAdmin, saveAdminProduct, searchInvoices, setAdminStock, updateOrderStatus,
-  deleteAdminBanner, listAdminBanners, saveAdminBanner, uploadAdminBanner, type AdminBanner,
+  deleteAdminBanner, listAdminBanners, setAdminAvailability, listAdminSiteAssets, saveAdminSiteAsset, resetAdminSiteAsset, saveAdminBanner, uploadAdminBanner, type AdminBanner,
   type AdminAccount, type AdminCustomer, type AdminInvoice, type AdminOrder, type AdminSession, type DeliveryMember,
 } from "@/lib/admin-api";
 import { brandAssets, formatRM } from "@/lib/maqamy-products";
+import { SITE_ASSET_SLOTS, refreshSiteAssets } from "@/lib/site-assets";
 import { ORDER_LABELS, ORDER_STATUSES, parseList, type OrderItem, type OrderStatus } from "@/lib/orders";
 
 type Product = Tables<"products">;
 type Order = AdminOrder;
-type Tab = "typography" | "orders" | "products" | "customers" | "admins" | "invoices" | "banners";
+type Tab = "typography" | "orders" | "products" | "customers" | "admins" | "invoices" | "banners" | "assets";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [
@@ -59,7 +60,7 @@ function AdminPage() {
       { id: "products" as Tab, label: "Products" },
       { id: "customers" as Tab, label: "Customers" },
     ] : []),
-    ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "banners" as Tab, label: "Banners" }, { id: "typography" as Tab, label: "Typography" }, { id: "admins" as Tab, label: "Admin team" }] : []),
+    ...(session.master ? [{ id: "invoices" as Tab, label: "Invoices" }, { id: "banners" as Tab, label: "Banners" }, { id: "assets" as Tab, label: "Assets" }, { id: "typography" as Tab, label: "Typography" }, { id: "admins" as Tab, label: "Admin team" }] : []),
   ];
 
   return <main className="min-h-screen bg-brand-mist text-brand-forest">
@@ -79,7 +80,7 @@ function AdminPage() {
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`-mb-px whitespace-nowrap border-b-2 px-5 py-3 text-sm font-semibold transition-colors duration-300 ${tab === t.id ? "border-brand-forest text-brand-forest" : "border-transparent text-muted-foreground hover:text-brand-forest"}`}>{t.label}</button>)}
       </nav>
       <div key={tab} className="animate-fade-soft py-10">
-        {tabs.length === 0 ? <p className="text-sm text-muted-foreground">This team has no store-management permissions.</p> : tab === "typography" && session.master ? <TypographyPanel /> : tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel canManage={session.master} /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : <AdminsPanel />}
+        {tabs.length === 0 ? <p className="text-sm text-muted-foreground">This team has no store-management permissions.</p> : tab === "typography" && session.master ? <TypographyPanel /> : tab === "orders" ? <OrdersPanel session={session} /> : tab === "products" ? <ProductsPanel /> : tab === "customers" ? <CustomersPanel canManage={session.master} /> : tab === "invoices" ? <InvoicesPanel /> : tab === "banners" ? <BannersPanel /> : tab === "assets" ? <AssetsPanel /> : <AdminsPanel />}
       </div>
     </div>
   </main>;
@@ -151,7 +152,7 @@ function OrdersPanel({ session }: { session: AdminSession }) {
             </div>
             <div className="text-right">
               <StatusPill status={order.status as OrderStatus} />
-              <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${order.payment_status === "paid" ? "text-brand-gold" : "text-muted-foreground"}`}>{order.payment_status === "paid" ? "Paid" : order.payment_status === "failed" ? "Payment failed" : "Not paid"}</p>
+              <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${order.payment_status === "paid" ? "text-brand-gold" : "text-muted-foreground"}`}>{order.payment_status === "paid" ? "Paid" : order.payment_status === "failed" ? "Payment failed" : "Not paid"}{order.is_preorder ? " · Pre-order" : ""}</p>
               <p className="mt-3 font-display text-3xl">{formatRM(order.total)}</p>
             </div>
           </div>
@@ -252,11 +253,16 @@ function StatusPill({ status }: { status: OrderStatus }) {
 
 /* ---------------- Products ---------------- */
 
+type Availability = "available" | "preorder" | "out_of_stock";
+const AVAILABILITY: { id: Availability; label: string }[] = [
+  { id: "available", label: "Available" }, { id: "preorder", label: "Pre-order" }, { id: "out_of_stock", label: "Out of stock" },
+];
+
 type FormState = {
   id?: string; name: string; collection: string; package: string; description: string; price: number; stock: number;
-  image_url: string; display_order: number; specifications: string; features: string; colours: string; varieties: string;
+  image_url: string; display_order: number; availability: Availability; specifications: string; features: string; colours: string; varieties: string;
 };
-const emptyForm: FormState = { name: "", collection: "MAQAMY", package: "", description: "", price: 0, stock: 0, image_url: "", display_order: 100, specifications: "", features: "", colours: "", varieties: "" };
+const emptyForm: FormState = { name: "", collection: "MAQAMY", package: "", description: "", price: 0, stock: 0, image_url: "", display_order: 100, availability: "available", specifications: "", features: "", colours: "", varieties: "" };
 
 function ProductsPanel() {
   const listFn = listAdminProducts;
@@ -271,7 +277,7 @@ function ProductsPanel() {
   useEffect(() => { void refresh(); }, []);
 
   const edit = (p: Product) => {
-    setForm({ id: p.id, name: p.name, collection: p.collection, package: p.package, description: p.description, price: p.price, stock: p.stock, image_url: p.image_url ?? "", display_order: p.display_order, specifications: p.specifications.join("\n"), features: p.features.join("\n"), colours: p.colours.join(", "), varieties: p.varieties.join(", ") });
+    setForm({ id: p.id, name: p.name, collection: p.collection, package: p.package, description: p.description, price: p.price, stock: p.stock, image_url: p.image_url ?? "", display_order: p.display_order, availability: p.availability as Availability, specifications: p.specifications.join("\n"), features: p.features.join("\n"), colours: p.colours.join(", "), varieties: p.varieties.join(", ") });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const save = async () => {
@@ -279,7 +285,7 @@ function ProductsPanel() {
     try {
       await saveFn({ data: {
         id: form.id, name: form.name, collection: form.collection || "MAQAMY", package: form.package || form.name,
-        description: form.description, price: form.price, stock: form.stock, image_url: form.image_url, display_order: form.display_order,
+        description: form.description, price: form.price, stock: form.stock, image_url: form.image_url, display_order: form.display_order, availability: form.availability,
         specifications: form.specifications.split("\n").map((s) => s.trim()).filter(Boolean),
         features: form.features.split("\n").map((s) => s.trim()).filter(Boolean),
         colours: parseList(form.colours), varieties: parseList(form.varieties),
@@ -301,6 +307,7 @@ function ProductsPanel() {
           <Field label="Price (RM)"><Input type="number" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} /></Field>
           <Field label="Stock"><Input type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} /></Field>
         </div>
+        <Field label="Availability"><select className="h-10 w-full border border-input bg-background px-3 text-sm" value={form.availability} onChange={(e) => setForm({ ...form, availability: e.target.value as Availability })}>{AVAILABILITY.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}</select></Field>
         <Field label="Features — one per line"><Textarea className="min-h-24" value={form.features} onChange={(e) => setForm({ ...form, features: e.target.value })} /></Field>
         <Field label="Specifications — one per line"><Textarea className="min-h-24" value={form.specifications} onChange={(e) => setForm({ ...form, specifications: e.target.value })} /></Field>
         <Field label="Colours — separate with commas"><Input placeholder="Sage, Ivory, Walnut" value={form.colours} onChange={(e) => setForm({ ...form, colours: e.target.value })} /></Field>
@@ -326,7 +333,7 @@ function ProductsPanel() {
               <h3 className="mt-1 font-display text-2xl">{p.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{formatRM(p.price)}{p.colours.length ? ` · ${p.colours.join(", ")}` : ""}{p.varieties.length ? ` · ${p.varieties.join(", ")}` : ""}</p>
             </div>
-            {p.stock === 0 ? <span className="bg-destructive px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive-foreground">Out of stock</span> : null}
+            <span className={`px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${p.availability === "out_of_stock" ? "bg-destructive text-destructive-foreground" : p.availability === "preorder" ? "bg-brand-gold text-brand-forest" : "bg-brand-forest text-brand-cream"}`}>{AVAILABILITY.find((a) => a.id === p.availability)?.label ?? "Available"}</span>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <div className="flex h-10 items-center border border-brand-gold/30">
@@ -334,7 +341,8 @@ function ProductsPanel() {
               <span className="min-w-12 text-center text-sm font-semibold">{p.stock}</span>
               <Button variant="ghost" size="icon" aria-label={`Increase ${p.name} stock`} onClick={() => void run(() => adjustFn({ data: { id: p.id, change: 1 } }))}><Plus /></Button>
             </div>
-            <Button variant="cream" size="sm" disabled={p.stock === 0} onClick={() => void run(() => setStockFn({ data: { id: p.id, stock: 0 } }), `${p.name} is now out of stock.`)}><PackageX /> Out of stock</Button>
+            <select aria-label={`${p.name} availability`} className="h-9 border border-brand-gold/30 bg-background px-2 text-sm" value={p.availability} onChange={(e) => { const availability = e.target.value as Availability; void run(() => setAdminAvailability({ data: { id: p.id, availability } }), `${p.name} · ${AVAILABILITY.find((a) => a.id === availability)?.label}`); }}>{AVAILABILITY.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}</select>
+            <Button variant="cream" size="sm" disabled={p.stock === 0} onClick={() => void run(() => setStockFn({ data: { id: p.id, stock: 0 } }), `${p.name} stock set to 0.`)}><PackageX /> Stock 0</Button>
             <Button variant="cream" size="sm" onClick={() => edit(p)}>Edit</Button>
             <Button variant="ghost" size="icon" aria-label={`Delete ${p.name}`} onClick={() => { if (window.confirm(`Delete ${p.name}? This cannot be undone.`)) void run(() => deleteFn({ data: { id: p.id } }), "Product deleted."); }}><Trash2 /></Button>
           </div>
@@ -471,6 +479,57 @@ function AdminLogin({ onSuccess }: { onSuccess: (s: AdminSession) => void }) {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.15em]"><span>{label}</span>{children}</label>; }
+
+/* ---------------- Site images ---------------- */
+
+function AssetsPanel() {
+  const [rows, setRows] = useState<Record<string, string> | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const refresh = () => listAdminSiteAssets().then((r) => setRows(Object.fromEntries(r.map((x) => [x.key, x.url])))).catch((e) => toast.error(errorText(e, "Site images could not be loaded")));
+  useEffect(() => { void refresh(); }, []);
+  const save = async (key: string, url: string) => {
+    setBusy(key);
+    try { await saveAdminSiteAsset({ data: { key, url } }); toast.success("Image replaced."); setDrafts((d) => ({ ...d, [key]: "" })); await refresh(); await refreshSiteAssets(); }
+    catch (e) { toast.error(errorText(e, "Image could not be saved.")); } finally { setBusy(null); }
+  };
+  const upload = async (key: string, file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Choose an image file."); return; }
+    setBusy(key);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result).split(",")[1] ?? ""); r.onerror = reject; r.readAsDataURL(file); });
+      const { url } = await uploadAdminBanner({ data: { kind: "image", filename: file.name, content_type: file.type, base64 } });
+      setBusy(null); await save(key, url);
+    } catch (e) { toast.error(errorText(e, "Upload failed.")); setBusy(null); }
+  };
+  const reset = async (key: string) => {
+    if (!window.confirm("Restore the original image?")) return;
+    try { await resetAdminSiteAsset({ data: { key } }); toast.success("Original image restored."); await refresh(); await refreshSiteAssets(); }
+    catch (e) { toast.error(errorText(e, "Image could not be reset.")); }
+  };
+  if (!rows) return <Loading />;
+  return <div>
+    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Website images</p>
+    <h2 className="mt-2 font-display text-4xl font-light">Assets</h2>
+    <p className="mt-2 text-sm text-muted-foreground">Replace any image on the website by pasting a direct image link or uploading a file. Product images for products you added are set in the Products tab.</p>
+    <div className="mt-8 grid gap-4 md:grid-cols-2">{SITE_ASSET_SLOTS.map((slot) => {
+      const current = rows[slot.key] || slot.fallback;
+      const draft = drafts[slot.key] ?? "";
+      return <article key={slot.key} className="animate-fade-soft border border-brand-gold/25 bg-card p-5">
+        <div className="flex aspect-video items-center justify-center bg-brand-mist"><img src={current} alt={slot.label} className="h-full w-full object-contain" /></div>
+        <div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-display text-xl">{slot.label}</h3>{rows[slot.key] ? <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-gold">Replaced</span> : null}</div>
+        <div className="mt-3 flex gap-2">
+          <Input type="url" placeholder="https://… direct image link" value={draft} onChange={(e) => setDrafts((d) => ({ ...d, [slot.key]: e.target.value }))} />
+          <Button variant="gold" size="sm" className="h-10" disabled={busy === slot.key || !/^https:\/\//.test(draft)} onClick={() => void save(slot.key, draft.trim())}>Save</Button>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button asChild variant="cream" size="sm" disabled={busy === slot.key}><label className="cursor-pointer">{busy === slot.key ? "Working…" : "Upload Here"}<input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void upload(slot.key, f); }} /></label></Button>
+          {rows[slot.key] ? <Button variant="ghost" size="sm" onClick={() => void reset(slot.key)}>Restore original</Button> : null}
+        </div>
+      </article>;
+    })}</div>
+  </div>;
+}
 
 /* ---------------- Banners ---------------- */
 

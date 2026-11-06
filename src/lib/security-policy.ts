@@ -10,9 +10,9 @@ export type AdminClaims = z.infer<typeof adminClaimsSchema>;
 const ownerActions = new Set([
   "listAdmins", "createAdmin", "deleteAdmin", "listInvoices", "searchInvoice",
   "approveOrder", "deleteOrder", "banCustomer", "deleteCustomer", "saveBanner", "deleteBanner",
-  "uploadBanner", "getTypography", "saveTypography",
+  "uploadBanner", "listSiteAssets", "saveSiteAsset", "resetSiteAsset", "getTypography", "saveTypography",
 ]);
-const salesActions = new Set(["session", "listProducts", "saveProduct", "adjustStock", "setStock", "deleteProduct", "listCustomers", "listOrders", "listDeliveryTeam", "listBanners"]);
+const salesActions = new Set(["session", "listProducts", "saveProduct", "adjustStock", "setStock", "setAvailability", "deleteProduct", "listCustomers", "listOrders", "listDeliveryTeam", "listBanners"]);
 const deliveryActions = new Set(["session", "listOrders", "updateOrderStatus"]);
 
 export function canAdminPerform(action: string, claims: AdminClaims) {

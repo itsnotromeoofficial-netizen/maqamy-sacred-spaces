@@ -72,3 +72,8 @@
 - [x] Centre and enlarge the supplied logo on mobile and desktop
 - [x] Refine home composition, navigation and collection controls with restrained animation
 - [x] Verify desktop and mobile navigation, logo visibility and edition selection
+
+## Pre-order, audit numbering, site images
+- [x] Product availability: Available / Pre-order / Out of stock, set in admin; pre-orders are paid and flagged
+- [x] Order no. and invoice no. identical, daily sequence YYYYMMDD### (Malaysia time)
+- [x] Admin Assets tab to replace every website image

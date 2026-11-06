@@ -154,6 +154,21 @@ export type Database = {
           },
         ]
       }
+      order_counters: {
+        Row: {
+          day: string
+          last_value: number
+        }
+        Insert: {
+          day: string
+          last_value?: number
+        }
+        Update: {
+          day?: string
+          last_value?: number
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           approved_by: string | null
@@ -164,6 +179,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id: string
+          is_preorder: boolean
           items: Json
           order_number: string
           payment_amount: number | null
@@ -184,6 +200,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id?: string
+          is_preorder?: boolean
           items?: Json
           order_number?: string
           payment_amount?: number | null
@@ -204,6 +221,7 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           id?: string
+          is_preorder?: boolean
           items?: Json
           order_number?: string
           payment_amount?: number | null
@@ -228,6 +246,7 @@ export type Database = {
       products: {
         Row: {
           active: boolean
+          availability: string
           collection: string
           colours: string[]
           created_at: string
@@ -246,6 +265,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          availability?: string
           collection: string
           colours?: string[]
           created_at?: string
@@ -264,6 +284,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          availability?: string
           collection?: string
           colours?: string[]
           created_at?: string
@@ -393,6 +414,24 @@ export type Database = {
         }
         Relationships: []
       }
+      site_assets: {
+        Row: {
+          key: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       typography_settings: {
         Row: {
           id: string
@@ -417,6 +456,7 @@ export type Database = {
     }
     Functions: {
       guarded_place_order: { Args: { _proof: string }; Returns: string }
+      next_order_number: { Args: never; Returns: string }
       place_order: { Args: never; Returns: string }
       rate_limit_clear: {
         Args: { _bucket: string; _key: string }

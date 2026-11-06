@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { SiteFooter, SiteHeader } from "@/components/maqamy/site-chrome";
 import { Button } from "@/components/ui/button";
-import { brandAssets } from "@/lib/maqamy-products";
+import { SiteImg } from "@/components/maqamy/site-img";
 import { useCart } from "@/lib/use-cart";
 import { useLang } from "@/lib/i18n";
 import { brandStory } from "@/lib/brand-story";
@@ -44,7 +44,7 @@ function StoryPage() {
           <p className="type-body mt-8 max-w-lg font-display text-2xl italic leading-8 text-muted-foreground">{t("Designed for the presence of the heart.", "Direka untuk kehadiran hati.")}</p>
         </div>
         <div className="min-h-[55svh] bg-brand-mist p-5 sm:p-8 lg:p-12">
-          <img src={brandAssets.prayerSpace} alt="A complete MAQAMY prayer space" className="h-full w-full object-contain" />
+          <SiteImg slot="story" alt="A complete MAQAMY prayer space" className="h-full w-full object-contain" />
         </div>
       </section>
       <section className="px-5 py-24 sm:px-8 lg:py-36">

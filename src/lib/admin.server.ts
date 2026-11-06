@@ -148,6 +148,7 @@ const productSchema = z.object({
   stock: z.number().int().min(0).max(1_000_000),
   image_url: safeMediaUrl.nullable().or(z.literal("")),
   display_order: z.number().int().min(0).max(100_000),
+  availability: z.enum(["available", "preorder", "out_of_stock"]).default("available"),
 });
 const idOnly = z.object({ id: z.string().uuid() });
 
@@ -248,7 +249,8 @@ export const actions: Record<string, Handler> = {
     const u = await client.from("orders").update({ status: "approved", assigned_to: courier.id, approved_by: c.u }).eq("id", d.id);
     if (u.error) throw new AdminError("Order could not be approved.");
     const inv = await client.from("invoices").insert({
-      order_id: order.id, order_number: order.order_number, user_id: order.user_id,
+      // Invoice number mirrors the order number so auditors can trace one reference.
+      invoice_number: order.order_number, order_id: order.id, order_number: order.order_number, user_id: order.user_id,
       customer_name: order.customer_name, customer_email: order.customer_email,
       customer_phone: order.customer_phone, customer_address: order.customer_address,
       items: order.items, total: order.total,
@@ -361,6 +363,35 @@ export const actions: Record<string, Handler> = {
     const { id } = idOnly.parse(input);
     const { error } = await (await db()).from("admin_accounts").delete().eq("id", id);
     if (error) throw new AdminError("Admin could not be removed.");
+    return { ok: true };
+  },
+
+  setAvailability: async (input) => {
+    const d = z.object({ id: z.string().uuid(), availability: z.enum(["available", "preorder", "out_of_stock"]) }).parse(input);
+    const { error } = await (await db()).from("products").update({ availability: d.availability }).eq("id", d.id);
+    if (error) throw new AdminError("Availability could not be updated.");
+    return d;
+  },
+
+  /* ---------- Site images ---------- */
+  listSiteAssets: async (_i, c) => {
+    master(c);
+    const { data, error } = await (await db()).from("site_assets").select("*");
+    if (error) throw new AdminError("Site images could not be loaded.");
+    return data ?? [];
+  },
+  saveSiteAsset: async (input, c) => {
+    master(c);
+    const d = z.object({ key: z.enum(["logo", "home", "story", "auth", "noor", "janna"]), url: safeMediaUrl }).parse(input);
+    const { error } = await (await db()).from("site_assets").upsert({ key: d.key, url: d.url, updated_at: new Date().toISOString() });
+    if (error) throw new AdminError("Image could not be saved.");
+    return d;
+  },
+  resetSiteAsset: async (input, c) => {
+    master(c);
+    const d = z.object({ key: z.string().min(1).max(40) }).parse(input);
+    const { error } = await (await db()).from("site_assets").delete().eq("key", d.key);
+    if (error) throw new AdminError("Image could not be reset.");
     return { ok: true };
   },
 

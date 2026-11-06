@@ -1,4 +1,4 @@
-import { brandAssets } from "@/lib/maqamy-products";
+import { SiteImg } from "@/components/maqamy/site-img";
 import { setLang, useLang, useLangChosen } from "@/lib/i18n";
 
 export function LanguagePicker() {
@@ -7,7 +7,7 @@ export function LanguagePicker() {
   return (
     <div className="animate-fade-soft fixed inset-0 z-[100] flex items-center justify-center bg-brand-forest/90 px-5 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Choose your language">
       <div className="w-full max-w-md border border-brand-gold/30 bg-brand-cream p-8 text-center text-brand-forest shadow-maqamy sm:p-10">
-        <img src={brandAssets.logo} alt="MAQAMY" className="mx-auto w-24" />
+        <SiteImg slot="logo" alt="MAQAMY" className="mx-auto w-24" />
         <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.4em] text-brand-gold">Language · Bahasa</p>
         <h2 className="mt-4 font-display text-3xl font-light leading-tight">Choose your language<br /><span className="italic">Pilih bahasa anda</span></h2>
         <div className="mt-8 grid gap-3">

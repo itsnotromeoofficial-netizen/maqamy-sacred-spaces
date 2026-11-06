@@ -101,6 +101,11 @@ export type AdminAccount = { id: string; username: string; team: string; created
 export const listAdminAccounts = () => call<AdminAccount[]>("listAdmins");
 export const createAdminAccount = ({ data }: D<{ username: string; team: string; password: string }>) => call("createAdmin", data);
 export const deleteAdminAccount = ({ data }: D<{ id: string }>) => call("deleteAdmin", data);
+export const setAdminAvailability = ({ data }: D<{ id: string; availability: "available" | "preorder" | "out_of_stock" }>) => call("setAvailability", data);
+export type SiteAssetRow = Tables<"site_assets">;
+export const listAdminSiteAssets = () => call<SiteAssetRow[]>("listSiteAssets");
+export const saveAdminSiteAsset = ({ data }: D<{ key: string; url: string }>) => call("saveSiteAsset", data);
+export const resetAdminSiteAsset = ({ data }: D<{ key: string }>) => call("resetSiteAsset", data);
 export type AdminBanner = Tables<"banners">;
 export const listAdminBanners = () => call<AdminBanner[]>("listBanners");
 export const saveAdminBanner = ({ data }: D<Record<string, unknown>>) => call<AdminBanner>("saveBanner", data);
