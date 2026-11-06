@@ -64,6 +64,13 @@
       "when": 1792557299693,
       "tag": "0008_retire_ai_shopper_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793959890688,
+      "tag": "0009_preorder_sequential_numbers_site_assets",
+      "breakpoints": true
     }
   ]
 }
