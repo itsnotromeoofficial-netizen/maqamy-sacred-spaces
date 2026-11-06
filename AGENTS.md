@@ -24,3 +24,5 @@
 - Rate limiting and brute-force lockout use the `rate_limit_events` table + `rate_limit_hit` SQL function — server workers are stateless, so limits must be durable.
 
 - Store owner-managed typography overrides by semantic text role and independent desktop/mobile sizes; apply only to customer pages so admin controls remain usable, with empty overrides preserving original responsive sizing.
+- New orders take sequential `YYYYMMDDNNN` numbers (Malaysia date) from `next_order_number()` and invoices reuse the order number, so tax records trace one reference.
+- Replaceable website images resolve through `site_assets` overrides with built-in fallbacks (`useSiteAsset`/`SiteImg`), so the owner can swap any image without code.
